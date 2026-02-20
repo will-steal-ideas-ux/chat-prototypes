@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexus.ai — Prototype</title>
+  <title>Nexus.ai — V2 Audio Input</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -394,6 +394,34 @@
       display: none;
     }
 
+    /* ─── V2: Scrolling waveform canvas ──────────────────── */
+    #waveform-canvas {
+      display: none;
+      width: 100%;
+      height: 24px;
+    }
+    #waveform-canvas.active { display: block; }
+
+    /* Recording actions row (swaps in for normal actions) */
+    .prompt-actions-recording {
+      display: none;
+      align-items: center;
+      height: 40px;
+    }
+    .prompt-actions-recording.active { display: flex; }
+    .prompt-actions-recording .prompt-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+
+    /* Stop button */
+    .stop-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text-tertiary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .stop-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
+    .stop-btn svg { width: 20px; height: 20px; }
+
     /* ─── Version switcher ────────────────────────────────── */
     .version-switcher {
       position: fixed;
@@ -570,6 +598,10 @@
               placeholder="Ask anything to start the chat"
               rows="1"
               oninput="onInput(this)"></textarea>
+
+            <!-- Scrolling waveform canvas (shown when recording) -->
+            <canvas id="waveform-canvas"></canvas>
+
             <!-- AI Tools Popover (anchored to prompt-box) -->
             <div class="aitools-popover" id="aitools-popover">
               <div class="aitools-search">
@@ -634,7 +666,8 @@
               </div>
             </div>
 
-            <div class="prompt-actions">
+            <!-- Normal actions -->
+            <div class="prompt-actions" id="actions-normal">
               <div class="prompt-left">
                 <button class="action-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -645,17 +678,28 @@
                   AI Tools
                 </button>
               </div>
-
               <div class="prompt-right">
                 <button class="model-selector">
                   <div class="model-logo">✦</div>
                   Auto
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <button class="mic-btn">
+                <button class="mic-btn" id="mic-btn" onclick="startRecording()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
                 </button>
                 <button class="send-btn" id="send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Recording actions (Stop + Send) -->
+            <div class="prompt-actions-recording" id="actions-recording">
+              <div class="prompt-right">
+                <button class="stop-btn" onclick="stopRecording()" title="Stop recording">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                </button>
+                <button class="send-btn visible" onclick="submitRecording()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
                 </button>
               </div>
@@ -671,6 +715,108 @@
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
       document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
+    }
+
+    // ── Canvas waveform — fills from right, scrolls left ──
+    let rafId   = null;
+    let bars    = [];   // grows rightward; newest bar = last element (right edge)
+    let maxBars = 0;
+
+    const STEP  = 8;   // 2px bar + 6px gap, matching Figma SVG
+    const BAR_W = 2;
+    const COLOR = '#44434B';
+
+    function randomHeight() {
+      // Speech-like distribution: silence, mid, peaks — min 4, max 22
+      const r = Math.random();
+      if (r < 0.12) return 4;                         // silence
+      if (r < 0.35) return 4  + Math.random() * 5;   // near-silence
+      if (r < 0.70) return 9  + Math.random() * 8;   // normal speech
+      if (r < 0.88) return 17 + Math.random() * 3;   // loud
+      return 20 + Math.random() * 2;                  // peak
+    }
+
+    function initCanvas() {
+      const canvas = document.getElementById('waveform-canvas');
+      const dpr    = window.devicePixelRatio || 1;
+      const rect   = canvas.getBoundingClientRect();
+      canvas.width  = Math.round(rect.width  * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      maxBars = Math.floor(rect.width / STEP) + 1;
+      bars = [];  // start empty — fills from right
+    }
+
+    function drawWaveform() {
+      const canvas = document.getElementById('waveform-canvas');
+      const dpr    = window.devicePixelRatio || 1;
+      const W      = canvas.width  / dpr;
+      const H      = canvas.height / dpr;
+      const ctx    = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = COLOR;
+      ctx.lineWidth   = BAR_W;
+      ctx.lineCap     = 'round';
+
+      // bars[last] = rightmost bar; bars[0] = leftmost
+      // right-anchor: last bar sits at W - STEP/2, grows leftward
+      bars.forEach((h, i) => {
+        const x = W - (bars.length - i) * STEP + STEP / 2;
+        const cy = H / 2;
+        ctx.beginPath();
+        ctx.moveTo(x, cy - h / 2);
+        ctx.lineTo(x, cy + h / 2);
+        ctx.stroke();
+      });
+    }
+
+    let frameTick = 0;
+    function animateWaveform() {
+      frameTick++;
+      // Add a new bar every 3 frames (~20 bars/sec at 60fps) — feels natural
+      if (frameTick % 3 === 0) {
+        bars.push(randomHeight());
+        if (bars.length > maxBars) bars.shift();  // scroll once full
+      }
+      drawWaveform();
+      rafId = requestAnimationFrame(animateWaveform);
+    }
+
+    function startRecording() {
+      const textarea = document.getElementById('prompt');
+      const canvas   = document.getElementById('waveform-canvas');
+      textarea.style.display = 'none';
+      canvas.classList.add('active');
+      document.getElementById('actions-normal').style.display = 'none';
+      document.getElementById('actions-recording').classList.add('active');
+      initCanvas();
+      frameTick = 0;
+      rafId = requestAnimationFrame(animateWaveform);
+    }
+
+    function stopRecording() {
+      cancelAnimationFrame(rafId); rafId = null;
+      const canvas = document.getElementById('waveform-canvas');
+      canvas.classList.remove('active');
+      document.getElementById('actions-normal').style.display = '';
+      document.getElementById('actions-recording').classList.remove('active');
+      const textarea = document.getElementById('prompt');
+      textarea.style.display = '';
+      textarea.value = 'Summarise the key findings from my last cybersecurity report';
+      onInput(textarea);
+      textarea.focus();
+    }
+
+    function submitRecording() {
+      stopRecording();
+      // Simulate sending — clear textarea and reset
+      setTimeout(() => {
+        const textarea = document.getElementById('prompt');
+        textarea.value = '';
+        onInput(textarea);
+      }, 80);
     }
 
     function toggleAITools(e) {
@@ -767,7 +913,7 @@
           <div class="version-item-label">V2</div>
           <div class="version-item-desc">Audio Input</div>
         </div>
-        <span class="version-item-tag">latest</span>
+        <span class="version-item-tag">current</span>
       </a>
       <a class="version-item" href="v1.html">
         <div class="version-item-dot"></div>
