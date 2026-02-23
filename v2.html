@@ -395,32 +395,40 @@
     }
 
     /* ─── V2: Scrolling waveform canvas ──────────────────── */
+    .recording-waveform-wrap {
+      flex: 1;
+      height: 24px;
+      overflow: hidden;
+      position: relative;
+      min-width: 0;
+    }
     #waveform-canvas {
-      display: none;
+      display: block;
       width: 100%;
       height: 24px;
     }
-    #waveform-canvas.active { display: block; }
 
     /* Recording actions row (swaps in for normal actions) */
     .prompt-actions-recording {
       display: none;
       align-items: center;
       height: 40px;
+      gap: 16px;
     }
     .prompt-actions-recording.active { display: flex; }
-    .prompt-actions-recording .prompt-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .prompt-actions-recording .prompt-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
     /* Stop button */
     .stop-btn {
-      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      width: 24px; height: 24px;
       display: flex; align-items: center; justify-content: center;
       background: transparent; border: none; cursor: pointer;
-      color: var(--text-tertiary);
-      transition: background var(--transition), color var(--transition);
+      color: var(--text-secondary);
+      transition: color var(--transition);
+      padding: 0;
     }
-    .stop-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
-    .stop-btn svg { width: 20px; height: 20px; }
+    .stop-btn:hover { color: var(--text-primary); }
+    .stop-btn svg { width: 16px; height: 16px; }
 
     /* ─── Version switcher ────────────────────────────────── */
     .version-switcher {
@@ -599,9 +607,6 @@
               rows="1"
               oninput="onInput(this)"></textarea>
 
-            <!-- Scrolling waveform canvas (shown when recording) -->
-            <canvas id="waveform-canvas"></canvas>
-
             <!-- AI Tools Popover (anchored to prompt-box) -->
             <div class="aitools-popover" id="aitools-popover">
               <div class="aitools-search">
@@ -693,8 +698,11 @@
               </div>
             </div>
 
-            <!-- Recording actions (Stop + Send) -->
+            <!-- Recording actions: waveform + Stop + Send -->
             <div class="prompt-actions-recording" id="actions-recording">
+              <div class="recording-waveform-wrap">
+                <canvas id="waveform-canvas"></canvas>
+              </div>
               <div class="prompt-right">
                 <button class="stop-btn" onclick="stopRecording()" title="Stop recording">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
@@ -738,13 +746,18 @@
 
     function initCanvas() {
       const canvas = document.getElementById('waveform-canvas');
+      const wrap   = canvas.parentElement;
       const dpr    = window.devicePixelRatio || 1;
-      const rect   = canvas.getBoundingClientRect();
-      canvas.width  = Math.round(rect.width  * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+      // Use the wrapper's width so the canvas fills the flex container
+      const W = wrap.getBoundingClientRect().width || wrap.offsetWidth;
+      const H = 24;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width  = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
       const ctx = canvas.getContext('2d');
       ctx.scale(dpr, dpr);
-      maxBars = Math.floor(rect.width / STEP) + 1;
+      maxBars = Math.floor(W / STEP) + 1;
       bars = [];  // start empty — fills from right
     }
 
@@ -786,9 +799,10 @@
 
     function startRecording() {
       const textarea = document.getElementById('prompt');
-      const canvas   = document.getElementById('waveform-canvas');
-      textarea.style.display = 'none';
-      canvas.classList.add('active');
+      textarea.value = '';
+      textarea.placeholder = 'Listening...';
+      textarea.readOnly = true;
+      onInput(textarea);
       document.getElementById('actions-normal').style.display = 'none';
       document.getElementById('actions-recording').classList.add('active');
       initCanvas();
@@ -798,12 +812,11 @@
 
     function stopRecording() {
       cancelAnimationFrame(rafId); rafId = null;
-      const canvas = document.getElementById('waveform-canvas');
-      canvas.classList.remove('active');
       document.getElementById('actions-normal').style.display = '';
       document.getElementById('actions-recording').classList.remove('active');
       const textarea = document.getElementById('prompt');
-      textarea.style.display = '';
+      textarea.readOnly = false;
+      textarea.placeholder = 'Ask anything to start the chat';
       textarea.value = 'Summarise the key findings from my last cybersecurity report';
       onInput(textarea);
       textarea.focus();
