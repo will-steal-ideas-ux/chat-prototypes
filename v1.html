@@ -575,7 +575,7 @@
               <div class="aitools-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" id="aitools-search" placeholder="Search" oninput="filterAITools(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off" />
-                <span class="aitools-kbd">⌘K</span>
+                <span class="aitools-kbd">/</span>
               </div>
               <div class="aitools-columns">
                 <div class="aitools-col" id="col-capabilities">
@@ -721,9 +721,10 @@
       }
     }
 
-    // CMD+K global shortcut
+    // "/" global shortcut (when not focused in an input)
     document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      const tag = document.activeElement.tagName;
+      if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
         e.preventDefault();
         const popover = document.getElementById('aitools-popover');
         const btn = document.getElementById('aitools-btn');
@@ -761,6 +762,14 @@
   <div class="version-switcher" id="version-switcher">
     <div class="version-menu">
       <div class="version-menu-header">Versions</div>
+      <a class="version-item" href="v3.html">
+        <div class="version-item-dot"></div>
+        <div class="version-item-info">
+          <div class="version-item-label">V3</div>
+          <div class="version-item-desc">Search</div>
+        </div>
+        <span class="version-item-tag">latest</span>
+      </a>
       <a class="version-item" href="v2.html">
         <div class="version-item-dot"></div>
         <div class="version-item-info">

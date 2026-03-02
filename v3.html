@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexus.ai — Prototype</title>
+  <title>Nexus.ai — V3 Search</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -690,7 +690,7 @@
         <div class="sidebar-nav-item" onclick="openSearch()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           Search chats
-          <span class="sidebar-nav-kbd">⌘F</span>
+          <span class="sidebar-nav-kbd">⌘K</span>
         </div>
       </div>
       <div class="sidebar-content">
@@ -731,7 +731,7 @@
               <div class="aitools-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" id="aitools-search" placeholder="Search" oninput="filterAITools(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off" />
-                <span class="aitools-kbd">⌘K</span>
+                <span class="aitools-kbd" style="display:none"></span>
               </div>
               <div class="aitools-columns">
                 <div class="aitools-col" id="col-capabilities">
@@ -877,20 +877,7 @@
       }
     }
 
-    // CMD+K global shortcut
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        const popover = document.getElementById('aitools-popover');
-        const btn = document.getElementById('aitools-btn');
-        const isOpen = !popover.classList.contains('open');
-        popover.classList.toggle('open', isOpen);
-        btn.classList.toggle('active', isOpen);
-        if (isOpen) {
-          setTimeout(() => document.getElementById('aitools-search').focus(), 50);
-        }
-      }
-    });
+    // CMD+K now opens search (see below)
 
     // Close popover when clicking outside
     document.addEventListener('click', (e) => {
@@ -1094,9 +1081,9 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ⌘F / Ctrl+F opens search; Esc closes it globally
+    // ⌘K / Ctrl+K opens search
     document.addEventListener('keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         if (!document.getElementById('search-backdrop').classList.contains('open')) openSearch();
       }
@@ -1141,7 +1128,7 @@
   <div class="version-switcher" id="version-switcher">
     <div class="version-menu">
       <div class="version-menu-header">Versions</div>
-      <a class="version-item" href="v3.html">
+      <a class="version-item current" href="v3.html">
         <div class="version-item-dot"></div>
         <div class="version-item-info">
           <div class="version-item-label">V3</div>
@@ -1149,7 +1136,7 @@
         </div>
         <span class="version-item-tag">latest</span>
       </a>
-      <a class="version-item current" href="v2.html">
+      <a class="version-item" href="v2.html">
         <div class="version-item-dot"></div>
         <div class="version-item-info">
           <div class="version-item-label">V2</div>
@@ -1166,7 +1153,7 @@
     </div>
     <div class="version-badge" onclick="toggleVersionMenu(event)">
       <div class="version-dot"></div>
-      V2 — Audio Input
+      V3 — Search
       <svg class="version-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
   </div>
