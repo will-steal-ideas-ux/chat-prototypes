@@ -215,27 +215,27 @@
       overflow: hidden;
     }
     .fq-header {
-      display: flex; align-items: center; gap: 12px;
-      padding: 24px 24px 12px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 16px 8px;
     }
     .fq-title {
       flex: 1;
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 18px;
-      line-height: 27px; color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 15px;
+      line-height: 22px; color: var(--text-primary);
     }
     .fq-close {
-      width: 28px; height: 28px; border-radius: 6px;
+      width: 24px; height: 24px; border-radius: 5px;
       border: none; background: transparent; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: var(--text-tertiary);
       transition: background var(--transition), color var(--transition);
     }
     .fq-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .fq-close svg { width: 16px; height: 16px; }
-    .fq-cards { display: flex; flex-direction: column; gap: 10px; padding: 0 24px 24px; }
+    .fq-close svg { width: 13px; height: 13px; }
+    .fq-cards { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
     .fq-card {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
       border: 1px solid var(--border-secondary);
       background: var(--bg-secondary);
       cursor: pointer;
@@ -247,18 +247,18 @@
       box-shadow: 0 4px 8px rgba(18,0,69,.05), 0 2px 4px rgba(18,0,69,.03);
     }
     .fq-kbd {
-      width: 29px; height: 29px; flex-shrink: 0;
+      width: 24px; height: 24px; flex-shrink: 0;
       background: #f2f2f3; border: 1px solid #cacace;
       border-radius: var(--radius-xs);
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 500; color: var(--text-placeholder);
+      font-size: 12px; font-weight: 500; color: var(--text-placeholder);
       line-height: 1;
     }
     .fq-label {
-      flex: 1; font-size: 16px; font-weight: 500; color: var(--text-primary); line-height: 24px;
+      flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 21px;
     }
     .fq-enter {
-      font-size: 14px; color: var(--text-tertiary); flex-shrink: 0;
+      font-size: 13px; color: var(--text-tertiary); flex-shrink: 0;
       opacity: 0; transition: opacity .15s;
     }
     .fq-card:hover .fq-enter, .fq-card.active .fq-enter { opacity: 1; }
