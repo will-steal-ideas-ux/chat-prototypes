@@ -550,101 +550,39 @@
       left: 20px;
       z-index: 9999;
       font-family: 'Inter', sans-serif;
-    }
-    .version-badge {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      height: 32px;
-      padding: 0 10px 0 8px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-full);
       box-shadow: 0 2px 8px rgba(18,0,69,.08);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: border-color var(--transition), box-shadow var(--transition), color var(--transition);
-      user-select: none;
+      padding: 3px;
+      gap: 2px;
     }
-    .version-badge:hover {
-      border-color: rgba(124,123,132,.45);
-      color: var(--text-primary);
-      box-shadow: 0 4px 12px rgba(18,0,69,.12);
-    }
-    .version-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--brand-purple);
-      flex-shrink: 0;
-    }
-    .version-chevron {
-      width: 14px; height: 14px;
-      color: var(--text-tertiary);
-      transition: transform var(--transition);
-    }
-    .version-switcher.open .version-chevron { transform: rotate(180deg); }
-
-    .version-menu {
-      position: absolute;
-      bottom: calc(100% + 6px);
-      left: 0;
-      min-width: 220px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(18,0,69,.12), 0 2px 8px rgba(18,0,69,.06);
-      overflow: hidden;
-      display: none;
-    }
-    .version-switcher.open .version-menu { display: block; }
-
-    .version-menu-header {
-      padding: 10px 14px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .version-item {
-      display: flex;
+    .version-tab {
+      display: inline-flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 8px 14px;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
       cursor: pointer;
-      transition: background var(--transition);
       text-decoration: none;
+      transition: background var(--transition);
     }
-    .version-item:hover { background: var(--bg-primary); }
-    .version-item.current { background: var(--brand-purple-light); }
-    .version-item-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--border-secondary);
-      flex-shrink: 0;
+    .version-tab:hover { background: var(--bg-primary); }
+    .version-tab.current { background: var(--brand-purple); }
+    .version-tab-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
-    .version-item.current .version-item-dot { background: var(--brand-purple); }
-    .version-item-info { flex: 1; min-width: 0; }
-    .version-item-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    .version-item-desc {
-      font-size: 11px;
+    .version-tab.current .version-tab-label { color: white; }
+    .version-tab-desc {
+      font-size: 10px;
       color: var(--text-tertiary);
       margin-top: 1px;
     }
-    .version-item-tag {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--brand-purple);
-      background: var(--brand-purple-light);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
+    .version-tab.current .version-tab-desc { color: rgba(255,255,255,0.75); }
   </style>
 </head>
 <body>
@@ -1102,15 +1040,6 @@
       }
     });
 
-    // Version switcher
-    function toggleVersionMenu(e) {
-      e.stopPropagation();
-      document.getElementById('version-switcher').classList.toggle('open');
-    }
-    document.addEventListener('click', (e) => {
-      const vs = document.getElementById('version-switcher');
-      if (vs && !vs.contains(e.target)) vs.classList.remove('open');
-    });
   </script>
 
   <!-- Search Modal -->
@@ -1138,37 +1067,27 @@
   </div>
 
   <!-- Version Switcher -->
-  <div class="version-switcher" id="version-switcher">
-    <div class="version-menu">
-      <div class="version-menu-header">Versions</div>
-      <a class="version-item" href="v3.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V3</div>
-          <div class="version-item-desc">Search</div>
-        </div>
-        <span class="version-item-tag">latest</span>
-      </a>
-      <a class="version-item current" href="v2.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V2</div>
-          <div class="version-item-desc">Audio Input</div>
-        </div>
-      </a>
-      <a class="version-item" href="v1.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V1</div>
-          <div class="version-item-desc">AI Tools redesign</div>
-        </div>
-      </a>
-    </div>
-    <div class="version-badge" onclick="toggleVersionMenu(event)">
-      <div class="version-dot"></div>
-      V2 — Audio Input
-      <svg class="version-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-    </div>
+  <div class="version-switcher">
+    <a class="version-tab" href="v1.html">
+      <span class="version-tab-label">V1</span>
+      <span class="version-tab-desc">AI Tools</span>
+    </a>
+    <a class="version-tab current" href="v2.html">
+      <span class="version-tab-label">V2</span>
+      <span class="version-tab-desc">Audio Input</span>
+    </a>
+    <a class="version-tab" href="v3.html">
+      <span class="version-tab-label">V3</span>
+      <span class="version-tab-desc">Search</span>
+    </a>
+    <a class="version-tab" href="v4.html">
+      <span class="version-tab-label">V4</span>
+      <span class="version-tab-desc">Follow-up</span>
+    </a>
+    <a class="version-tab" href="canvas.html">
+      <span class="version-tab-label">V5</span>
+      <span class="version-tab-desc">Canvas</span>
+    </a>
   </div>
 
 </body>

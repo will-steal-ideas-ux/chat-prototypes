@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus.ai — Canvas</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-primary: #f7f7f8;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: rgba(124,123,132,.10);
+      --border-secondary: rgba(124,123,132,.25);
+      --text-primary: #252429;
+      --text-secondary: #464546;
+      --text-tertiary: #6f6e78;
+      --text-placeholder: #9d9ca3;
+      --brand-purple: #6c47ff;
+      --brand-purple-light: #ede9ff;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-full: 9999px;
+      --shadow-lg: 0 8px 15px rgba(18,0,69,.06), 0 4px 7px rgba(18,0,69,.03);
+      --transition: .18s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top nav ─────────────────────────────────────────── */
+    .top-nav {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-secondary);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 0 0;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .nav-left { display: flex; align-items: center; }
+    .nav-logo {
+      width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      border-right: 1px solid var(--border-secondary);
+    }
+    .logo-emblem {
+      width: 32px; height: 32px;
+      background: var(--brand-purple);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-emblem svg { width: 18px; height: 18px; color: white; }
+    .nav-brand {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 16px;
+      color: var(--text-primary);
+      margin-left: 14px;
+    }
+    .nav-divider { width: 1px; height: 20px; background: var(--border-secondary); margin: 0 16px; }
+    .nav-badge {
+      font-size: 12px; font-weight: 600;
+      color: var(--brand-purple);
+      background: var(--brand-purple-light);
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--brand-purple);
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 32px; height: 32px;
+      background: var(--brand-purple);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: white;
+    }
+
+    /* ── App layout ──────────────────────────────────────── */
+    .app-layout { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Chat panel ──────────────────────────────────────── */
+    .chat-panel {
+      width: 340px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-secondary);
+    }
+    .chat-header {
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 16px; gap: 8px;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+      flex-shrink: 0;
+    }
+    .chat-header-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .chat-header-pill {
+      margin-left: auto;
+      font-size: 11px; font-weight: 600;
+      color: #16a34a;
+      background: #dcfce7;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .online-dot { width: 5px; height: 5px; background: #16a34a; border-radius: 50%; }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto;
+      padding: 14px; display: flex;
+      flex-direction: column; gap: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-secondary) transparent;
+    }
+    .chat-msg { display: flex; gap: 8px; align-items: flex-start; }
+    .msg-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .msg-body { flex: 1; min-width: 0; }
+    .msg-name { font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 3px; }
+    .msg-bubble {
+      font-size: 13px; line-height: 1.55;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      padding: 8px 11px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-secondary);
+      word-break: break-word;
+    }
+    .msg-bubble.system {
+      background: transparent; border: none; padding: 0;
+      color: var(--text-tertiary); font-size: 12px; text-align: center;
+      width: 100%;
+    }
+    .msg-bubble.ai {
+      background: var(--brand-purple-light);
+      border-color: transparent;
+      color: #3730a3;
+    }
+    .msg-bubble.user {
+      background: var(--text-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .chat-input-wrap {
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-secondary);
+      flex-shrink: 0;
+    }
+    .chat-input-row {
+      display: flex; align-items: flex-end; gap: 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      padding: 8px 8px 8px 12px;
+      transition: border-color var(--transition);
+    }
+    .chat-input-row:focus-within { border-color: var(--brand-purple); }
+    .chat-input-row textarea {
+      flex: 1; border: none; background: transparent;
+      font-family: inherit; font-size: 13px;
+      color: var(--text-primary); resize: none; outline: none;
+      line-height: 1.5; max-height: 100px; min-height: 20px;
+    }
+    .chat-input-row textarea::placeholder { color: var(--text-placeholder); }
+    .send-btn {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: var(--text-primary); border: none;
+      border-radius: var(--radius-xs); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition), background var(--transition);
+    }
+    .send-btn.visible { opacity: 1; pointer-events: auto; }
+    .send-btn svg { width: 14px; height: 14px; color: white; }
+
+    /* ── Canvas panel ────────────────────────────────────── */
+    .canvas-panel {
+      flex: 1; display: flex; flex-direction: column;
+      background: var(--bg-secondary); overflow: hidden;
+    }
+    .canvas-header {
+      height: 52px; flex-shrink: 0;
+      display: flex; align-items: center; padding: 0 20px; gap: 10px;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+    }
+    .canvas-doc-icon {
+      width: 28px; height: 28px;
+      background: var(--brand-purple-light); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .canvas-doc-icon svg { width: 14px; height: 14px; color: var(--brand-purple); }
+    .canvas-doc-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+    .collab-stack {
+      display: flex; align-items: center;
+      margin-left: auto;
+    }
+    .collab-av {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      margin-left: -7px;
+    }
+    .collab-av:first-child { margin-left: 0; }
+    .collab-label {
+      font-size: 12px; color: var(--text-tertiary);
+      margin-left: 10px; white-space: nowrap;
+    }
+
+    .share-btn {
+      display: flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 14px;
+      background: var(--brand-purple); color: white;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; font-family: inherit;
+      cursor: pointer; margin-left: 14px;
+      transition: background var(--transition);
+    }
+    .share-btn:hover { background: #5a3ae0; }
+    .share-btn svg { width: 13px; height: 13px; }
+
+    /* ── Toolbar ─────────────────────────────────────────── */
+    .canvas-toolbar {
+      height: 40px; flex-shrink: 0;
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 2px;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+    }
+    .tb-select {
+      height: 26px; border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-xs); padding: 0 6px;
+      font-size: 12px; font-family: inherit;
+      color: var(--text-secondary); background: var(--bg-secondary);
+      cursor: pointer; outline: none;
+    }
+    .tb-sep { width: 1px; height: 18px; background: var(--border-secondary); margin: 0 4px; }
+    .tb-btn {
+      width: 28px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent;
+      border-radius: var(--radius-xs); cursor: pointer;
+      color: var(--text-secondary); font-size: 13px; font-weight: 600;
+      transition: background var(--transition), color var(--transition);
+    }
+    .tb-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .tb-btn svg { width: 14px; height: 14px; }
+
+    /* ── Canvas scroll + doc ─────────────────────────────── */
+    .canvas-scroll {
+      flex: 1; overflow-y: auto; position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-secondary) transparent;
+    }
+    .canvas-doc {
+      max-width: 740px; margin: 0 auto;
+      padding: 48px 60px 140px;
+      outline: none; position: relative;
+      min-height: calc(100% - 0px);
+    }
+    /* Doc typography */
+    .canvas-doc h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 27px; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 6px; line-height: 1.25;
+    }
+    .canvas-doc h2 {
+      font-size: 16px; font-weight: 600;
+      color: var(--text-primary);
+      margin: 30px 0 11px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .canvas-doc h3 {
+      font-size: 14px; font-weight: 600;
+      color: var(--text-primary); margin: 18px 0 8px;
+    }
+    .canvas-doc p {
+      font-size: 14px; line-height: 1.78;
+      color: var(--text-secondary); margin-bottom: 13px;
+    }
+    .canvas-doc p.ph {
+      color: var(--text-placeholder); font-style: italic;
+    }
+    .canvas-doc ul, .canvas-doc ol {
+      margin: 0 0 13px 22px; font-size: 14px;
+      line-height: 1.78; color: var(--text-secondary);
+    }
+    .canvas-doc li { margin-bottom: 5px; }
+    .canvas-doc table {
+      width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px;
+    }
+    .canvas-doc th {
+      background: var(--bg-primary); font-weight: 600; text-align: left;
+      padding: 7px 11px; border: 1px solid var(--border-secondary);
+      color: var(--text-primary);
+    }
+    .canvas-doc td {
+      padding: 7px 11px; border: 1px solid var(--border-secondary);
+      color: var(--text-secondary);
+    }
+    .canvas-doc td:first-child { font-weight: 500; color: var(--text-primary); }
+    .canvas-doc tr:nth-child(even) td { background: #fafafa; }
+    .canvas-doc .doc-meta {
+      font-size: 12px; color: var(--text-tertiary);
+      margin-bottom: 32px; display: flex; gap: 18px;
+    }
+    .canvas-doc .doc-meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* ── Ghost cursors ───────────────────────────────────── */
+    .gc {
+      position: absolute; pointer-events: none; z-index: 20;
+      transition: top 2s cubic-bezier(.4,0,.2,1), left 2s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column; align-items: flex-start;
+    }
+    .gc-arrow {
+      width: 0; height: 0; border-style: solid;
+      border-width: 0 5px 13px 0;
+    }
+    .gc-label {
+      padding: 2px 7px 3px; border-radius: 0 3px 3px 3px;
+      font-size: 11px; font-weight: 600; color: white;
+      white-space: nowrap; line-height: 1.45;
+      margin-top: -1px;
+    }
+
+    /* ── AI cursor ───────────────────────────────────────── */
+    .ai-flag {
+      display: none; position: absolute; z-index: 30;
+      pointer-events: none; flex-direction: column;
+    }
+    .ai-flag.on { display: flex; }
+    .ai-flag-label {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--brand-purple); color: white;
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px 3px; border-radius: 3px 3px 3px 0;
+      white-space: nowrap;
+    }
+    .ai-flag-dot {
+      width: 5px; height: 5px; background: rgba(255,255,255,.7);
+      border-radius: 50%; animation: pulse-dot .9s infinite;
+    }
+    .ai-flag-line {
+      width: 2px; height: 18px; background: var(--brand-purple);
+      margin-left: 0;
+    }
+
+    /* Inline cursor while typing */
+    .tcursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--brand-purple); margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: blink .65s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Toast ───────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 68px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--text-primary); color: white;
+      padding: 8px 18px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity .2s, transform .2s;
+      z-index: 1000; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Typing indicator dots */
+    .dots { display: inline-flex; align-items: center; gap: 3px; }
+    .dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--brand-purple);
+      animation: bounce 1.1s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%,80%,100%{transform:scale(.7);opacity:.5}
+      40%{transform:scale(1);opacity:1}
+    }
+
+    /* ── Version switcher ────────────────────────────────── */
+    .version-switcher {
+      position: fixed; bottom: 16px; right: 50%; transform: translateX(50%);
+      display: flex; align-items: center; gap: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full); padding: 4px;
+      z-index: 100; box-shadow: var(--shadow-lg);
+    }
+    .version-tab {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 5px 14px; border-radius: var(--radius-full);
+      text-decoration: none; transition: background var(--transition);
+    }
+    .version-tab:hover { background: var(--bg-tertiary); }
+    .version-tab.current { background: var(--text-primary); }
+    .version-tab-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-tertiary); letter-spacing: .5px;
+    }
+    .version-tab.current .version-tab-label { color: rgba(255,255,255,.6); }
+    .version-tab-desc { font-size: 11px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
+    .version-tab.current .version-tab-desc { color: white; }
+  </style>
+</head>
+<body>
+
+<!-- Top nav -->
+<nav class="top-nav">
+  <div class="nav-left">
+    <div class="nav-logo">
+      <div class="logo-emblem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+    </div>
+    <span class="nav-brand" style="margin-left:14px">Nexus.ai</span>
+    <div class="nav-divider"></div>
+    <div class="nav-badge">
+      <div class="nav-badge-dot"></div>
+      Canvas
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="avatar">T</div>
+  </div>
+</nav>
+
+<!-- App -->
+<div class="app-layout">
+
+  <!-- ── Left: Chat ──────────────────────────────────────── -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="chat-header-title">Team Chat</span>
+      <div class="chat-header-pill"><div class="online-dot"></div>3 online</div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg">
+        <div class="msg-body" style="width:100%">
+          <div class="msg-bubble system">📄 Canvas created · Cybersecurity Report 2026</div>
+        </div>
+      </div>
+      <div class="chat-msg">
+        <div class="msg-avatar" style="background:#dcfce7;color:#16a34a">S</div>
+        <div class="msg-body">
+          <div class="msg-name">Sarah Chen</div>
+          <div class="msg-bubble">I've added Key Findings. Can someone get AI to write the executive summary?</div>
+        </div>
+      </div>
+      <div class="chat-msg">
+        <div class="msg-avatar" style="background:#dbeafe;color:#2563eb">M</div>
+        <div class="msg-body">
+          <div class="msg-name">Marcus R.</div>
+          <div class="msg-bubble">Also need a threat breakdown table. @AI can handle that 👆</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-row">
+        <textarea id="chat-input" rows="1"
+          placeholder="Message canvas… try @AI write executive summary"
+          oninput="onInput(this)" onkeydown="onKey(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: Canvas ───────────────────────────────────── -->
+  <div class="canvas-panel">
+    <!-- Header -->
+    <div class="canvas-header">
+      <div class="canvas-doc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      </div>
+      <span class="canvas-doc-name">Cybersecurity Report 2026</span>
+
+      <div class="collab-stack">
+        <div class="collab-av" style="background:#dcfce7;color:#16a34a" title="Sarah Chen">S</div>
+        <div class="collab-av" style="background:#dbeafe;color:#2563eb" title="Marcus R.">M</div>
+        <div class="collab-av" style="background:#fef3c7;color:#d97706" title="Priya K.">P</div>
+        <span class="collab-label">3 in canvas</span>
+      </div>
+
+      <button class="share-btn" onclick="shareLink()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="canvas-toolbar">
+      <select class="tb-select" onchange="fmtBlock(this.value);this.value=''">
+        <option value="">Normal</option>
+        <option value="h1">Heading 1</option>
+        <option value="h2">Heading 2</option>
+        <option value="h3">Heading 3</option>
+      </select>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+      <button class="tb-btn" onclick="fmt('italic')" title="Italic"><i style="font-style:italic">I</i></button>
+      <button class="tb-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="fmt('insertUnorderedList')" title="Bullets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="tb-btn" onclick="fmt('insertOrderedList')" title="Numbered">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4M4 10h2" stroke-linecap="round"/><path d="M6 18H4c0-1 2-2 2-3s-1-2-2-2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="insertTable()" title="Table">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      </button>
+    </div>
+
+    <!-- Scroll area with doc -->
+    <div class="canvas-scroll" id="canvas-scroll">
+      <div class="canvas-doc" id="canvas-doc" contenteditable="true" spellcheck="false">
+
+        <h1>Cybersecurity Market Trends 2026</h1>
+        <div class="doc-meta">
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            March 2026
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Research Team
+          </span>
+        </div>
+
+        <h2>Executive Summary</h2>
+        <p id="exec-summary" class="ph">✦ Ask AI to generate the executive summary…</p>
+
+        <h2>Key Findings</h2>
+        <p>The cybersecurity landscape has undergone significant transformation in 2025, driven by the proliferation of AI-powered attack vectors and the increasing sophistication of nation-state threat actors. Our analysis of 2,400 incidents across 47 countries reveals three critical patterns that will define the 2026 security posture for enterprise organizations.</p>
+        <ul>
+          <li>AI-augmented phishing attacks increased by 340% year-over-year, with detection rates dropping to 23% for traditional email security platforms</li>
+          <li>Supply chain compromises now account for 41% of all critical infrastructure breaches, up from 28% in 2024</li>
+          <li>Mean time to detect (MTTD) improved to 16 days industry-wide, though critical sectors lag at 31 days</li>
+        </ul>
+
+        <h2>Market Overview</h2>
+        <p>Global cybersecurity spending reached $284B in 2025, representing a 14.3% increase year-over-year. The acceleration is attributed to regulatory mandates, high-profile breach disclosures, and the rapid adoption of cloud-native infrastructure demanding new security architectures.</p>
+
+        <h2>Threat Landscape</h2>
+        <p id="threat-content" class="ph">✦ Ask AI to add a threat breakdown table…</p>
+
+        <h2>Recommendations</h2>
+        <p id="recs-content" class="ph">✦ Ask AI to write strategic recommendations…</p>
+
+      </div>
+
+      <!-- AI cursor flag (inside scroll, positioned absolutely) -->
+      <div class="ai-flag" id="ai-flag">
+        <div class="ai-flag-label">
+          <div class="ai-flag-dot"></div>
+          ✦ AI
+        </div>
+        <div class="ai-flag-line"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Version switcher -->
+<div class="version-switcher">
+  <a class="version-tab" href="v1.html"><span class="version-tab-label">V1</span><span class="version-tab-desc">AI Tools</span></a>
+  <a class="version-tab" href="index.html"><span class="version-tab-label">V2</span><span class="version-tab-desc">Audio</span></a>
+  <a class="version-tab" href="v3.html"><span class="version-tab-label">V3</span><span class="version-tab-desc">Search</span></a>
+  <a class="version-tab" href="v4.html"><span class="version-tab-label">V4</span><span class="version-tab-desc">Follow-up</span></a>
+  <a class="version-tab current" href="canvas.html"><span class="version-tab-label">V5</span><span class="version-tab-desc">Canvas</span></a>
+</div>
+
+<script>
+/* ── Ghost cursors ──────────────────────────────────────── */
+const GHOSTS = [
+  {
+    name: 'Sarah Chen', color: '#16a34a',
+    pts: [{t:195,l:80},{t:240,l:220},{t:210,l:150}]
+  },
+  {
+    name: 'Marcus R.', color: '#2563eb',
+    pts: [{t:430,l:180},{t:490,l:310},{t:460,l:120}]
+  },
+  {
+    name: 'Priya K.', color: '#d97706',
+    pts: [{t:560,l:260},{t:520,l:380},{t:590,l:200}]
+  }
+];
+
+function initGhosts() {
+  const doc = document.getElementById('canvas-doc');
+  GHOSTS.forEach((g, i) => {
+    const el = document.createElement('div');
+    el.className = 'gc';
+    el.id = 'gc' + i;
+    el.style.top = g.pts[0].t + 'px';
+    el.style.left = g.pts[0].l + 'px';
+    el.innerHTML =
+      `<div class="gc-arrow" style="border-color:transparent ${g.color} transparent transparent"></div>` +
+      `<div class="gc-label" style="background:${g.color}">${g.name}</div>`;
+    doc.appendChild(el);
+
+    let idx = 0;
+    setTimeout(() => {
+      setInterval(() => {
+        idx = (idx + 1) % g.pts.length;
+        el.style.top  = g.pts[idx].t + 'px';
+        el.style.left = g.pts[idx].l + 'px';
+      }, 3200 + i * 900);
+    }, 800 + i * 500);
+  });
+}
+
+/* ── AI responses ───────────────────────────────────────── */
+const RESPONSES = {
+  exec: {
+    target: 'exec-summary',
+    text: 'Global cybersecurity spending surpassed $284 billion in 2025, and the trajectory for 2026 signals accelerated investment as AI-powered threats outpace traditional defensive architectures. This report synthesizes intelligence from 2,400+ incidents across 47 countries to deliver actionable guidance for security leaders.\n\nThree imperatives define the 2026 posture: AI-native detection to counter generative attack tooling, supply chain visibility as the new perimeter, and cross-sector intelligence sharing to reduce mean time to detect below 10 days. Organizations aligned to these priorities face a measurably lower breach probability — those that are not face an estimated 2.3× higher likelihood of a material incident.'
+  },
+  table: {
+    target: 'threat-content',
+    html: '<table><tr><th>Threat Vector</th><th>Severity</th><th>Affected Orgs</th><th>YoY Change</th><th>Avg Dwell</th></tr><tr><td>AI-Augmented Phishing</td><td>🔴 Critical</td><td>68%</td><td>+340%</td><td>3 days</td></tr><tr><td>Supply Chain Compromise</td><td>🔴 Critical</td><td>41%</td><td>+46%</td><td>47 days</td></tr><tr><td>Ransomware-as-a-Service</td><td>🟠 High</td><td>34%</td><td>+18%</td><td>12 days</td></tr><tr><td>Cloud Misconfiguration</td><td>🟠 High</td><td>57%</td><td>+22%</td><td>8 days</td></tr><tr><td>Insider Threats</td><td>🟡 Medium</td><td>23%</td><td>+9%</td><td>71 days</td></tr><tr><td>Zero-Day Exploitation</td><td>🔴 Critical</td><td>19%</td><td>+31%</td><td>1 day</td></tr></table>'
+  },
+  recs: {
+    target: 'recs-content',
+    text: 'Based on threat pattern analysis, security leaders should prioritize three initiatives in H1 2026:\n\nFirst, deploy AI-native email and endpoint detection. Traditional signature-based systems fail against generative phishing at a 77% rate — adaptive behavioral models reduce this gap to under 15%.\n\nSecond, establish continuous supply chain monitoring. Mandate SBOMs from all tier-1 vendors and automate dependency vulnerability scanning as a condition of contract renewal.\n\nThird, invest in cross-sector threat intelligence sharing. Organizations participating in ISACs detect incidents 2.1× faster than those relying solely on internal telemetry.'
+  },
+  rewrite: {
+    target: 'exec-summary',
+    text: 'The 2026 cybersecurity market stands at an inflection point. With AI-driven attack tooling now available at commodity pricing, the asymmetry between offense and defense has reached a critical threshold — organizations that fail to adopt AI-native security capabilities face unprecedented exposure heading into the next 18 months.\n\nThis report presents findings from our global incident database, offering security executives a data-driven roadmap for prioritizing investments, rationalizing vendor portfolios, and building measurable resilience against the threat classes most likely to define 2026.'
+  }
+};
+
+function detectIntent(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes('executive') || m.includes('exec summary') || m.includes('exec summ')) return 'exec';
+  if (m.includes('table') || m.includes('threat breakdown') || m.includes('breakdown')) return 'table';
+  if (m.includes('recommend') || m.includes('strateg')) return 'recs';
+  if (m.includes('rewrite') || m.includes('improve') || m.includes('better')) return 'rewrite';
+  // default: exec summary
+  return 'exec';
+}
+
+/* ── Typewriter engine ──────────────────────────────────── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let aiRunning = false;
+
+async function aiTypeText(targetId, text) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.classList.remove('ph');
+
+  // Position AI flag above the target element
+  positionFlag(el);
+
+  // Clear and start cursor
+  let typed = '';
+  el.innerHTML = '<span class="tcursor"></span>';
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    await sleep(14 + Math.random() * 18);
+    typed += ch;
+    // Handle newlines as <br>
+    const rendered = typed
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\n\n/g, '<br><br>').replace(/\n/g, ' ');
+    el.innerHTML = rendered + '<span class="tcursor"></span>';
+    // Pause at sentence ends
+    if (['.','!','?'].includes(ch)) await sleep(60 + Math.random() * 50);
+  }
+
+  // Remove cursor
+  el.innerHTML = typed
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n\n/g, '<br><br>').replace(/\n/g, ' ');
+
+  hideFlag();
+}
+
+async function aiTypeHTML(targetId, html) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.classList.remove('ph');
+  positionFlag(el);
+  el.innerHTML = '<span class="tcursor"></span>';
+  await sleep(700);
+  el.innerHTML = html;
+  hideFlag();
+}
+
+function positionFlag(targetEl) {
+  const flag = document.getElementById('ai-flag');
+  const scroll = document.getElementById('canvas-scroll');
+  const tRect = targetEl.getBoundingClientRect();
+  const sRect = scroll.getBoundingClientRect();
+  const topInScroll = tRect.top - sRect.top + scroll.scrollTop - 40;
+  const leftInScroll = tRect.left - sRect.left;
+  flag.style.top = topInScroll + 'px';
+  flag.style.left = leftInScroll + 'px';
+  flag.classList.add('on');
+}
+
+function hideFlag() {
+  document.getElementById('ai-flag').classList.remove('on');
+}
+
+/* ── Chat ───────────────────────────────────────────────── */
+function onInput(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  document.getElementById('send-btn').classList.toggle('visible', ta.value.trim().length > 0);
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+async function sendMsg() {
+  if (aiRunning) return;
+  const ta = document.getElementById('chat-input');
+  const msg = ta.value.trim();
+  if (!msg) return;
+
+  ta.value = ''; ta.style.height = 'auto';
+  document.getElementById('send-btn').classList.remove('visible');
+
+  appendMsg('You', msg, 'user', '#252429', 'T');
+
+  // Thinking indicator
+  const thinking = appendMsg('✦ AI', null, 'ai', null, '✦', true);
+  await sleep(500);
+  thinking.remove();
+
+  const intent = detectIntent(msg);
+  const resp = RESPONSES[intent];
+
+  let actionText;
+  if (intent === 'table') actionText = 'Threat breakdown table added to the canvas.';
+  else if (intent === 'recs') actionText = 'Strategic recommendations written to the canvas.';
+  else if (intent === 'rewrite') actionText = 'Executive summary rewritten in the canvas.';
+  else actionText = 'Executive summary written directly to the canvas.';
+
+  appendMsg('✦ AI', actionText, 'ai', null, '✦');
+
+  // Scroll canvas to target
+  const targetEl = document.getElementById(resp.target);
+  if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  aiRunning = true;
+  if (resp.html) {
+    await aiTypeHTML(resp.target, resp.html);
+  } else {
+    await aiTypeText(resp.target, resp.text);
+  }
+  aiRunning = false;
+}
+
+function appendMsg(name, text, type, avatarBg, avatarLetter, thinking = false) {
+  const wrap = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'chat-msg';
+
+  let avHtml = '';
+  if (type === 'user') {
+    avHtml = `<div class="msg-avatar" style="background:${avatarBg};color:white">${avatarLetter}</div>`;
+  } else {
+    avHtml = `<div class="msg-avatar" style="background:var(--brand-purple-light);color:var(--brand-purple);font-size:13px">✦</div>`;
+  }
+
+  const bubble = thinking
+    ? `<div class="msg-bubble ${type}"><div class="dots"><span></span><span></span><span></span></div></div>`
+    : `<div class="msg-bubble ${type}">${text || ''}</div>`;
+
+  el.innerHTML = `${avHtml}<div class="msg-body"><div class="msg-name">${name}</div>${bubble}</div>`;
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+  return el;
+}
+
+/* ── Toolbar ────────────────────────────────────────────── */
+function fmt(cmd) {
+  document.getElementById('canvas-doc').focus();
+  document.execCommand(cmd, false, null);
+}
+function fmtBlock(tag) {
+  if (!tag) return;
+  document.getElementById('canvas-doc').focus();
+  document.execCommand('formatBlock', false, tag);
+}
+function insertTable() {
+  document.getElementById('canvas-doc').focus();
+  document.execCommand('insertHTML', false,
+    '<table><tr><th>Column A</th><th>Column B</th><th>Column C</th></tr>' +
+    '<tr><td>Cell</td><td>Cell</td><td>Cell</td></tr>' +
+    '<tr><td>Cell</td><td>Cell</td><td>Cell</td></tr></table><p></p>');
+}
+
+/* ── Share ──────────────────────────────────────────────── */
+function shareLink() {
+  const url = window.location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).catch(() => fallbackCopy(url));
+  } else { fallbackCopy(url); }
+  showToast('🔗 Link copied to clipboard!');
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); ta.remove();
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ── Init ───────────────────────────────────────────────── */
+initGhosts();
+</script>
+</body>
+</html>
