@@ -407,29 +407,6 @@
       40%{transform:scale(1);opacity:1}
     }
 
-    /* ── Version switcher ────────────────────────────────── */
-    .version-switcher {
-      position: fixed; bottom: 16px; right: 50%; transform: translateX(50%);
-      display: flex; align-items: center; gap: 4px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-full); padding: 4px;
-      z-index: 100; box-shadow: var(--shadow-lg);
-    }
-    .version-tab {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 5px 14px; border-radius: var(--radius-full);
-      text-decoration: none; transition: background var(--transition);
-    }
-    .version-tab:hover { background: var(--bg-tertiary); }
-    .version-tab.current { background: var(--text-primary); }
-    .version-tab-label {
-      font-size: 11px; font-weight: 700;
-      color: var(--text-tertiary); letter-spacing: .5px;
-    }
-    .version-tab.current .version-tab-label { color: rgba(255,255,255,.6); }
-    .version-tab-desc { font-size: 11px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
-    .version-tab.current .version-tab-desc { color: white; }
   </style>
 </head>
 <body>
@@ -601,14 +578,6 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Version switcher -->
-<div class="version-switcher">
-  <a class="version-tab" href="v1.html"><span class="version-tab-label">V1</span><span class="version-tab-desc">AI Tools</span></a>
-  <a class="version-tab" href="index.html"><span class="version-tab-label">V2</span><span class="version-tab-desc">Audio</span></a>
-  <a class="version-tab" href="v3.html"><span class="version-tab-label">V3</span><span class="version-tab-desc">Search</span></a>
-  <a class="version-tab" href="v4.html"><span class="version-tab-label">V4</span><span class="version-tab-desc">Follow-up</span></a>
-  <a class="version-tab current" href="canvas.html"><span class="version-tab-label">V5</span><span class="version-tab-desc">Canvas</span></a>
-</div>
 
 <script>
 /* ── Ghost cursors ──────────────────────────────────────── */
