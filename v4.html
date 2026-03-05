@@ -913,7 +913,8 @@
             <textarea class="prompt-textarea" id="prompt"
               placeholder="Ask a follow up"
               rows="1"
-              oninput="onInput(this)"></textarea>
+              oninput="onInput(this)"
+              onkeydown="onPromptKey(event)"></textarea>
             <!-- AI Tools Popover (anchored to prompt-box) -->
             <div class="aitools-popover" id="aitools-popover">
               <div class="aitools-search">
@@ -1015,6 +1016,17 @@
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
       document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
+    }
+
+    function onPromptKey(e) {
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      const ta = e.target;
+      if (!ta.value.trim()) return;
+      // If FQ card is still active, collapse it to disabled summary
+      if (!fq_done) {
+        fq_done = true;
+        fqCollapseToSummary();
+      }
     }
 
     function toggleAITools(e) {
@@ -1163,6 +1175,19 @@
       document.getElementById('fq-modal').classList.toggle('collapsed');
     }
 
+    function fqCollapseToSummary() {
+      const modal = document.getElementById('fq-modal');
+      if (!modal) return;
+      modal.style.transition = 'opacity .15s ease';
+      modal.style.opacity = '0';
+      setTimeout(() => {
+        modal.outerHTML = `<div class="fq-summary">
+          <span class="fq-summary-text">What kind of campaign do you need?</span>
+          <span class="fq-summary-count">2 questions</span>
+        </div>`;
+      }, 150);
+    }
+
     function fqSubmit() {
       if (fq_done) return;
       fq_done = true;
@@ -1182,16 +1207,7 @@
         'Thanks! I\'ll put together a custom marketing plan tailored to your needs.';
 
       // Collapse card to disabled summary
-      const wrap = document.getElementById('fq-wrap');
-      const modal = document.getElementById('fq-modal');
-      modal.style.transition = 'opacity .15s ease';
-      modal.style.opacity = '0';
-      setTimeout(() => {
-        modal.outerHTML = `<div class="fq-summary">
-          <span class="fq-summary-text">What kind of campaign do you need?</span>
-          <span class="fq-summary-count">2 questions</span>
-        </div>`;
-      }, 150);
+      fqCollapseToSummary();
 
       // Append user message
       const msgs = document.getElementById('chat-messages');
