@@ -200,7 +200,7 @@
     .typing-dot:nth-child(2) { animation-delay: .15s; }
     .typing-dot:nth-child(3) { animation-delay: .3s; }
     @keyframes td { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-4px);opacity:1} }
-    /* FQ modal (inline, slides in) */
+    /* FQ card (inline, slides in) */
     .fq-wrap {
       width: 100%; max-width: 760px; margin: 8px auto 0;
       padding: 0 24px 32px;
@@ -215,53 +215,82 @@
       overflow: hidden;
     }
     .fq-header {
-      display: flex; align-items: center; gap: 10px;
-      padding: 16px 16px 8px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-secondary);
     }
     .fq-title {
       flex: 1;
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 15px;
-      line-height: 22px; color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
+      line-height: 20px; color: var(--text-primary);
     }
-    .fq-close {
+    .fq-header-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .fq-pagination { display: flex; align-items: center; gap: 0; margin-right: 6px; }
+    .fq-page-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; padding: 0 4px; white-space: nowrap; }
+    .fq-icon-btn {
       width: 24px; height: 24px; border-radius: 5px;
       border: none; background: transparent; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: var(--text-tertiary);
       transition: background var(--transition), color var(--transition);
     }
-    .fq-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .fq-close svg { width: 13px; height: 13px; }
-    .fq-cards { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
+    .fq-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .fq-icon-btn:disabled { opacity: 0.35; cursor: default; }
+    .fq-icon-btn:disabled:hover { background: transparent; color: var(--text-tertiary); }
+    .fq-icon-btn svg { width: 14px; height: 14px; }
+    .fq-chevron { transition: transform .2s ease; }
+    .fq-modal.collapsed .fq-chevron { transform: rotate(180deg); }
+    .fq-body { overflow: hidden; transition: max-height .25s ease, opacity .2s ease; max-height: 600px; }
+    .fq-modal.collapsed .fq-body { max-height: 0; opacity: 0; }
+    .fq-cards { display: flex; flex-direction: column; gap: 0; padding: 8px 12px; }
     .fq-card {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 12px; border-radius: var(--radius-sm);
-      border: 1px solid var(--border-secondary);
-      background: var(--bg-secondary);
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 8px; border-radius: var(--radius-sm);
+      border: 1px solid transparent;
       cursor: pointer;
-      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      transition: border-color .15s ease, background .15s ease;
       user-select: none;
     }
-    .fq-card:hover, .fq-card.active {
-      border-color: #693bff;
-      box-shadow: 0 4px 8px rgba(18,0,69,.05), 0 2px 4px rgba(18,0,69,.03);
-    }
-    .fq-kbd {
-      width: 24px; height: 24px; flex-shrink: 0;
-      background: #f2f2f3; border: 1px solid #cacace;
-      border-radius: var(--radius-xs);
+    .fq-card:hover { border-color: var(--brand-purple); background: rgba(108,71,255,.03); }
+    .fq-card.selected { border-color: var(--brand-purple); background: rgba(108,71,255,.04); }
+    .fq-radio {
+      width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
+      border: 1.5px solid var(--border-secondary); background: var(--bg-secondary);
+      transition: border-color .15s, background .15s;
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 500; color: var(--text-placeholder);
-      line-height: 1;
     }
-    .fq-label {
-      flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 21px;
+    .fq-card.selected .fq-radio { border-color: var(--brand-purple); background: var(--brand-purple); }
+    .fq-radio-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
+    .fq-card.selected .fq-radio-dot { opacity: 1; }
+    .fq-checkbox {
+      width: 16px; height: 16px; flex-shrink: 0; border-radius: 4px;
+      border: 1.5px solid var(--border-secondary); background: var(--bg-secondary);
+      transition: border-color .15s, background .15s;
+      display: flex; align-items: center; justify-content: center;
     }
-    .fq-enter {
-      font-size: 13px; color: var(--text-tertiary); flex-shrink: 0;
-      opacity: 0; transition: opacity .15s;
+    .fq-card.selected .fq-checkbox { border-color: var(--brand-purple); background: var(--brand-purple); }
+    .fq-check-icon { opacity: 0; transition: opacity .15s; }
+    .fq-card.selected .fq-check-icon { opacity: 1; }
+    .fq-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 20px; }
+    .fq-dash { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .15s; line-height: 1; }
+    .fq-card:hover .fq-dash, .fq-card.selected .fq-dash { opacity: 1; }
+    .fq-other-input-wrap { padding: 4px 12px 0; }
+    .fq-other-input {
+      width: 100%; padding: 9px 10px;
+      border: 1px solid var(--brand-purple); border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary); outline: none;
     }
-    .fq-card:hover .fq-enter, .fq-card.active .fq-enter { opacity: 1; }
+    .fq-other-input::placeholder { color: var(--text-placeholder); }
+    .fq-footer { display: flex; justify-content: flex-end; padding: 8px 12px 12px; }
+    .fq-submit {
+      height: 32px; padding: 0 16px;
+      background: var(--brand-purple); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .fq-submit:hover { opacity: 0.88; }
 
     /* ─── Prompt input ────────────────────────────────────── */
     .prompt-wrap { width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto; }
@@ -668,100 +697,75 @@
       z-index: 9999;
       font-family: 'Inter', sans-serif;
     }
-    .version-badge {
+    .version-trigger {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 32px;
-      padding: 0 10px 0 8px;
+      padding: 6px 12px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-full);
       box-shadow: 0 2px 8px rgba(18,0,69,.08);
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: border-color var(--transition), box-shadow var(--transition), color var(--transition);
       user-select: none;
     }
-    .version-badge:hover {
-      border-color: rgba(124,123,132,.45);
-      color: var(--text-primary);
-      box-shadow: 0 4px 12px rgba(18,0,69,.12);
+    .version-trigger-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
-    .version-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--brand-purple);
-      flex-shrink: 0;
+    .version-trigger-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
     }
-    .version-chevron {
+    .version-trigger svg {
       width: 14px; height: 14px;
       color: var(--text-tertiary);
       transition: transform var(--transition);
     }
-    .version-switcher.open .version-chevron { transform: rotate(180deg); }
-
-    .version-menu {
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
       position: absolute;
       bottom: calc(100% + 6px);
       left: 0;
-      min-width: 220px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-secondary);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(18,0,69,.12), 0 2px 8px rgba(18,0,69,.06);
-      overflow: hidden;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px;
+      min-width: 160px;
       display: none;
     }
-    .version-switcher.open .version-menu { display: block; }
-
-    .version-menu-header {
-      padding: 10px 14px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .version-item {
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 14px;
+      padding: 7px 10px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background var(--transition);
       text-decoration: none;
+      transition: background var(--transition);
     }
-    .version-item:hover { background: var(--bg-primary); }
-    .version-item.current { background: var(--brand-purple-light); }
-    .version-item-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--border-secondary);
-      flex-shrink: 0;
-    }
-    .version-item.current .version-item-dot { background: var(--brand-purple); }
-    .version-item-info { flex: 1; min-width: 0; }
-    .version-item-label {
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label {
       font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    .version-item-desc {
-      font-size: 11px;
-      color: var(--text-tertiary);
-      margin-top: 1px;
-    }
-    .version-item-tag {
-      font-size: 10px;
       font-weight: 600;
-      color: var(--brand-purple);
-      background: var(--brand-purple-light);
-      padding: 2px 6px;
-      border-radius: 4px;
+      color: var(--text-primary);
+      min-width: 22px;
     }
+    .version-option-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .version-option-check {
+      margin-left: auto;
+      width: 14px; height: 14px;
+      color: var(--brand-purple);
+      opacity: 0;
+    }
+    .version-option.current .version-option-check { opacity: 1; }
   </style>
 </head>
 <body>
@@ -852,30 +856,36 @@
             <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>
           </div>
         </div>
-        <!-- Follow-up question modal (inline) -->
+        <!-- Follow-up question card (inline) -->
         <div class="fq-wrap" id="fq-wrap">
-          <div class="fq-modal">
+          <div class="fq-modal" id="fq-modal">
             <div class="fq-header">
-              <div class="fq-title">What kind of plan are you looking for?</div>
-              <button class="fq-close" onclick="fqClose()" aria-label="Dismiss">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
+              <div class="fq-title" id="fq-title">What kind of campaign do you need?</div>
+              <div class="fq-header-controls">
+                <div class="fq-pagination">
+                  <button class="fq-icon-btn" id="fq-prev" onclick="fqGoStep(fq_step - 1)" aria-label="Previous" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <span class="fq-page-label" id="fq-page-label">1 of 2</span>
+                  <button class="fq-icon-btn" id="fq-next" onclick="fqGoStep(fq_step + 1)" aria-label="Next" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
+                <button class="fq-icon-btn" onclick="fqToggleCollapse()" aria-label="Collapse">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fq-chevron"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <button class="fq-icon-btn" onclick="fqClose()" aria-label="Dismiss">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
             </div>
-            <div class="fq-cards" id="fq-cards">
-              <div class="fq-card" onclick="fqSelect(0)" onmouseenter="fqHover(0)">
-                <div class="fq-kbd">1</div><div class="fq-label">PPC Facebook Ads</div><span class="fq-enter">↵</span>
+            <div class="fq-body" id="fq-body">
+              <div class="fq-cards" id="fq-cards"></div>
+              <div id="fq-other-input-wrap" class="fq-other-input-wrap" style="display:none">
+                <input class="fq-other-input" id="fq-other-input" type="text" placeholder="Describe your campaign…" />
               </div>
-              <div class="fq-card" onclick="fqSelect(1)" onmouseenter="fqHover(1)">
-                <div class="fq-kbd">2</div><div class="fq-label">PPC Google Ads</div><span class="fq-enter">↵</span>
-              </div>
-              <div class="fq-card" onclick="fqSelect(2)" onmouseenter="fqHover(2)">
-                <div class="fq-kbd">3</div><div class="fq-label">SEO Campaign</div><span class="fq-enter">↵</span>
-              </div>
-              <div class="fq-card" onclick="fqSelect(3)" onmouseenter="fqHover(3)">
-                <div class="fq-kbd">4</div><div class="fq-label">Influencer Marketing</div><span class="fq-enter">↵</span>
-              </div>
-              <div class="fq-card" onclick="fqSelect(4)" onmouseenter="fqHover(4)">
-                <div class="fq-kbd">5</div><div class="fq-label">Other</div><span class="fq-enter">↵</span>
+              <div class="fq-footer" id="fq-footer" style="display:none">
+                <button class="fq-submit" onclick="fqSubmit()">Submit</button>
               </div>
             </div>
           </div>
@@ -885,7 +895,7 @@
         <div class="prompt-wrap">
           <div class="prompt-box">
             <textarea class="prompt-textarea" id="prompt"
-              placeholder="Ask anything to start the chat"
+              placeholder="Ask a follow up"
               rows="1"
               oninput="onInput(this)"></textarea>
             <!-- AI Tools Popover (anchored to prompt-box) -->
@@ -1052,80 +1062,152 @@
     });
 
     // ─── Follow-up questions ───────────────────────────────
-    const FQ_OPTIONS = ['PPC Facebook Ads','PPC Google Ads','SEO Campaign','Influencer Marketing','Other'];
-    const FQ_RESPONSES = {
+    const FQ_STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Other'];
+    const FQ_STEP2 = ['$100 – $1,000', '$1,001 – $5,000', '$5,000+'];
+    const FQ_RESPONSES_MAP = {
       0: 'Great choice! Here\'s a tailored PPC Facebook Ads marketing plan for your business. I\'ll focus on audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
       1: 'Perfect. For PPC Google Ads, I\'ll build a plan around keyword strategy, match types, ad copy best practices, bidding strategies, and conversion tracking to drive qualified traffic.',
       2: 'Excellent. An SEO campaign is a strong long-term investment. Your plan will cover technical SEO, on-page optimisation, content strategy, link building, and measurable milestones.',
-      3: 'Smart move. Here\'s an influencer marketing plan covering platform selection, creator tiers (nano to mega), campaign briefing, content formats, and performance measurement.',
-      4: 'No problem — tell me more about what you have in mind. You can describe your target audience, product, and goals, and I\'ll build a custom plan around your specific needs.',
+      3: 'No problem — tell me more about what you have in mind. You can describe your target audience, product, and goals, and I\'ll build a custom plan around your specific needs.',
     };
-    let _fqActive = -1;
-    let _fqDone = false;
 
-    function fqHover(idx) {
-      if (_fqDone) return;
-      _fqActive = idx;
-      _fqUpdateCards();
+    let fq_step = 1;
+    let fq_step1_sel = null;   // index into FQ_STEP1, or null
+    let fq_step2_sel = new Set();
+    let fq_done = false;
+
+    function fqRender() {
+      const cards = document.getElementById('fq-cards');
+      const otherWrap = document.getElementById('fq-other-input-wrap');
+      const footer = document.getElementById('fq-footer');
+      const title = document.getElementById('fq-title');
+      const pageLabel = document.getElementById('fq-page-label');
+      const prevBtn = document.getElementById('fq-prev');
+      const nextBtn = document.getElementById('fq-next');
+
+      pageLabel.textContent = fq_step + ' of 2';
+      prevBtn.disabled = fq_step === 1;
+      nextBtn.disabled = fq_step === 2 || fq_step1_sel === null;
+
+      if (fq_step === 1) {
+        title.textContent = 'What kind of campaign do you need?';
+        const isOther = fq_step1_sel === FQ_STEP1.length - 1;
+        cards.innerHTML = FQ_STEP1.map((opt, i) => `
+          <div class="fq-card${fq_step1_sel === i ? ' selected' : ''}" onclick="fqStep1Select(${i})">
+            <div class="fq-radio"><div class="fq-radio-dot"></div></div>
+            <div class="fq-label">${opt}</div>
+            <div class="fq-dash">—</div>
+          </div>`).join('');
+        otherWrap.style.display = isOther ? 'block' : 'none';
+        if (isOther) setTimeout(() => document.getElementById('fq-other-input').focus(), 50);
+        footer.style.display = isOther ? 'flex' : 'none';
+      } else {
+        title.textContent = 'What is your budget?';
+        cards.innerHTML = FQ_STEP2.map((opt, i) => `
+          <div class="fq-card${fq_step2_sel.has(i) ? ' selected' : ''}" onclick="fqStep2Toggle(${i})">
+            <div class="fq-checkbox">
+              <svg class="fq-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="fq-label">${opt}</div>
+            <div class="fq-dash">—</div>
+          </div>`).join('');
+        otherWrap.style.display = 'none';
+        footer.style.display = 'flex';
+      }
     }
 
-    function _fqUpdateCards() {
-      document.querySelectorAll('.fq-card').forEach((c, i) => c.classList.toggle('active', i === _fqActive));
+    function fqStep1Select(idx) {
+      if (fq_done) return;
+      fq_step1_sel = idx;
+      fqRender();
+      const isOther = idx === FQ_STEP1.length - 1;
+      if (!isOther) {
+        // auto-advance to step 2 after brief delay
+        setTimeout(() => fqGoStep(2), 420);
+      }
     }
 
-    function fqSelect(idx) {
-      if (_fqDone) return;
-      _fqDone = true;
-      const label = FQ_OPTIONS[idx];
-      // Dismiss modal
+    function fqStep2Toggle(idx) {
+      if (fq_done) return;
+      if (fq_step2_sel.has(idx)) fq_step2_sel.delete(idx);
+      else fq_step2_sel.add(idx);
+      fqRender();
+    }
+
+    function fqGoStep(n) {
+      if (n < 1 || n > 2) return;
+      if (n === 2 && fq_step1_sel === null) return;
+      fq_step = n;
+      fqRender();
+    }
+
+    function fqToggleCollapse() {
+      document.getElementById('fq-modal').classList.toggle('collapsed');
+    }
+
+    function fqSubmit() {
+      if (fq_done) return;
+      fq_done = true;
+
+      // Build summary label
+      let label = FQ_STEP1[fq_step1_sel] || '';
+      if (fq_step1_sel === FQ_STEP1.length - 1) {
+        const inp = document.getElementById('fq-other-input');
+        if (inp && inp.value.trim()) label = inp.value.trim();
+      }
+      if (fq_step2_sel.size > 0) {
+        const budgets = [...fq_step2_sel].map(i => FQ_STEP2[i]).join(', ');
+        label += ' · Budget: ' + budgets;
+      }
+
+      const responseText = FQ_RESPONSES_MAP[fq_step1_sel] ||
+        'Thanks! I\'ll put together a custom marketing plan tailored to your needs.';
+
+      // Dismiss card
       const wrap = document.getElementById('fq-wrap');
       wrap.style.transition = 'opacity .2s ease';
       wrap.style.opacity = '0';
       setTimeout(() => { wrap.remove(); }, 200);
-      // Append user selection message
+
+      // Append user message
       const msgs = document.getElementById('chat-messages');
       const userRow = document.createElement('div');
       userRow.className = 'msg-row user';
       userRow.innerHTML = `<div class="msg-bubble user">${label}</div>`;
       msgs.appendChild(userRow);
-      // Scroll to bottom
       const thread = document.getElementById('chat-thread');
       thread.scrollTop = thread.scrollHeight;
-      // Show AI typing
+
+      // Show AI typing then response
       const aiRow = document.createElement('div');
       aiRow.className = 'msg-row ai';
       aiRow.innerHTML = `<div class="ai-meta"><div class="ai-badge"><div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>GPT-4o mini · Search Preview</div></div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
       msgs.appendChild(aiRow);
       thread.scrollTop = thread.scrollHeight;
-      // Replace with response after delay
       setTimeout(() => {
-        aiRow.innerHTML = `<div class="ai-meta"><div class="ai-badge"><div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>GPT-4o mini · Search Preview</div></div><div class="msg-bubble ai">${FQ_RESPONSES[idx]}</div>`;
+        aiRow.innerHTML = `<div class="ai-meta"><div class="ai-badge"><div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>GPT-4o mini · Search Preview</div></div><div class="msg-bubble ai">${responseText}</div>`;
         thread.scrollTop = thread.scrollHeight;
       }, 1400);
     }
 
     function fqClose() {
-      if (_fqDone) return;
-      _fqDone = true;
+      if (fq_done) return;
+      fq_done = true;
       const wrap = document.getElementById('fq-wrap');
       wrap.style.transition = 'opacity .2s ease';
       wrap.style.opacity = '0';
       setTimeout(() => { wrap.remove(); }, 200);
     }
 
-    // Keyboard: 1–5 to select, arrows to navigate, Enter to confirm
+    // Escape to close
     document.addEventListener('keydown', e => {
-      const wrap = document.getElementById('fq-wrap');
-      if (!wrap || _fqDone) return;
-      // Don't hijack when typing in inputs
-      const tag = document.activeElement.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.key >= '1' && e.key <= '5') { e.preventDefault(); fqSelect(parseInt(e.key) - 1); return; }
-      if (e.key === 'ArrowDown') { e.preventDefault(); _fqActive = Math.min(_fqActive + 1, 4); _fqUpdateCards(); return; }
-      if (e.key === 'ArrowUp')   { e.preventDefault(); _fqActive = Math.max(_fqActive - 1, 0);  _fqUpdateCards(); return; }
-      if (e.key === 'Enter' && _fqActive >= 0) { e.preventDefault(); fqSelect(_fqActive); return; }
-      if (e.key === 'Escape') { fqClose(); return; }
+      if (e.key === 'Escape' && !fq_done && document.getElementById('fq-wrap')) fqClose();
     });
+
+    // Initial render
+    fqRender();
 
     // ─── Search ────────────────────────────────────────────
     const CHATS = [
@@ -1399,15 +1481,14 @@
       }
     });
 
-    // Version switcher
-    function toggleVersionMenu(e) {
+    function toggleVersionDropdown(e) {
       e.stopPropagation();
       document.getElementById('version-switcher').classList.toggle('open');
     }
-    document.addEventListener('click', (e) => {
-      const vs = document.getElementById('version-switcher');
-      if (vs && !vs.contains(e.target)) vs.classList.remove('open');
+    document.addEventListener('click', () => {
+      document.getElementById('version-switcher').classList.remove('open');
     });
+
   </script>
 
   <!-- Search Modal -->
@@ -1438,42 +1519,37 @@
 
   <!-- Version Switcher -->
   <div class="version-switcher" id="version-switcher">
-    <div class="version-menu">
-      <div class="version-menu-header">Versions</div>
-      <a class="version-item current" href="v4.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V4</div>
-          <div class="version-item-desc">Follow-up Questions</div>
-        </div>
-        <span class="version-item-tag">latest</span>
-      </a>
-      <a class="version-item" href="v3.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V3</div>
-          <div class="version-item-desc">Search</div>
-        </div>
-      </a>
-      <a class="version-item" href="v2.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V2</div>
-          <div class="version-item-desc">Audio Input</div>
-        </div>
-      </a>
-      <a class="version-item" href="v1.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V1</div>
-          <div class="version-item-desc">AI Tools redesign</div>
-        </div>
-      </a>
+    <div class="version-trigger" onclick="toggleVersionDropdown(event)">
+      <span class="version-trigger-label">V4</span>
+      <span class="version-trigger-desc">Follow-up</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
-    <div class="version-badge" onclick="toggleVersionMenu(event)">
-      <div class="version-dot"></div>
-      V4 — Follow-up Questions
-      <svg class="version-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    <div class="version-dropdown">
+      <a class="version-option" href="v1.html">
+        <span class="version-option-label">V1</span>
+        <span class="version-option-desc">AI Tools</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v2.html">
+        <span class="version-option-label">V2</span>
+        <span class="version-option-desc">Audio Input</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v3.html">
+        <span class="version-option-label">V3</span>
+        <span class="version-option-desc">Search</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option current" href="v4.html">
+        <span class="version-option-label">V4</span>
+        <span class="version-option-desc">Follow-up</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="canvas.html">
+        <span class="version-option-label">V5</span>
+        <span class="version-option-desc">Canvas</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
     </div>
   </div>
 
