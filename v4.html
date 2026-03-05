@@ -214,99 +214,120 @@
       box-shadow: 0 20px 25px -5px rgba(18,0,69,.06), 0 10px 10px -5px rgba(18,0,69,.03);
       overflow: hidden;
     }
+    /* Header */
     .fq-header {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border-secondary);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 24px 12px;
+      background: var(--bg-secondary);
     }
     .fq-title {
-      flex: 1;
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
-      line-height: 20px; color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 22px;
+      line-height: 30px; color: var(--text-primary); flex-shrink: 1; margin-right: 12px;
     }
-    .fq-header-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-    .fq-pagination { display: flex; align-items: center; gap: 0; margin-right: 6px; }
-    .fq-page-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; padding: 0 4px; white-space: nowrap; }
-    .fq-icon-btn {
-      width: 24px; height: 24px; border-radius: 5px;
+    .fq-header-right { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+    .fq-changer { display: flex; align-items: center; gap: 8px; }
+    .fq-nav-btn {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); border-radius: 6px;
+      transition: background var(--transition);
+    }
+    .fq-nav-btn:hover { background: var(--bg-tertiary); }
+    .fq-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .fq-nav-btn:disabled:hover { background: transparent; }
+    .fq-nav-btn svg { width: 32px; height: 32px; }
+    .fq-page-label {
+      font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
+      line-height: 24px; color: var(--text-primary); white-space: nowrap;
+    }
+    .fq-header-actions { display: flex; align-items: center; height: 30px; }
+    .fq-toggle-btn {
+      width: 20px; height: 20px;
       border: none; background: transparent; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: var(--text-tertiary);
-      transition: background var(--transition), color var(--transition);
+      transition: color var(--transition);
     }
-    .fq-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .fq-icon-btn:disabled { opacity: 0.35; cursor: default; }
-    .fq-icon-btn:disabled:hover { background: transparent; color: var(--text-tertiary); }
-    .fq-icon-btn svg { width: 14px; height: 14px; }
-    .fq-chevron { transition: transform .2s ease; }
-    .fq-modal.collapsed .fq-chevron { transform: rotate(180deg); }
-    .fq-body { overflow: hidden; transition: max-height .25s ease, opacity .2s ease; max-height: 600px; }
+    .fq-toggle-btn:hover { color: var(--text-primary); }
+    .fq-toggle-btn svg { width: 20px; height: 20px; }
+    /* Body */
+    .fq-body { overflow: hidden; transition: max-height .25s ease, opacity .2s ease; max-height: 800px; }
     .fq-modal.collapsed .fq-body { max-height: 0; opacity: 0; }
-    .fq-cards { display: flex; flex-direction: column; gap: 0; padding: 8px 12px; }
+    .fq-cards { display: flex; flex-direction: column; gap: 12px; padding: 8px 24px 24px; }
     .fq-card {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 8px; border-radius: var(--radius-sm);
-      border: 1px solid transparent;
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 24px 16px 16px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
       cursor: pointer;
-      transition: border-color .15s ease, background .15s ease;
-      user-select: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+      user-select: none; position: relative;
     }
-    .fq-card:hover { border-color: var(--brand-purple); background: rgba(108,71,255,.03); }
-    .fq-card.selected { border-color: var(--brand-purple); background: rgba(108,71,255,.04); }
+    .fq-card:hover {
+      border-color: #693bff;
+      box-shadow: 0 4px 8px rgba(18,0,69,.05), 0 2px 4px rgba(18,0,69,.03);
+    }
+    .fq-card.selected { border-color: #693bff; }
+    /* Radio */
     .fq-radio {
-      width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
-      border: 1.5px solid var(--border-secondary); background: var(--bg-secondary);
+      width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
+      border: 1px solid #cacace; background: var(--bg-secondary);
       transition: border-color .15s, background .15s;
       display: flex; align-items: center; justify-content: center;
     }
-    .fq-card.selected .fq-radio { border-color: var(--brand-purple); background: var(--brand-purple); }
+    .fq-card:hover .fq-radio { border-color: #693bff; }
+    .fq-card.selected .fq-radio { border-color: #693bff; background: #693bff; }
     .fq-radio-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
     .fq-card.selected .fq-radio-dot { opacity: 1; }
+    /* Checkbox */
     .fq-checkbox {
-      width: 16px; height: 16px; flex-shrink: 0; border-radius: 4px;
-      border: 1.5px solid var(--border-secondary); background: var(--bg-secondary);
+      width: 18px; height: 18px; flex-shrink: 0; border-radius: 4px;
+      border: 1px solid #cacace; background: var(--bg-secondary);
       transition: border-color .15s, background .15s;
       display: flex; align-items: center; justify-content: center;
     }
-    .fq-card.selected .fq-checkbox { border-color: var(--brand-purple); background: var(--brand-purple); }
+    .fq-card:hover .fq-checkbox { border-color: #693bff; }
+    .fq-card.selected .fq-checkbox { border-color: #693bff; background: #693bff; }
     .fq-check-icon { opacity: 0; transition: opacity .15s; }
     .fq-card.selected .fq-check-icon { opacity: 1; }
-    .fq-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 20px; }
-    .fq-dash { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .15s; line-height: 1; }
-    .fq-card:hover .fq-dash, .fq-card.selected .fq-dash { opacity: 1; }
-    .fq-other-input-wrap { padding: 4px 12px 0; }
+    /* Label & enter hint */
+    .fq-label { flex: 1; font-size: 16px; font-weight: 500; color: var(--text-primary); line-height: 24px; }
+    .fq-enter-hint { font-size: 14px; color: var(--text-tertiary); flex-shrink: 0; opacity: 0; transition: opacity .15s; }
+    .fq-card:hover .fq-enter-hint { opacity: 1; }
+    /* Other freeform input */
+    .fq-other-input-wrap { padding: 0 24px 0; }
     .fq-other-input {
-      width: 100%; padding: 9px 10px;
-      border: 1px solid var(--brand-purple); border-radius: var(--radius-sm);
+      width: 100%; padding: 12px 16px;
+      border: 1px solid #693bff; border-radius: var(--radius-sm);
       background: var(--bg-secondary);
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary); outline: none;
+      font-family: 'Inter', sans-serif; font-size: 16px; color: var(--text-primary); outline: none;
     }
     .fq-other-input::placeholder { color: var(--text-placeholder); }
-    .fq-footer { display: flex; justify-content: flex-end; padding: 8px 12px 12px; }
+    /* Footer / submit */
+    .fq-footer { display: flex; justify-content: flex-end; padding: 12px 24px 24px; }
     .fq-submit {
-      height: 32px; padding: 0 16px;
+      height: 36px; padding: 0 20px;
       background: var(--brand-purple); color: #fff;
       border: none; border-radius: var(--radius-sm);
-      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
       cursor: pointer; transition: opacity .15s;
     }
     .fq-submit:hover { opacity: 0.88; }
-    /* FQ disabled summary (post-submit) */
-    .fq-summary {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 16px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-secondary);
+    /* Disabled state (post-submit) */
+    .fq-modal.disabled {
+      background: #f2f0f9;
+    }
+    .fq-modal.disabled .fq-header {
+      background: #f2f2f3;
       border-radius: var(--radius-md);
+      padding: 24px;
     }
-    .fq-summary-text {
-      flex: 1; font-size: 14px; color: var(--text-tertiary);
-      font-family: 'Inter', sans-serif; font-weight: 400;
+    .fq-modal.disabled .fq-title {
+      font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
+      line-height: 24px; color: #949399;
     }
-    .fq-summary-count {
-      font-size: 13px; color: var(--text-tertiary); flex-shrink: 0;
-      font-family: 'Inter', sans-serif;
-    }
+    .fq-modal.disabled .fq-page-label { color: #949399; }
 
     /* ─── Prompt input ────────────────────────────────────── */
     .prompt-wrap { width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto; }
@@ -876,23 +897,22 @@
         <div class="fq-wrap" id="fq-wrap">
           <div class="fq-modal" id="fq-modal">
             <div class="fq-header">
-              <div class="fq-title" id="fq-title">What kind of campaign do you need?</div>
-              <div class="fq-header-controls">
-                <div class="fq-pagination">
-                  <button class="fq-icon-btn" id="fq-prev" onclick="fqGoStep(fq_step - 1)" aria-label="Previous" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+              <div class="fq-header-right">
+                <div class="fq-changer">
+                  <button class="fq-nav-btn" id="fq-prev" onclick="fqGoStep(fq_step - 1)" aria-label="Previous" disabled>
+                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 L12 16 L20 24"/></svg>
                   </button>
                   <span class="fq-page-label" id="fq-page-label">1 of 2</span>
-                  <button class="fq-icon-btn" id="fq-next" onclick="fqGoStep(fq_step + 1)" aria-label="Next" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                  <button class="fq-nav-btn" id="fq-next" onclick="fqGoStep(fq_step + 1)" aria-label="Next" disabled>
+                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 L20 16 L12 24"/></svg>
                   </button>
                 </div>
-                <button class="fq-icon-btn" onclick="fqToggleCollapse()" aria-label="Collapse">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fq-chevron"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <button class="fq-icon-btn" onclick="fqClose()" aria-label="Dismiss">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
+                <div class="fq-header-actions">
+                  <button class="fq-toggle-btn" id="fq-toggle-btn" onclick="fqToggle()" aria-label="Close">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5 L15 15 M15 5 L5 15"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div class="fq-body" id="fq-body">
@@ -1124,7 +1144,7 @@
           <div class="fq-card${fq_step1_sel === i ? ' selected' : ''}" onclick="fqStep1Select(${i})">
             <div class="fq-radio"><div class="fq-radio-dot"></div></div>
             <div class="fq-label">${opt}</div>
-            <div class="fq-dash">—</div>
+            <span class="fq-enter-hint">↵</span>
           </div>`).join('');
         otherWrap.style.display = isOther ? 'block' : 'none';
         if (isOther) setTimeout(() => document.getElementById('fq-other-input').focus(), 50);
@@ -1139,7 +1159,7 @@
               </svg>
             </div>
             <div class="fq-label">${opt}</div>
-            <div class="fq-dash">—</div>
+            <span class="fq-enter-hint">↵</span>
           </div>`).join('');
         otherWrap.style.display = 'none';
         footer.style.display = 'flex';
@@ -1171,8 +1191,15 @@
       fqRender();
     }
 
-    function fqToggleCollapse() {
-      document.getElementById('fq-modal').classList.toggle('collapsed');
+    const FQ_ICON_CLOSE = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5 L15 15 M15 5 L5 15"/></svg>`;
+    const FQ_ICON_EXPAND = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7 L10 13 L15 7"/></svg>`;
+
+    function fqToggle() {
+      const modal = document.getElementById('fq-modal');
+      const btn = document.getElementById('fq-toggle-btn');
+      const isCollapsed = modal.classList.toggle('collapsed');
+      btn.innerHTML = isCollapsed ? FQ_ICON_EXPAND : FQ_ICON_CLOSE;
+      btn.setAttribute('aria-label', isCollapsed ? 'Expand' : 'Close');
     }
 
     function fqCollapseToSummary() {
@@ -1181,10 +1208,18 @@
       modal.style.transition = 'opacity .15s ease';
       modal.style.opacity = '0';
       setTimeout(() => {
-        modal.outerHTML = `<div class="fq-summary">
-          <span class="fq-summary-text">What kind of campaign do you need?</span>
-          <span class="fq-summary-count">2 questions</span>
-        </div>`;
+        modal.classList.add('disabled', 'collapsed');
+        modal.style.opacity = '';
+        modal.style.transition = '';
+        // Replace header content with disabled version
+        const header = modal.querySelector('.fq-header');
+        header.innerHTML = `
+          <p class="fq-title">What kind of campaign do you need?</p>
+          <div class="fq-header-right">
+            <div class="fq-changer">
+              <span class="fq-page-label">2 questions</span>
+            </div>
+          </div>`;
       }, 150);
     }
 
@@ -1230,18 +1265,11 @@
       }, 1400);
     }
 
-    function fqClose() {
-      if (fq_done) return;
-      fq_done = true;
-      const wrap = document.getElementById('fq-wrap');
-      wrap.style.transition = 'opacity .2s ease';
-      wrap.style.opacity = '0';
-      setTimeout(() => { wrap.remove(); }, 200);
-    }
-
-    // Escape to close
+    // Escape collapses the card
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !fq_done && document.getElementById('fq-wrap')) fqClose();
+      if (e.key === 'Escape' && !fq_done && document.getElementById('fq-modal') && !document.getElementById('fq-modal').classList.contains('collapsed')) {
+        fqToggle();
+      }
     });
 
     // Initial render
