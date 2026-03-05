@@ -291,6 +291,22 @@
       cursor: pointer; transition: opacity .15s;
     }
     .fq-submit:hover { opacity: 0.88; }
+    /* FQ disabled summary (post-submit) */
+    .fq-summary {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+    }
+    .fq-summary-text {
+      flex: 1; font-size: 14px; color: var(--text-tertiary);
+      font-family: 'Inter', sans-serif; font-weight: 400;
+    }
+    .fq-summary-count {
+      font-size: 13px; color: var(--text-tertiary); flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+    }
 
     /* ─── Prompt input ────────────────────────────────────── */
     .prompt-wrap { width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto; }
@@ -1165,11 +1181,17 @@
       const responseText = FQ_RESPONSES_MAP[fq_step1_sel] ||
         'Thanks! I\'ll put together a custom marketing plan tailored to your needs.';
 
-      // Dismiss card
+      // Collapse card to disabled summary
       const wrap = document.getElementById('fq-wrap');
-      wrap.style.transition = 'opacity .2s ease';
-      wrap.style.opacity = '0';
-      setTimeout(() => { wrap.remove(); }, 200);
+      const modal = document.getElementById('fq-modal');
+      modal.style.transition = 'opacity .15s ease';
+      modal.style.opacity = '0';
+      setTimeout(() => {
+        modal.outerHTML = `<div class="fq-summary">
+          <span class="fq-summary-text">What kind of campaign do you need?</span>
+          <span class="fq-summary-count">2 questions</span>
+        </div>`;
+      }, 150);
 
       // Append user message
       const msgs = document.getElementById('chat-messages');
