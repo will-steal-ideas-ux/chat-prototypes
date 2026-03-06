@@ -771,6 +771,8 @@
   function fqStop() {
     if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
     if (aiRow) { aiRow.remove(); aiRow = null; }
+    const wrap = document.getElementById('fq-wrap');
+    if (wrap) wrap.remove();
     const promptBox = document.querySelector('.prompt-box');
     promptBox.classList.remove('working');
     document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
