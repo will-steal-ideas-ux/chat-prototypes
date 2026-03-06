@@ -311,6 +311,13 @@
       line-height: 21px; flex: 1; min-width: 0;
     }
 
+    /* Recommended badge */
+    .fq-recommended {
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 500; line-height: 1;
+      padding: 3px 6px; border-radius: 100px; flex-shrink: 0;
+    }
+
     /* Shortcut badge */
     .fq-kbd {
       flex-shrink: 0; min-width: 29px; height: 29px; padding: 0 8px;
@@ -631,6 +638,7 @@
             <div class="fq-kbd">4</div>
           </div>`;
         }
+        const recommended = i === 0;
         return `<div class="fq-option${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
           <div class="fq-option-left">
             <div class="fq-checkbox">
@@ -639,6 +647,7 @@
               </svg>
             </div>
             <div class="fq-label">${label}</div>
+            ${recommended ? `<span class="fq-recommended">Recommended</span>` : ''}
           </div>
           <div class="fq-kbd">${i + 1}</div>
         </div>`;
