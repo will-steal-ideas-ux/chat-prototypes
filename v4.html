@@ -424,6 +424,41 @@
     .prompt-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .prompt-icon-btn svg { width: 18px; height: 18px; }
 
+    /* ─── Version switcher ────────────────────────────────── */
+    .version-switcher {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 9999; font-family: 'Inter', sans-serif;
+    }
+    .version-trigger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(18,0,69,.08); cursor: pointer; user-select: none;
+    }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .version-trigger-desc { font-size: 12px; color: var(--text-tertiary); }
+    .version-trigger svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform var(--transition); }
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px; min-width: 160px; display: none;
+    }
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: background var(--transition);
+    }
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 22px; }
+    .version-option-desc { font-size: 13px; color: var(--text-secondary); }
+    .version-option-check { margin-left: auto; width: 14px; height: 14px; color: var(--accent); opacity: 0; }
+    .version-option.current .version-option-check { opacity: 1; }
+
     /* Working state — disable everything except Stop */
     .prompt-box.working .prompt-textarea { opacity: .4; pointer-events: none; }
     .prompt-box.working .prompt-btn,
@@ -840,8 +875,51 @@
     }
   });
 
+  function toggleVersionDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('version-switcher').classList.toggle('open');
+  }
+  document.addEventListener('click', () => {
+    document.getElementById('version-switcher').classList.remove('open');
+  });
+
   // ─── Init ──────────────────────────────────────────────────
   render();
 </script>
+  <div class="version-switcher" id="version-switcher">
+    <div class="version-trigger" onclick="toggleVersionDropdown(event)">
+      <span class="version-trigger-label">V4</span>
+      <span class="version-trigger-desc">Follow-up</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="version-dropdown">
+      <a class="version-option" href="v1.html">
+        <span class="version-option-label">V1</span>
+        <span class="version-option-desc">AI Tools</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v2.html">
+        <span class="version-option-label">V2</span>
+        <span class="version-option-desc">Audio Input</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v3.html">
+        <span class="version-option-label">V3</span>
+        <span class="version-option-desc">Search</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option current" href="v4.html">
+        <span class="version-option-label">V4</span>
+        <span class="version-option-desc">Follow-up</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="canvas.html">
+        <span class="version-option-label">V5</span>
+        <span class="version-option-desc">Canvas</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+    </div>
+  </div>
+
 </body>
 </html>
