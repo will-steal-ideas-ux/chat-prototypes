@@ -346,6 +346,15 @@
       display: flex; justify-content: flex-end;
       padding: 4px 24px 16px;
     }
+    .fq-footer { gap: 8px; }
+    .fq-skip {
+      height: 34px; padding: 0 14px;
+      background: transparent; color: var(--text-secondary); border: none;
+      border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .fq-skip:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .fq-submit {
       height: 34px; padding: 0 16px;
       background: var(--accent); color: #fff; border: none;
@@ -534,9 +543,7 @@
             </div>
           </div>
           <div class="fq-options" id="fq-options"></div>
-          <div class="fq-footer" id="fq-footer" style="display:none">
-            <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
-          </div>
+          <div class="fq-footer" id="fq-footer" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -634,6 +641,7 @@
           ${dash}
         </div>`;
       }).join('');
+      footer.innerHTML = `<button class="fq-submit" onclick="fqSubmit()">Submit</button>`;
       footer.style.display = isOtherSel ? 'flex' : 'none';
 
     } else {
@@ -650,6 +658,7 @@
           ${dash}
         </div>`;
       }).join('');
+      footer.innerHTML = `<button class="fq-skip" onclick="fqSkip()">Skip</button><button class="fq-submit" onclick="fqSubmit()">Submit</button>`;
       footer.style.display = 'flex';
     }
   }
@@ -692,6 +701,11 @@
     wrap.style.transition = 'opacity .15s';
     wrap.style.opacity = '0';
     setTimeout(() => wrap.remove(), 150);
+  }
+
+  function fqSkip() {
+    s2sel = new Set();
+    fqSubmit();
   }
 
   // ─── Submit ────────────────────────────────────────────────
