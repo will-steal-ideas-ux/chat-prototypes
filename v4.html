@@ -408,6 +408,13 @@
     }
     .prompt-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .prompt-icon-btn svg { width: 18px; height: 18px; }
+
+    /* Working state — disable everything except Stop */
+    .prompt-box.working { opacity: .55; pointer-events: none; }
+    .prompt-box.working .prompt-icon-btn[title="Stop"] {
+      opacity: 1; pointer-events: auto;
+      color: var(--text-primary);
+    }
   </style>
 </head>
 <body>
@@ -694,6 +701,10 @@
 
     const responseText = RESPONSES[s1sel] || RESPONSES[3];
 
+    // Disable prompt while working
+    const promptBox = document.querySelector('.prompt-box');
+    promptBox.classList.add('working');
+
     // Remove card entirely
     const wrap = document.getElementById('fq-wrap');
     wrap.style.transition = 'opacity .15s';
@@ -749,7 +760,8 @@
 
       thread.scrollTop = thread.scrollHeight;
 
-      // Update prompt placeholder
+      // Re-enable prompt
+      promptBox.classList.remove('working');
       document.getElementById('prompt-input').placeholder = 'As a follow up';
     }, 1400);
   }
