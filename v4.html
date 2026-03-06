@@ -578,6 +578,7 @@
   let s2sel = new Set();
   let done = false;
   let aiTimer = null;
+  let wrapTimer = null;
   let aiRow = null;
 
   // ─── Render ────────────────────────────────────────────────
@@ -711,7 +712,7 @@
     const wrap = document.getElementById('fq-wrap');
     wrap.style.transition = 'opacity .15s';
     wrap.style.opacity = '0';
-    setTimeout(() => wrap.remove(), 150);
+    wrapTimer = setTimeout(() => { wrap.remove(); wrapTimer = null; }, 150);
 
     // Append user message
     const msgs = document.getElementById('chat-messages');
@@ -770,9 +771,11 @@
 
   function fqStop() {
     if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+    if (wrapTimer) { clearTimeout(wrapTimer); wrapTimer = null; }
     if (aiRow) { aiRow.remove(); aiRow = null; }
+    done = true;
     const wrap = document.getElementById('fq-wrap');
-    if (wrap) wrap.remove();
+    if (wrap) { wrap.style.transition = 'none'; wrap.remove(); }
     const promptBox = document.querySelector('.prompt-box');
     promptBox.classList.remove('working');
     document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
