@@ -38,90 +38,47 @@
       flex-direction: column;
     }
 
-    /* ─── Top nav ─────────────────────────────────────────── */
-    .top-nav {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-secondary);
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px 0 0;
-      flex-shrink: 0;
-      z-index: 10;
-    }
-    .nav-left { display: flex; align-items: center; gap: 32px; }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 24px;
-      width: 248px;
-      text-decoration: none;
-    }
-    .logo-emblem {
-      width: 32px; height: 32px;
-      background: var(--text-primary);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-emblem svg { color: white; }
-    .logo-name {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 700; font-size: 17px;
-      color: var(--text-primary); letter-spacing: -0.3px;
-    }
-    .logo-name span { color: var(--brand-purple); font-size: 11px; vertical-align: super; font-weight: 500; }
-    .nav-menu { display: flex; align-items: center; }
-    .nav-item {
-      display: flex; align-items: center;
-      height: 56px; padding: 0 12px;
-      font-size: 14px; font-weight: 500;
-      color: var(--text-secondary);
-      cursor: pointer; position: relative;
-      text-decoration: none;
-      transition: color var(--transition);
-    }
-    .nav-item:hover { color: var(--text-primary); }
-    .nav-item.active { color: var(--text-primary); }
-    .nav-item.active::after {
-      content: ''; position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px; background: var(--text-primary);
-      border-radius: 2px 2px 0 0;
-    }
-    .nav-right { display: flex; align-items: center; gap: 24px; }
-    .nav-docs {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 14px; font-weight: 500;
-      color: var(--text-secondary); text-decoration: none; cursor: pointer;
-    }
-    .nav-docs:hover { color: var(--text-primary); }
-    .nav-docs svg { width: 16px; height: 16px; }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 600; color: var(--brand-purple); cursor: pointer;
-    }
-
     /* ─── Body layout ─────────────────────────────────────── */
     .body-layout { display: flex; flex: 1; overflow: hidden; }
 
     /* ─── Sidebar ─────────────────────────────────────────── */
     .sidebar {
-      width: 248px; background: var(--bg-primary);
+      width: 264px; background: var(--bg-primary);
       display: flex; flex-direction: column;
       flex-shrink: 0; overflow: hidden;
       transition: width var(--transition);
       border-right: 1px solid var(--border-secondary);
       position: relative; z-index: 2;
     }
-    .sidebar.collapsed { width: 0; }
-    .sidebar-top {
+    .sidebar.collapsed { width: 52px; }
+    .sidebar-header {
       display: flex; align-items: center;
       justify-content: space-between;
-      padding: 12px 8px 8px; flex-shrink: 0;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
     }
+    .sidebar.collapsed .sidebar-header { padding: 14px 0 10px; justify-content: center; }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; flex: 1; min-width: 0; overflow: hidden;
+    }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-emblem svg { color: white; }
+    .sidebar-logo-name {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+      white-space: nowrap;
+      transition: opacity var(--transition), max-width var(--transition);
+      max-width: 160px; overflow: hidden;
+    }
+    .sidebar-logo-name .ai-suffix { color: var(--brand-purple); font-size: 11px; vertical-align: super; font-weight: 500; }
+    .sidebar.collapsed .sidebar-logo-name { max-width: 0; opacity: 0; }
+    .sidebar.collapsed .collapse-btn { display: none; }
     .icon-btn {
       width: 32px; height: 32px; border-radius: var(--radius-full);
       display: flex; align-items: center; justify-content: center;
@@ -131,24 +88,85 @@
     }
     .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .icon-btn svg { width: 20px; height: 20px; }
+    .sidebar-quick { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-quick-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-quick-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-quick-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-quick-item:hover svg { color: var(--text-secondary); }
+    .sidebar-quick-item span { overflow: hidden; transition: opacity var(--transition), max-width var(--transition); max-width: 200px; }
+    .sidebar.collapsed .sidebar-quick { display: none; }
+    .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-nav-item:hover svg { color: var(--text-secondary); }
+    .sidebar-nav-item .nav-label { transition: opacity var(--transition), max-width var(--transition); max-width: 200px; overflow: hidden; }
+    .sidebar.collapsed .sidebar-nav { display: none; }
+    .sidebar-divider { height: 1px; background: var(--border-secondary); margin: 4px 8px; flex-shrink: 0; }
+    .sidebar.collapsed .sidebar-divider { display: none; }
     .sidebar-content { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
     .sidebar-content::-webkit-scrollbar { width: 4px; }
     .sidebar-content::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+    .sidebar.collapsed .sidebar-content { display: none; }
     .sidebar-section { margin-bottom: 4px; }
-    .sidebar-section-label {
-      padding: 8px 8px; font-size: 12px; font-weight: 600;
-      color: var(--text-tertiary);
+    .sidebar-section-header {
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px 8px 4px; cursor: pointer;
     }
+    .sidebar-section-chevron { color: var(--text-tertiary); display: flex; align-items: center; }
+    .sidebar-section-chevron svg { width: 14px; height: 14px; }
+    .sidebar-section-label {
+      flex: 1; font-size: 11px; font-weight: 600;
+      color: var(--text-tertiary); letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .sidebar-section-add {
+      width: 20px; height: 20px; border: none; background: transparent;
+      color: var(--text-tertiary); cursor: pointer; font-size: 18px; font-weight: 300;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: background var(--transition), color var(--transition);
+      line-height: 1;
+    }
+    .sidebar-section-add:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .sidebar-link {
-      display: flex; align-items: center;
-      height: 40px; padding: 0 8px;
-      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px;
+      font-size: 14px; font-weight: 400; color: var(--text-secondary);
       border-radius: var(--radius-sm); cursor: pointer;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       transition: background var(--transition);
     }
     .sidebar-link:hover { background: var(--bg-tertiary); }
-    .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
+    .sidebar-link-icon { font-size: 16px; flex-shrink: 0; }
+    .sidebar-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0;
+      border-top: 1px solid var(--border-secondary);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--brand-purple); cursor: pointer;
+    }
+    .sidebar-user-email {
+      font-size: 13px; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: opacity var(--transition), max-width var(--transition); max-width: 200px;
+    }
+    .sidebar.collapsed .sidebar-footer { padding: 12px 0; justify-content: center; }
+    .sidebar.collapsed .sidebar-user-email { max-width: 0; opacity: 0; }
 
     /* ─── Main area ───────────────────────────────────────── */
     .main-area {
@@ -398,27 +416,6 @@
       display: none;
     }
 
-    /* ─── Sidebar nav items ───────────────────────────────── */
-    .sidebar-nav { padding: 0 8px 2px; }
-    .sidebar-nav-item {
-      display: flex; align-items: center; gap: 8px;
-      height: 32px; padding: 0 8px;
-      border-radius: var(--radius-sm); cursor: pointer;
-      font-size: 14px; font-weight: 500; color: var(--text-secondary);
-      transition: background var(--transition), color var(--transition);
-      user-select: none;
-    }
-    .sidebar-nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .sidebar-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
-    .sidebar-nav-item:hover svg { color: var(--text-secondary); }
-    .sidebar-nav-kbd {
-      margin-left: auto; font-size: 11px; font-weight: 500;
-      color: var(--text-tertiary); background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary); border-radius: 4px;
-      padding: 1px 5px; line-height: 16px; display: none;
-    }
-    .sidebar-nav-item:hover .sidebar-nav-kbd { display: inline; }
-
     /* ─── Search modal ────────────────────────────────────── */
     .search-backdrop {
       position: fixed; inset: 0; z-index: 500;
@@ -575,167 +572,141 @@
       z-index: 9999;
       font-family: 'Inter', sans-serif;
     }
-    .version-badge {
+    .version-trigger {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 32px;
-      padding: 0 10px 0 8px;
+      padding: 6px 12px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-full);
       box-shadow: 0 2px 8px rgba(18,0,69,.08);
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: border-color var(--transition), box-shadow var(--transition), color var(--transition);
       user-select: none;
     }
-    .version-badge:hover {
-      border-color: rgba(124,123,132,.45);
-      color: var(--text-primary);
-      box-shadow: 0 4px 12px rgba(18,0,69,.12);
+    .version-trigger-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
-    .version-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--brand-purple);
-      flex-shrink: 0;
+    .version-trigger-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
     }
-    .version-chevron {
+    .version-trigger svg {
       width: 14px; height: 14px;
       color: var(--text-tertiary);
       transition: transform var(--transition);
     }
-    .version-switcher.open .version-chevron { transform: rotate(180deg); }
-
-    .version-menu {
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
       position: absolute;
       bottom: calc(100% + 6px);
       left: 0;
-      min-width: 220px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-secondary);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(18,0,69,.12), 0 2px 8px rgba(18,0,69,.06);
-      overflow: hidden;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px;
+      min-width: 160px;
       display: none;
     }
-    .version-switcher.open .version-menu { display: block; }
-
-    .version-menu-header {
-      padding: 10px 14px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .version-item {
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 14px;
+      padding: 7px 10px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background var(--transition);
       text-decoration: none;
+      transition: background var(--transition);
     }
-    .version-item:hover { background: var(--bg-primary); }
-    .version-item.current { background: var(--brand-purple-light); }
-    .version-item-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--border-secondary);
-      flex-shrink: 0;
-    }
-    .version-item.current .version-item-dot { background: var(--brand-purple); }
-    .version-item-info { flex: 1; min-width: 0; }
-    .version-item-label {
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label {
       font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    .version-item-desc {
-      font-size: 11px;
-      color: var(--text-tertiary);
-      margin-top: 1px;
-    }
-    .version-item-tag {
-      font-size: 10px;
       font-weight: 600;
-      color: var(--brand-purple);
-      background: var(--brand-purple-light);
-      padding: 2px 6px;
-      border-radius: 4px;
+      color: var(--text-primary);
+      min-width: 22px;
     }
+    .version-option-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .version-option-check {
+      margin-left: auto;
+      width: 14px; height: 14px;
+      color: var(--brand-purple);
+      opacity: 0;
+    }
+    .version-option.current .version-option-check { opacity: 1; }
   </style>
 </head>
 <body>
 
   <!-- Top Nav -->
-  <nav class="top-nav">
-    <div class="nav-left">
-      <a class="logo" href="#">
-        <div class="logo-emblem">
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <span class="logo-name">nexos<span>.ai</span></span>
-      </a>
-      <nav class="nav-menu">
-        <a class="nav-item active" href="#">Chat</a>
-        <a class="nav-item" href="#">Compare models</a>
-        <a class="nav-item" href="#">Projects</a>
-        <a class="nav-item" href="#">Agents</a>
-      </nav>
-    </div>
-    <div class="nav-right">
-      <a class="nav-docs" href="#">
-        Docs
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-      </a>
-      <div class="avatar">T</div>
-    </div>
-  </nav>
-
   <!-- Body -->
   <div class="body-layout">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <button class="icon-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" title="Collapse sidebar">
+      <div class="sidebar-header">
+        <a class="sidebar-logo" href="#" onclick="if(document.getElementById('sidebar').classList.contains('collapsed')){event.preventDefault();document.getElementById('sidebar').classList.remove('collapsed');}">
+          <div class="logo-emblem">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="sidebar-logo-name">nexos<span class="ai-suffix">.ai</span></span>
+        </a>
+        <button class="icon-btn collapse-btn" onclick="document.getElementById('sidebar').classList.add('collapsed')" title="Collapse sidebar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
         </button>
-        <button class="icon-btn" title="New chat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-        </button>
       </div>
-      <div class="sidebar-nav">
-        <div class="sidebar-nav-item" onclick="openSearch()">
+      <div class="sidebar-quick">
+        <div class="sidebar-quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+          <span>New chat</span>
+        </div>
+        <div class="sidebar-quick-item" onclick="openSearch()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          Search chats
-          <span class="sidebar-nav-kbd">⌘K</span>
+          <span>Search chats</span>
         </div>
       </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-nav">
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          <span class="nav-label">Agents</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-label">Projects</span>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
       <div class="sidebar-content">
         <div class="sidebar-section">
-          <div class="sidebar-section-label">Yesterday</div>
-          <div class="sidebar-link active">Cybersecurity market tr...</div>
-          <div class="sidebar-link">Generate an image bursting...</div>
+          <div class="sidebar-section-header">
+            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            <span class="sidebar-section-label">Agents</span>
+            <button class="sidebar-section-add">+</button>
+          </div>
+          <div class="sidebar-link"><span class="sidebar-link-icon">🏃</span>Sprint Architect</div>
+          <div class="sidebar-link"><span class="sidebar-link-icon">✨</span>Sentiment Strategist</div>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-section-label">Previous 30 days</div>
+          <div class="sidebar-section-header">
+            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            <span class="sidebar-section-label">Recent Chats</span>
+          </div>
+          <div class="sidebar-link active">Cybersecurity market trends for 2026</div>
           <div class="sidebar-link">EV Market Trends Analysis</div>
+          <div class="sidebar-link">Generate an image bursting out of the pa...</div>
           <div class="sidebar-link">Target Audience Brainstorming</div>
-          <div class="sidebar-link">Summary of the user resear...</div>
-          <div class="sidebar-link">Cybersecurity market trend...</div>
-          <div class="sidebar-link">Data trends analysis</div>
-          <div class="sidebar-link">EV Market Trends Analysis</div>
-          <div class="sidebar-link">Target Audience Brainstorming</div>
-          <div class="sidebar-link">Summary of the user resear...</div>
-          <div class="sidebar-link">Cybersecurity market trend...</div>
-          <div class="sidebar-link">Data trends analysis</div>
         </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-avatar">A</div>
+        <span class="sidebar-user-email">andrzej@nexos.ai</span>
       </div>
     </aside>
 
@@ -1185,15 +1156,14 @@
       }
     });
 
-    // Version switcher
-    function toggleVersionMenu(e) {
+    function toggleVersionDropdown(e) {
       e.stopPropagation();
       document.getElementById('version-switcher').classList.toggle('open');
     }
-    document.addEventListener('click', (e) => {
-      const vs = document.getElementById('version-switcher');
-      if (vs && !vs.contains(e.target)) vs.classList.remove('open');
+    document.addEventListener('click', () => {
+      document.getElementById('version-switcher').classList.remove('open');
     });
+
   </script>
 
   <!-- Search Modal -->
@@ -1224,42 +1194,37 @@
 
   <!-- Version Switcher -->
   <div class="version-switcher" id="version-switcher">
-    <div class="version-menu">
-      <div class="version-menu-header">Versions</div>
-      <a class="version-item" href="v4.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V4</div>
-          <div class="version-item-desc">Follow-up Questions</div>
-        </div>
-        <span class="version-item-tag">latest</span>
-      </a>
-      <a class="version-item current" href="v3.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V3</div>
-          <div class="version-item-desc">Search</div>
-        </div>
-      </a>
-      <a class="version-item" href="v2.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V2</div>
-          <div class="version-item-desc">Audio Input</div>
-        </div>
-      </a>
-      <a class="version-item" href="v1.html">
-        <div class="version-item-dot"></div>
-        <div class="version-item-info">
-          <div class="version-item-label">V1</div>
-          <div class="version-item-desc">AI Tools redesign</div>
-        </div>
-      </a>
+    <div class="version-trigger" onclick="toggleVersionDropdown(event)">
+      <span class="version-trigger-label">V3</span>
+      <span class="version-trigger-desc">Search</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
-    <div class="version-badge" onclick="toggleVersionMenu(event)">
-      <div class="version-dot"></div>
-      V3 — Search
-      <svg class="version-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    <div class="version-dropdown">
+      <a class="version-option" href="v1.html">
+        <span class="version-option-label">V1</span>
+        <span class="version-option-desc">AI Tools</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v2.html">
+        <span class="version-option-label">V2</span>
+        <span class="version-option-desc">Audio Input</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option current" href="v3.html">
+        <span class="version-option-label">V3</span>
+        <span class="version-option-desc">Search</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v4.html">
+        <span class="version-option-label">V4</span>
+        <span class="version-option-desc">Follow-up</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="canvas.html">
+        <span class="version-option-label">V5</span>
+        <span class="version-option-desc">Canvas</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
     </div>
   </div>
 
