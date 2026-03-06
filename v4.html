@@ -259,16 +259,17 @@
       font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
       line-height: 24px; color: var(--text-primary); white-space: nowrap;
     }
-    .fq-header-actions { display: flex; align-items: center; height: 30px; }
-    .fq-toggle-btn {
-      width: 20px; height: 20px;
+    .fq-header-actions { display: flex; align-items: center; gap: 2px; }
+    .fq-toggle-btn, .fq-close-btn {
+      width: 28px; height: 28px;
       border: none; background: transparent; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text-tertiary);
-      transition: color var(--transition);
+      color: var(--text-tertiary); border-radius: 6px;
+      transition: background var(--transition), color var(--transition);
     }
-    .fq-toggle-btn:hover { color: var(--text-primary); }
-    .fq-toggle-btn svg { width: 20px; height: 20px; }
+    .fq-toggle-btn:hover, .fq-close-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .fq-toggle-btn svg, .fq-close-btn svg { width: 18px; height: 18px; transition: transform .2s ease; }
+    .fq-modal.collapsed .fq-toggle-btn svg { transform: rotate(180deg); }
     /* Body */
     .fq-body { overflow: hidden; transition: max-height .25s ease, opacity .2s ease; max-height: 800px; }
     .fq-modal.collapsed .fq-body { max-height: 0; opacity: 0; }
@@ -311,26 +312,23 @@
     .fq-card.selected .fq-check-icon { opacity: 1; }
     /* Label & enter hint */
     .fq-label { flex: 1; font-size: 16px; font-weight: 500; color: var(--text-primary); line-height: 24px; }
-    .fq-enter-hint { font-size: 14px; color: var(--text-tertiary); flex-shrink: 0; opacity: 0; transition: opacity .15s; margin-right: 6px; }
-    .fq-card:hover .fq-enter-hint { opacity: 1; }
-    .fq-kbd {
-      flex-shrink: 0; min-width: 22px; height: 22px; padding: 0 5px;
-      background: #f2f2f3; border: 1px solid #d1d1d4; border-bottom-width: 2px;
-      border-radius: 4px; display: flex; align-items: center; justify-content: center;
-      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
-      color: var(--text-tertiary); line-height: 1;
-      opacity: 0; transition: opacity .15s;
+    .fq-dash {
+      flex-shrink: 0; font-size: 16px; font-weight: 400; color: var(--text-tertiary);
+      opacity: 0; transition: opacity .15s; line-height: 1;
     }
-    .fq-card:hover .fq-kbd { opacity: 1; }
-    /* Other freeform input */
-    .fq-other-input-wrap { padding: 0 24px 0; }
-    .fq-other-input {
-      width: 100%; padding: 12px 16px;
-      border: 1px solid #693bff; border-radius: var(--radius-sm);
-      background: var(--bg-secondary);
-      font-family: 'Inter', sans-serif; font-size: 16px; color: var(--text-primary); outline: none;
+    .fq-card:hover .fq-dash,
+    .fq-card.selected .fq-dash { opacity: 1; }
+    /* Custom inline input row */
+    .fq-card-custom { gap: 10px; }
+    .fq-card-custom svg.fq-pencil { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
+    .fq-custom-input {
+      flex: 1; border: none; outline: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary);
+      line-height: 21px;
     }
-    .fq-other-input::placeholder { color: var(--text-placeholder); }
+    .fq-custom-input::placeholder { color: var(--text-placeholder); }
+    .fq-card-custom:hover .fq-pencil, .fq-card-custom:focus-within .fq-pencil { color: var(--text-secondary); }
+    .fq-card-custom:focus-within { border-color: #693bff; }
     /* Footer / submit */
     .fq-footer { display: flex; justify-content: flex-end; padding: 12px 24px 24px; }
     .fq-submit {
@@ -898,7 +896,7 @@
             <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>
           </div>
         </div>
-        <!-- Follow-up question card (inline) -->
+        <!-- Interactive chat card (inline) -->
         <div class="fq-wrap" id="fq-wrap">
           <div class="fq-modal" id="fq-modal">
             <div class="fq-header">
@@ -914,17 +912,17 @@
                   </button>
                 </div>
                 <div class="fq-header-actions">
-                  <button class="fq-toggle-btn" id="fq-toggle-btn" onclick="fqToggle()" aria-label="Close">
-                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5 L15 15 M15 5 L5 15"/></svg>
+                  <button class="fq-toggle-btn" id="fq-toggle-btn" onclick="fqToggle()" aria-label="Collapse">
+                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6 L9 12 L14 6"/></svg>
+                  </button>
+                  <button class="fq-close-btn" onclick="fqClose()" aria-label="Close">
+                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4 L14 14 M14 4 L4 14"/></svg>
                   </button>
                 </div>
               </div>
             </div>
             <div class="fq-body" id="fq-body">
               <div class="fq-cards" id="fq-cards"></div>
-              <div id="fq-other-input-wrap" class="fq-other-input-wrap" style="display:none">
-                <input class="fq-other-input" id="fq-other-input" type="text" placeholder="Describe your campaign…" />
-              </div>
               <div class="fq-footer" id="fq-footer" style="display:none">
                 <button class="fq-submit" onclick="fqSubmit()">Submit</button>
               </div>
@@ -1116,7 +1114,7 @@
 
     // ─── Follow-up questions ───────────────────────────────
     const FQ_STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Other'];
-    const FQ_STEP2 = ['$100 – $1,000', '$1,001 – $5,000', '$5,000+'];
+    const FQ_STEP2 = ['100–1000', '1001–5000', '5000+'];
     const FQ_RESPONSES_MAP = {
       0: 'Great choice! Here\'s a tailored PPC Facebook Ads marketing plan for your business. I\'ll focus on audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
       1: 'Perfect. For PPC Google Ads, I\'ll build a plan around keyword strategy, match types, ad copy best practices, bidding strategies, and conversion tracking to drive qualified traffic.',
@@ -1129,9 +1127,10 @@
     let fq_step2_sel = new Set();
     let fq_done = false;
 
+    const PENCIL_SVG = `<svg class="fq-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`;
+
     function fqRender() {
       const cards = document.getElementById('fq-cards');
-      const otherWrap = document.getElementById('fq-other-input-wrap');
       const footer = document.getElementById('fq-footer');
       const title = document.getElementById('fq-title');
       const pageLabel = document.getElementById('fq-page-label');
@@ -1145,30 +1144,37 @@
       if (fq_step === 1) {
         title.textContent = 'What kind of campaign do you need?';
         const isOther = fq_step1_sel === FQ_STEP1.length - 1;
-        cards.innerHTML = FQ_STEP1.map((opt, i) => `
-          <div class="fq-card${fq_step1_sel === i ? ' selected' : ''}" onclick="fqStep1Select(${i})">
+        cards.innerHTML = FQ_STEP1.map((opt, i) => {
+          const isLast = i === FQ_STEP1.length - 1;
+          const sel = fq_step1_sel === i;
+          if (isLast && sel) {
+            return `<div class="fq-card fq-card-custom selected" onclick="event.stopPropagation()">
+              ${PENCIL_SVG}
+              <input class="fq-custom-input" id="fq-custom-s1" type="text" placeholder="Describe your campaign" />
+              <span class="fq-dash">—</span>
+            </div>`;
+          }
+          return `<div class="fq-card${sel ? ' selected' : ''}" onclick="fqStep1Select(${i})">
             <div class="fq-radio"><div class="fq-radio-dot"></div></div>
             <div class="fq-label">${opt}</div>
-            <span class="fq-enter-hint">↵</span>
-            <kbd class="fq-kbd">${i + 1}</kbd>
-          </div>`).join('');
-        otherWrap.style.display = isOther ? 'block' : 'none';
-        if (isOther) setTimeout(() => document.getElementById('fq-other-input').focus(), 50);
+            <span class="fq-dash">—</span>
+          </div>`;
+        }).join('');
         footer.style.display = isOther ? 'flex' : 'none';
       } else {
         title.textContent = 'What is your budget?';
-        cards.innerHTML = FQ_STEP2.map((opt, i) => `
-          <div class="fq-card${fq_step2_sel.has(i) ? ' selected' : ''}" onclick="fqStep2Toggle(${i})">
+        cards.innerHTML = FQ_STEP2.map((opt, i) => {
+          const sel = fq_step2_sel.has(i);
+          return `<div class="fq-card${sel ? ' selected' : ''}" onclick="fqStep2Toggle(${i})">
             <div class="fq-checkbox">
               <svg class="fq-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
                 <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
             <div class="fq-label">${opt}</div>
-            <span class="fq-enter-hint">↵</span>
-            <kbd class="fq-kbd">${i + 1}</kbd>
-          </div>`).join('');
-        otherWrap.style.display = 'none';
+            <span class="fq-dash">—</span>
+          </div>`;
+        }).join('');
         footer.style.display = 'flex';
       }
     }
@@ -1178,7 +1184,10 @@
       fq_step1_sel = idx;
       fqRender();
       const isOther = idx === FQ_STEP1.length - 1;
-      if (!isOther) {
+      if (isOther) {
+        const inp = document.getElementById('fq-custom-s1');
+        if (inp) inp.focus();
+      } else {
         // auto-advance to step 2 after brief delay
         setTimeout(() => fqGoStep(2), 420);
       }
@@ -1198,15 +1207,19 @@
       fqRender();
     }
 
-    const FQ_ICON_CLOSE = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5 L15 15 M15 5 L5 15"/></svg>`;
-    const FQ_ICON_EXPAND = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7 L10 13 L15 7"/></svg>`;
-
     function fqToggle() {
       const modal = document.getElementById('fq-modal');
       const btn = document.getElementById('fq-toggle-btn');
       const isCollapsed = modal.classList.toggle('collapsed');
-      btn.innerHTML = isCollapsed ? FQ_ICON_EXPAND : FQ_ICON_CLOSE;
-      btn.setAttribute('aria-label', isCollapsed ? 'Expand' : 'Close');
+      btn.setAttribute('aria-label', isCollapsed ? 'Expand' : 'Collapse');
+    }
+
+    function fqClose() {
+      const wrap = document.getElementById('fq-wrap');
+      if (!wrap) return;
+      wrap.style.transition = 'opacity .15s ease';
+      wrap.style.opacity = '0';
+      setTimeout(() => wrap.remove(), 150);
     }
 
     function fqCollapseToSummary() {
@@ -1237,7 +1250,7 @@
       // Build summary label
       let label = FQ_STEP1[fq_step1_sel] || '';
       if (fq_step1_sel === FQ_STEP1.length - 1) {
-        const inp = document.getElementById('fq-other-input');
+        const inp = document.getElementById('fq-custom-s1');
         if (inp && inp.value.trim()) label = inp.value.trim();
       }
       if (fq_step2_sel.size > 0) {
