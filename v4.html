@@ -346,6 +346,13 @@
       display: flex; justify-content: flex-end;
       padding: 4px 24px 16px;
     }
+    .fq-skip {
+      height: 36px; padding: 0 12px; border: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-sm);
+      transition: background var(--transition), color var(--transition);
+    }
+    .fq-skip:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .fq-submit {
       height: 36px; padding: 0 16px;
       background: var(--accent); color: #fff; border: none;
@@ -526,6 +533,7 @@
           </div>
           <div class="fq-options" id="fq-options"></div>
           <div class="fq-footer" id="fq-footer" style="display:none">
+            <button class="fq-skip" onclick="fqSkip()">Skip</button>
             <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
           </div>
         </div>
@@ -689,6 +697,8 @@
     step = n;
     render();
   }
+
+  function fqSkip() { s2sel = new Set(); fqSubmit(); }
 
   // ─── Submit ────────────────────────────────────────────────
   function fqSubmit() {
