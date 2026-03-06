@@ -242,46 +242,58 @@
 
     /* Card header */
     .fq-header {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 16px 24px 0; gap: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 12px 0 24px; gap: 8px;
     }
     .fq-title {
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 16px;
-      line-height: 24px; color: var(--text-primary); flex: 1;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 15px;
+      line-height: 22px; color: var(--text-primary); flex: 1;
     }
-    .fq-changer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .fq-header-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .fq-changer { display: flex; align-items: center; }
     .fq-nav-btn {
-      width: 24px; height: 24px; border: none; background: transparent;
+      width: 26px; height: 26px; border: none; background: transparent;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-      color: var(--text-primary); border-radius: 4px;
-      transition: background var(--transition);
+      color: var(--text-tertiary); border-radius: 4px;
+      transition: background var(--transition), color var(--transition);
     }
-    .fq-nav-btn:hover { background: var(--bg-tertiary); }
+    .fq-nav-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .fq-nav-btn:disabled { opacity: .3; cursor: default; }
     .fq-nav-btn:disabled:hover { background: transparent; }
-    .fq-nav-btn svg { width: 24px; height: 24px; }
-    .fq-page { font-size: 14px; color: var(--text-primary); white-space: nowrap; }
+    .fq-nav-btn svg { width: 16px; height: 16px; }
+    .fq-page { font-size: 13px; color: var(--text-tertiary); white-space: nowrap; padding: 0 1px; }
+    .fq-header-sep { width: 1px; height: 14px; background: var(--border-secondary); margin: 0 4px; }
+    .fq-icon-btn {
+      width: 28px; height: 28px; border: none; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary); border-radius: 4px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .fq-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .fq-icon-btn svg { width: 15px; height: 15px; }
+    .fq-collapse-btn svg { transition: transform .2s ease; }
+    .fq-card.collapsed .fq-collapse-btn svg { transform: rotate(180deg); }
+    .fq-card.collapsed .fq-options,
+    .fq-card.collapsed .fq-footer { display: none !important; }
 
     /* Options list */
-    .fq-options { display: flex; flex-direction: column; gap: 12px; padding: 16px 24px; }
+    .fq-options { display: flex; flex-direction: column; gap: 8px; padding: 14px 24px; }
 
     /* Option row */
     .fq-option {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: var(--radius-sm);
       border: 1px solid var(--border-secondary); cursor: pointer;
-      transition: border-color var(--transition), box-shadow var(--transition);
+      transition: border-color var(--transition);
       user-select: none;
     }
     .fq-option:hover { border-color: var(--accent); }
     .fq-option.selected { border-color: var(--accent); }
 
-    .fq-option-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-
     /* Radio */
     .fq-radio {
-      width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
-      border: 1px solid var(--gray-400); background: #fff;
+      width: 17px; height: 17px; flex-shrink: 0; border-radius: 50%;
+      border: 1.5px solid var(--gray-400); background: #fff;
       display: flex; align-items: center; justify-content: center;
       transition: border-color var(--transition), background var(--transition);
     }
@@ -295,8 +307,8 @@
 
     /* Checkbox */
     .fq-checkbox {
-      width: 18px; height: 18px; flex-shrink: 0; border-radius: 4px;
-      border: 1px solid var(--gray-400); background: #fff;
+      width: 17px; height: 17px; flex-shrink: 0; border-radius: 4px;
+      border: 1.5px solid var(--gray-400); background: #fff;
       display: flex; align-items: center; justify-content: center;
       transition: border-color var(--transition), background var(--transition);
     }
@@ -308,38 +320,26 @@
     /* Label */
     .fq-label {
       font-size: 14px; font-weight: 400; color: var(--text-primary);
-      line-height: 21px;
-    }
-    .fq-option-left { flex: 1; }
-
-    /* Recommended badge */
-    .fq-recommended {
-      background: var(--accent); color: #fff;
-      font-size: 12px; font-weight: 500; line-height: 1;
-      padding: 3px 6px; border-radius: 100px; flex-shrink: 0;
+      line-height: 20px; flex: 1;
     }
 
-    /* Shortcut badge */
-    .fq-kbd {
-      flex-shrink: 0; min-width: 29px; height: 29px; padding: 0 8px;
-      background: var(--gray-250); border: 1px solid var(--gray-400);
-      border-radius: var(--radius-xs);
+    /* Dash icon — visible on hover / selected */
+    .fq-dash {
+      width: 20px; height: 20px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 500; color: var(--text-placeholder);
-      line-height: 1; font-family: 'Inter', sans-serif;
+      color: var(--text-tertiary); opacity: 0;
+      transition: opacity var(--transition);
     }
+    .fq-option:hover .fq-dash,
+    .fq-option.selected .fq-dash { opacity: 1; }
 
-    /* Custom (freeform) row */
-    .fq-option-custom { gap: 10px; }
-    .fq-custom-pencil {
-      width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary);
-    }
-    .fq-custom-input {
+    /* "Other" inline text input */
+    .fq-other-input {
       flex: 1; border: none; outline: none; background: transparent;
-      font-family: 'Inter', sans-serif; font-size: 16px; color: var(--text-primary);
-      line-height: 24px; min-width: 0;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary);
+      line-height: 20px; min-width: 0;
     }
-    .fq-custom-input::placeholder { color: var(--text-placeholder); }
+    .fq-other-input::placeholder { color: var(--text-placeholder); }
 
     /* Footer / submit */
     .fq-footer {
@@ -347,7 +347,7 @@
       padding: 4px 24px 16px;
     }
     .fq-submit {
-      height: 36px; padding: 0 16px;
+      height: 34px; padding: 0 16px;
       background: var(--accent); color: #fff; border: none;
       border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
       font-size: 14px; font-weight: 500; cursor: pointer;
@@ -355,7 +355,7 @@
     }
     .fq-submit:hover { opacity: .88; }
 
-    /* Disabled (submitted) card state */
+    /* Submitted card state */
     .fq-card.submitted {
       background: #f7f5ff;
       border-color: var(--border-secondary);
@@ -514,13 +514,22 @@
         <div class="fq-card" id="fq-card">
           <div class="fq-header">
             <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
-            <div class="fq-changer">
-              <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
+            <div class="fq-header-controls">
+              <div class="fq-changer">
+                <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <span class="fq-page" id="fq-page">1 of 2</span>
+                <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </div>
+              <div class="fq-header-sep"></div>
+              <button class="fq-icon-btn fq-collapse-btn" onclick="fqCollapse()" aria-label="Collapse">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
               </button>
-              <span class="fq-page" id="fq-page">Step 1 of 2</span>
-              <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
+              <button class="fq-icon-btn" onclick="fqClose()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
           </div>
@@ -570,8 +579,8 @@
 
 <script>
   // ─── Data ─────────────────────────────────────────────────
-  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
-  const STEP2 = ['100–1000', '1001–5000', '5000+', 'Custom'];
+  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Other'];
+  const STEP2 = ['100–1000', '1001–5000', '5000+'];
 
   const RESPONSES = {
     0: 'Great choice. Here\'s a tailored PPC Facebook Ads marketing plan for your business — covering audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
@@ -582,7 +591,7 @@
 
   // State
   let step = 1;
-  let s1sel = null;   // index or null
+  let s1sel = null;
   let s2sel = new Set();
   let done = false;
   let aiTimer = null;
@@ -598,59 +607,47 @@
     const prev = document.getElementById('fq-prev');
     const next = document.getElementById('fq-next');
 
-    page.textContent = 'Step ' + step + ' of 2';
+    page.textContent = step + ' of 2';
     prev.disabled = step === 1;
     next.disabled = step === 2 || s1sel === null;
 
+    const dash = `<div class="fq-dash"><svg viewBox="0 0 14 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="0" y1="1" x2="14" y2="1"/></svg></div>`;
+
     if (step === 1) {
       title.textContent = 'What kind of campaign do you need?';
+      const isOtherSel = s1sel === STEP1.length - 1;
       opts.innerHTML = STEP1.map((label, i) => {
-        const isCustom = i === STEP1.length - 1;
+        const isOther = i === STEP1.length - 1;
         const sel = s1sel === i;
-        if (isCustom) {
-          return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s1pick(${i})" id="fq-opt-${i}">
-            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <input class="fq-custom-input" id="s1-input" type="text" placeholder="Custom"
-              onclick="event.stopPropagation(); s1pick(${i})"
-              onkeydown="if(event.key==='Enter'){fqNav(1)}" />
-            <div class="fq-kbd">4</div>
+        if (isOther && sel) {
+          return `<div class="fq-option selected" onclick="s1pick(${i})" id="fq-opt-${i}">
+            <div class="fq-radio"><div class="fq-radio-dot"></div></div>
+            <input class="fq-other-input" id="s1-input" type="text" placeholder="Describe your campaign…"
+              onclick="event.stopPropagation()"
+              onkeydown="if(event.key==='Enter'){fqSubmit()}" />
+            ${dash}
           </div>`;
         }
         return `<div class="fq-option${sel ? ' selected' : ''}" onclick="s1pick(${i})" id="fq-opt-${i}">
-          <div class="fq-option-left">
-            <div class="fq-radio"><div class="fq-radio-dot"></div></div>
-            <div class="fq-label">${label}</div>
-          </div>
-          <div class="fq-kbd">${i + 1}</div>
+          <div class="fq-radio"><div class="fq-radio-dot"></div></div>
+          <div class="fq-label">${label}</div>
+          ${dash}
         </div>`;
       }).join('');
-      footer.style.display = 'none';
+      footer.style.display = isOtherSel ? 'flex' : 'none';
 
     } else {
       title.textContent = 'What is your budget?';
       opts.innerHTML = STEP2.map((label, i) => {
-        const isCustom = i === STEP2.length - 1;
         const sel = s2sel.has(i);
-        if (isCustom) {
-          return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
-            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <input class="fq-custom-input" id="s2-input" type="text" placeholder="Custom"
-              onclick="event.stopPropagation(); s2toggle(${i})" />
-            <div class="fq-kbd">4</div>
-          </div>`;
-        }
-        const recommended = i === 0;
         return `<div class="fq-option${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
-          <div class="fq-option-left">
-            <div class="fq-checkbox">
-              <svg class="fq-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
-                <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="fq-label">${label}</div>
-            ${recommended ? `<span class="fq-recommended">Recommended</span>` : ''}
+          <div class="fq-checkbox">
+            <svg class="fq-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </div>
-          <div class="fq-kbd">${i + 1}</div>
+          <div class="fq-label">${label}</div>
+          ${dash}
         </div>`;
       }).join('');
       footer.style.display = 'flex';
@@ -662,8 +659,7 @@
     if (done) return;
     s1sel = idx;
     render();
-    const isCustom = idx === STEP1.length - 1;
-    if (isCustom) {
+    if (idx === STEP1.length - 1) {
       const inp = document.getElementById('s1-input');
       if (inp) inp.focus();
     } else {
@@ -676,10 +672,6 @@
     if (s2sel.has(idx)) s2sel.delete(idx);
     else s2sel.add(idx);
     render();
-    if (idx === STEP2.length - 1) {
-      const inp = document.getElementById('s2-input');
-      if (inp) inp.focus();
-    }
   }
 
   function fqNav(dir) {
@@ -690,49 +682,48 @@
     render();
   }
 
+  function fqCollapse() {
+    document.getElementById('fq-card').classList.toggle('collapsed');
+  }
+
+  function fqClose() {
+    const wrap = document.getElementById('fq-wrap');
+    if (!wrap) return;
+    wrap.style.transition = 'opacity .15s';
+    wrap.style.opacity = '0';
+    setTimeout(() => wrap.remove(), 150);
+  }
+
   // ─── Submit ────────────────────────────────────────────────
   function fqSubmit() {
     if (done) return;
     done = true;
 
-    // Build label
     let label = STEP1[s1sel] || '';
     if (s1sel === STEP1.length - 1) {
       const inp = document.getElementById('s1-input');
       if (inp && inp.value.trim()) label = inp.value.trim();
     }
     if (s2sel.size > 0) {
-      const budgets = [...s2sel].map(i => {
-        if (i === STEP2.length - 1) {
-          const inp = document.getElementById('s2-input');
-          return (inp && inp.value.trim()) ? inp.value.trim() : 'Custom';
-        }
-        return STEP2[i];
-      }).join(', ');
+      const budgets = [...s2sel].map(i => STEP2[i]).join(', ');
       label += ' · Budget: ' + budgets;
     }
 
     const responseText = RESPONSES[s1sel] || RESPONSES[3];
-
-    // Disable prompt while working
     const promptBox = document.querySelector('.prompt-box');
     promptBox.classList.add('working');
 
-    // Remove card entirely
     const wrap = document.getElementById('fq-wrap');
     wrap.style.transition = 'opacity .15s';
     wrap.style.opacity = '0';
     wrapTimer = setTimeout(() => { wrap.remove(); wrapTimer = null; }, 150);
 
-    // Append user message
     const msgs = document.getElementById('chat-messages');
-
     const userRow = document.createElement('div');
     userRow.className = 'msg-row user';
     userRow.innerHTML = `<div class="msg-bubble user">${label}</div>`;
     msgs.appendChild(userRow);
 
-    // Typing indicator
     aiRow = document.createElement('div');
     aiRow.className = 'msg-row ai';
     aiRow.innerHTML = `
@@ -748,7 +739,6 @@
     const thread = document.getElementById('chat-thread');
     thread.scrollTop = thread.scrollHeight;
 
-    // Show response after delay
     aiTimer = setTimeout(() => {
       aiRow.innerHTML = `
         <div class="ai-badge">
@@ -772,10 +762,8 @@
         </div>`;
 
       thread.scrollTop = thread.scrollHeight;
-
-      // Re-enable prompt
       promptBox.classList.remove('working');
-      document.getElementById('prompt-input').placeholder = 'As a follow up';
+      document.getElementById('prompt-input').placeholder = 'Ask a follow-up';
     }, 1400);
   }
 
@@ -788,9 +776,8 @@
     if (wrap) { wrap.style.transition = 'none'; wrap.remove(); }
     const promptBox = document.querySelector('.prompt-box');
     promptBox.classList.remove('working');
-    document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
+    document.getElementById('prompt-input').placeholder = 'Ask a follow-up';
 
-    // Add "stopped" AI message
     const msgs = document.getElementById('chat-messages');
     const row = document.createElement('div');
     row.className = 'msg-row ai';
@@ -810,25 +797,6 @@
     body.classList.toggle('open');
     btn.setAttribute('aria-expanded', body.classList.contains('open'));
   }
-
-  // ─── Keyboard shortcuts ────────────────────────────────────
-  document.addEventListener('keydown', e => {
-    if (done) return;
-    const active = document.activeElement;
-    const inInput = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA';
-
-    const num = parseInt(e.key);
-    if (!isNaN(num) && num >= 1 && !inInput) {
-      if (step === 1 && num <= STEP1.length) {
-        e.preventDefault(); s1pick(num - 1);
-      } else if (step === 2 && num <= STEP2.length) {
-        e.preventDefault(); s2toggle(num - 1);
-      }
-    }
-    if (e.key === 'Enter' && step === 2 && !inInput) {
-      e.preventDefault(); fqSubmit();
-    }
-  });
 
   // ─── Init ──────────────────────────────────────────────────
   render();
