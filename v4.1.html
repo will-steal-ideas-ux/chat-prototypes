@@ -327,7 +327,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 14px; font-weight: 500; color: var(--text-placeholder);
       line-height: 1; font-family: 'Inter', sans-serif;
+      opacity: 0; transition: opacity var(--transition);
     }
+    .fq-option:hover .fq-kbd { opacity: 1; }
 
     /* Custom (freeform) row */
     .fq-option-custom { gap: 10px; }
@@ -888,8 +890,8 @@
 </script>
   <div class="version-switcher" id="version-switcher">
     <div class="version-trigger" onclick="toggleVersionDropdown(event)">
-      <span class="version-trigger-label">V4</span>
-      <span class="version-trigger-desc">Follow-up</span>
+      <span class="version-trigger-label">V4.1</span>
+      <span class="version-trigger-desc">Hover Shortcuts</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
     <div class="version-dropdown">
@@ -908,12 +910,12 @@
         <span class="version-option-desc">Search</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
-      <a class="version-option current" href="v4.html">
+      <a class="version-option" href="v4.html">
         <span class="version-option-label">V4</span>
         <span class="version-option-desc">Follow-up</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
-      <a class="version-option" href="v4.1.html">
+      <a class="version-option current" href="v4.1.html">
         <span class="version-option-label">V4.1</span>
         <span class="version-option-desc">Hover Shortcuts</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
