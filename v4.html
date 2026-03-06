@@ -234,7 +234,7 @@
 
     .fq-card {
       background: #fff;
-      border: 1px solid var(--border-secondary);
+      border: 1px solid rgba(124,123,132,.15);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-sm);
       overflow: hidden;
@@ -242,8 +242,8 @@
 
     /* Card header */
     .fq-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 24px 24px 12px; gap: 12px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      padding: 16px 24px 0; gap: 12px;
     }
     .fq-title {
       font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 16px;
@@ -251,19 +251,19 @@
     }
     .fq-changer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .fq-nav-btn {
-      width: 32px; height: 32px; border: none; background: transparent;
+      width: 24px; height: 24px; border: none; background: transparent;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-      color: var(--text-primary); border-radius: 6px;
+      color: var(--text-primary); border-radius: 4px;
       transition: background var(--transition);
     }
     .fq-nav-btn:hover { background: var(--bg-tertiary); }
     .fq-nav-btn:disabled { opacity: .3; cursor: default; }
     .fq-nav-btn:disabled:hover { background: transparent; }
-    .fq-nav-btn svg { width: 32px; height: 32px; }
-    .fq-page { font-size: 16px; color: var(--text-primary); white-space: nowrap; }
+    .fq-nav-btn svg { width: 24px; height: 24px; }
+    .fq-page { font-size: 14px; color: var(--text-primary); white-space: nowrap; }
 
     /* Options list */
-    .fq-options { display: flex; flex-direction: column; gap: 12px; padding: 8px 24px 24px; }
+    .fq-options { display: flex; flex-direction: column; gap: 12px; padding: 16px 24px; }
 
     /* Option row */
     .fq-option {
@@ -336,7 +336,7 @@
     /* Footer / submit */
     .fq-footer {
       display: flex; justify-content: flex-end;
-      padding: 0 24px 24px;
+      padding: 4px 24px 16px;
     }
     .fq-submit {
       height: 36px; padding: 0 16px;
@@ -503,7 +503,7 @@
               <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
                 <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
               </button>
-              <span class="fq-page" id="fq-page">1 of 2</span>
+              <span class="fq-page" id="fq-page">Step 1 of 2</span>
               <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
                 <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
               </button>
@@ -580,7 +580,7 @@
     const prev = document.getElementById('fq-prev');
     const next = document.getElementById('fq-next');
 
-    page.textContent = step + ' of 2';
+    page.textContent = 'Step ' + step + ' of 2';
     prev.disabled = step === 1;
     next.disabled = step === 2 || s1sel === null;
 
