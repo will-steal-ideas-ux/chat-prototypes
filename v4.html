@@ -410,11 +410,11 @@
     .prompt-icon-btn svg { width: 18px; height: 18px; }
 
     /* Working state — disable everything except Stop */
-    .prompt-box.working { opacity: .55; pointer-events: none; }
-    .prompt-box.working .prompt-icon-btn[title="Stop"] {
-      opacity: 1; pointer-events: auto;
-      color: var(--text-primary);
-    }
+    .prompt-box.working .prompt-textarea { opacity: .4; pointer-events: none; }
+    .prompt-box.working .prompt-btn,
+    .prompt-box.working .prompt-btn-divider,
+    .prompt-box.working .prompt-auto-btn { opacity: .4; pointer-events: none; }
+    .prompt-icon-btn[title="Stop"] { color: var(--text-primary); }
   </style>
 </head>
 <body>
@@ -550,7 +550,7 @@
               Auto
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
             </button>
-            <button class="prompt-icon-btn" title="Stop">
+            <button class="prompt-icon-btn" title="Stop" id="stop-btn" onclick="fqStop()">
               <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
             </button>
           </div>
@@ -577,6 +577,8 @@
   let s1sel = null;   // index or null
   let s2sel = new Set();
   let done = false;
+  let aiTimer = null;
+  let aiRow = null;
 
   // ─── Render ────────────────────────────────────────────────
   function render() {
@@ -720,7 +722,7 @@
     msgs.appendChild(userRow);
 
     // Typing indicator
-    const aiRow = document.createElement('div');
+    aiRow = document.createElement('div');
     aiRow.className = 'msg-row ai';
     aiRow.innerHTML = `
       <div class="ai-badge">
@@ -736,7 +738,7 @@
     thread.scrollTop = thread.scrollHeight;
 
     // Show response after delay
-    setTimeout(() => {
+    aiTimer = setTimeout(() => {
       aiRow.innerHTML = `
         <div class="ai-badge">
           <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
@@ -764,6 +766,27 @@
       promptBox.classList.remove('working');
       document.getElementById('prompt-input').placeholder = 'As a follow up';
     }, 1400);
+  }
+
+  function fqStop() {
+    if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+    if (aiRow) { aiRow.remove(); aiRow = null; }
+    const promptBox = document.querySelector('.prompt-box');
+    promptBox.classList.remove('working');
+    document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
+
+    // Add "stopped" AI message
+    const msgs = document.getElementById('chat-messages');
+    const row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.innerHTML = `
+      <div class="ai-badge">
+        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+        GPT-4o mini · Search Preview
+      </div>
+      <div class="msg-bubble ai">The interactive questionnaire was stopped. What kind of campaign are you looking to create? Feel free to describe it in your own words.</div>`;
+    msgs.appendChild(row);
+    document.getElementById('chat-thread').scrollTop = 99999;
   }
 
   function toggleReasoning(btn) {
