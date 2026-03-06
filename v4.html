@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexus.ai — V4 Follow-up Questions</title>
+  <title>Nexos.ai — V4</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -16,14 +16,16 @@
       --text-secondary: #464546;
       --text-tertiary:  #6f6e78;
       --text-placeholder: #6f6e78;
-      --brand-purple:  #6c47ff;
-      --brand-purple-light: #ede9ff;
+      --accent:        #693bff;
+      --gray-250:      #f2f2f3;
+      --gray-400:      #cacace;
       --radius-xs: 4px;
       --radius-sm: 8px;
       --radius-md: 16px;
       --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(18,0,69,.10), 0 1px 2px rgba(18,0,69,.05);
       --shadow-lg: 0 8px 15px rgba(18,0,69,.06), 0 4px 7px rgba(18,0,69,.03);
-      --transition: .18s ease;
+      --transition: .15s ease;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +40,7 @@
       flex-direction: column;
     }
 
-    /* ─── Body layout ─────────────────────────────────────── */
+    /* ─── Layout ──────────────────────────────────────────── */
     .body-layout { display: flex; flex: 1; overflow: hidden; }
 
     /* ─── Sidebar ─────────────────────────────────────────── */
@@ -46,1612 +48,750 @@
       width: 264px; background: var(--bg-primary);
       display: flex; flex-direction: column;
       flex-shrink: 0; overflow: hidden;
-      transition: width var(--transition);
       border-right: 1px solid var(--border-secondary);
-      position: relative; z-index: 2;
     }
-    .sidebar.collapsed { width: 52px; }
     .sidebar-header {
-      display: flex; align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 14px 10px 10px 16px; flex-shrink: 0;
     }
-    .sidebar.collapsed .sidebar-header { padding: 14px 0 10px; justify-content: center; }
     .sidebar-logo {
       display: flex; align-items: center; gap: 8px;
-      text-decoration: none; flex: 1; min-width: 0; overflow: hidden;
+      text-decoration: none; flex: 1;
     }
     .logo-emblem {
       width: 28px; height: 28px; border-radius: 6px;
       background: var(--text-primary);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .logo-emblem svg { color: white; }
-    .sidebar-logo-name {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 700; font-size: 16px;
+    .logo-emblem svg { width: 14px; height: 14px; color: white; }
+    .logo-name {
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
       color: var(--text-primary); letter-spacing: -0.3px;
-      white-space: nowrap;
-      transition: opacity var(--transition), max-width var(--transition);
-      max-width: 160px; overflow: hidden;
     }
-    .sidebar-logo-name .ai-suffix { color: var(--brand-purple); font-size: 11px; vertical-align: super; font-weight: 500; }
-    .sidebar.collapsed .sidebar-logo-name { max-width: 0; opacity: 0; }
-    .sidebar.collapsed .collapse-btn { display: none; }
+    .logo-name sup { color: var(--accent); font-size: 11px; font-weight: 500; }
     .icon-btn {
       width: 32px; height: 32px; border-radius: var(--radius-full);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; background: transparent; border: none;
-      color: var(--text-tertiary);
-      transition: background var(--transition), color var(--transition);
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
     }
     .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .icon-btn svg { width: 20px; height: 20px; }
-    .sidebar-quick { padding: 4px 8px; flex-shrink: 0; }
-    .sidebar-quick-item {
-      display: flex; align-items: center; gap: 10px;
-      height: 36px; padding: 0 8px;
-      border-radius: var(--radius-sm); cursor: pointer;
-      font-size: 14px; font-weight: 500; color: var(--text-secondary);
-      transition: background var(--transition); white-space: nowrap;
-    }
-    .sidebar-quick-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .sidebar-quick-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
-    .sidebar-quick-item:hover svg { color: var(--text-secondary); }
-    .sidebar-quick-item span { overflow: hidden; transition: opacity var(--transition), max-width var(--transition); max-width: 200px; }
-    .sidebar.collapsed .sidebar-quick { display: none; }
+
     .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
     .sidebar-nav-item {
       display: flex; align-items: center; gap: 10px;
-      height: 36px; padding: 0 8px;
-      border-radius: var(--radius-sm); cursor: pointer;
-      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      height: 36px; padding: 0 8px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary);
       transition: background var(--transition); white-space: nowrap;
     }
-    .sidebar-nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); }
     .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
-    .sidebar-nav-item:hover svg { color: var(--text-secondary); }
-    .sidebar-nav-item .nav-label { transition: opacity var(--transition), max-width var(--transition); max-width: 200px; overflow: hidden; }
-    .sidebar.collapsed .sidebar-nav { display: none; }
+
     .sidebar-divider { height: 1px; background: var(--border-secondary); margin: 4px 8px; flex-shrink: 0; }
-    .sidebar.collapsed .sidebar-divider { display: none; }
+
     .sidebar-content { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
     .sidebar-content::-webkit-scrollbar { width: 4px; }
     .sidebar-content::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
-    .sidebar.collapsed .sidebar-content { display: none; }
-    .sidebar-section { margin-bottom: 4px; }
+
     .sidebar-section-header {
-      display: flex; align-items: center; gap: 4px;
-      padding: 8px 8px 4px; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; padding: 8px 8px 4px;
     }
-    .sidebar-section-chevron { color: var(--text-tertiary); display: flex; align-items: center; }
-    .sidebar-section-chevron svg { width: 14px; height: 14px; }
     .sidebar-section-label {
-      flex: 1; font-size: 11px; font-weight: 600;
-      color: var(--text-tertiary); letter-spacing: 0.4px; text-transform: uppercase;
+      flex: 1; font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      letter-spacing: 0.4px; text-transform: uppercase;
     }
     .sidebar-section-add {
       width: 20px; height: 20px; border: none; background: transparent;
       color: var(--text-tertiary); cursor: pointer; font-size: 18px; font-weight: 300;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 4px; transition: background var(--transition), color var(--transition);
-      line-height: 1;
+      display: flex; align-items: center; justify-content: center; border-radius: 4px;
+      transition: background var(--transition), color var(--transition);
     }
     .sidebar-section-add:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
     .sidebar-link {
       display: flex; align-items: center; gap: 8px;
-      height: 36px; padding: 0 8px;
-      font-size: 14px; font-weight: 400; color: var(--text-secondary);
-      border-radius: var(--radius-sm); cursor: pointer;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
       transition: background var(--transition);
     }
     .sidebar-link:hover { background: var(--bg-tertiary); }
     .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
     .sidebar-link-icon { font-size: 16px; flex-shrink: 0; }
+
+    .sidebar-agent {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer;
+      transition: background var(--transition);
+    }
+    .sidebar-agent:hover { background: var(--bg-tertiary); }
+    .agent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
     .sidebar-footer {
       display: flex; align-items: center; gap: 10px;
-      padding: 12px 16px; flex-shrink: 0;
-      border-top: 1px solid var(--border-secondary);
+      padding: 12px 16px; flex-shrink: 0; border-top: 1px solid var(--border-secondary);
     }
     .sidebar-avatar {
       width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
       background: #e0d8ff; display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 600; color: var(--brand-purple); cursor: pointer;
+      font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer;
     }
-    .sidebar-user-email {
+    .sidebar-email {
       font-size: 13px; color: var(--text-secondary);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      transition: opacity var(--transition), max-width var(--transition); max-width: 200px;
     }
-    .sidebar.collapsed .sidebar-footer { padding: 12px 0; justify-content: center; }
-    .sidebar.collapsed .sidebar-user-email { max-width: 0; opacity: 0; }
 
     /* ─── Main area ───────────────────────────────────────── */
-    .main-area {
-      flex: 1; display: flex; flex-direction: column;
-      overflow: hidden; background: var(--bg-secondary);
-    }
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     /* ─── Chat thread ─────────────────────────────────────── */
     .chat-thread {
-      flex: 1; display: flex; flex-direction: column;
-      overflow-y: auto; padding: 40px 0 0;
+      flex: 1; overflow-y: auto; padding: 40px 0 0;
+      display: flex; flex-direction: column;
     }
     .chat-thread::-webkit-scrollbar { width: 4px; }
     .chat-thread::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
-    .chat-messages { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
-    /* User message */
+
+    .chat-messages {
+      width: 100%; max-width: 760px; margin: 0 auto;
+      padding: 0 24px 32px; display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* User bubble */
     .msg-row.user { display: flex; justify-content: flex-end; }
     .msg-bubble.user {
       max-width: 68%; background: var(--bg-primary);
       border: 1px solid var(--border-secondary);
       border-radius: 16px 16px 4px 16px;
-      padding: 12px 16px;
-      font-size: 15px; line-height: 24px; color: var(--text-primary);
+      padding: 12px 16px; font-size: 15px; line-height: 24px;
     }
-    /* AI message */
+
+    /* AI row */
     .msg-row.ai { display: flex; flex-direction: column; gap: 8px; }
-    .ai-meta { display: flex; align-items: center; gap: 6px; }
     .ai-badge {
-      display: inline-flex; align-items: center; gap: 5px;
+      display: inline-flex; align-items: center; gap: 6px;
       font-size: 12px; font-weight: 500; color: var(--text-tertiary);
     }
-    .ai-badge-dot {
-      width: 16px; height: 16px; border-radius: 50%;
-      background: var(--text-primary);
+    .ai-badge-icon {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .ai-badge-dot svg { width: 9px; height: 9px; color: white; }
+    .ai-badge-icon svg { width: 11px; height: 11px; color: var(--text-tertiary); }
     .msg-bubble.ai {
-      font-size: 15px; line-height: 26px; color: var(--text-primary);
-      max-width: 640px;
+      font-size: 15px; line-height: 24px; color: var(--text-primary);
     }
-    /* Typing dots */
-    .typing-indicator { display: flex; align-items: center; gap: 4px; height: 26px; padding: 4px 0; }
+
+    /* Reasoning accordion */
+    .reasoning-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .reasoning-toggle {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: color var(--transition);
+    }
+    .reasoning-toggle:hover { color: var(--text-primary); }
+    .reasoning-toggle svg { width: 16px; height: 16px; transition: transform .2s ease; }
+    .reasoning-toggle.open svg { transform: rotate(180deg); }
+    .reasoning-body {
+      font-size: 14px; line-height: 22px; color: var(--text-tertiary);
+      overflow: hidden; max-height: 0; transition: max-height .25s ease, opacity .2s ease;
+      opacity: 0;
+    }
+    .reasoning-body.open { max-height: 200px; opacity: 1; }
+
+    /* Skeleton */
+    .skeleton-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .skeleton-line {
+      height: 14px; border-radius: 4px; background: #ebebec;
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer {
+      0%,100% { opacity: .5; } 50% { opacity: 1; }
+    }
+
+    /* Typing indicator */
+    .typing-indicator { display: flex; align-items: center; gap: 4px; height: 24px; }
     .typing-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--text-tertiary); opacity: 0.5;
-      animation: td .9s ease-in-out infinite;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary);
+      animation: td .9s ease infinite;
     }
     .typing-dot:nth-child(2) { animation-delay: .15s; }
     .typing-dot:nth-child(3) { animation-delay: .3s; }
-    @keyframes td { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-4px);opacity:1} }
-    /* FQ card (inline, slides in) */
+    @keyframes td {
+      0%,60%,100%{transform:translateY(0);opacity:.4}
+      30%{transform:translateY(-4px);opacity:1}
+    }
+
+    /* ─── Interactive card ────────────────────────────────── */
     .fq-wrap {
-      width: 100%; max-width: 760px; margin: 8px auto 0;
+      width: 100%; max-width: 760px; margin: 0 auto;
       padding: 0 24px 32px;
       animation: fq-in .2s ease;
     }
-    @keyframes fq-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .fq-modal {
-      background: var(--bg-secondary);
+    @keyframes fq-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    .fq-card {
+      background: #fff;
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-md);
-      box-shadow: 0 20px 25px -5px rgba(18,0,69,.06), 0 10px 10px -5px rgba(18,0,69,.03);
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
     }
-    /* Header */
+
+    /* Card header */
     .fq-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 24px 24px 12px;
-      background: var(--bg-secondary);
+      padding: 24px 24px 12px; gap: 12px;
     }
     .fq-title {
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 22px;
-      line-height: 30px; color: var(--text-primary); flex-shrink: 1; margin-right: 12px;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 20px;
+      line-height: 24px; color: var(--text-primary); flex: 1;
     }
-    .fq-header-right { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
-    .fq-changer { display: flex; align-items: center; gap: 8px; }
+    .fq-changer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .fq-nav-btn {
-      width: 32px; height: 32px; flex-shrink: 0;
-      border: none; background: transparent; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border: none; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
       color: var(--text-primary); border-radius: 6px;
       transition: background var(--transition);
     }
     .fq-nav-btn:hover { background: var(--bg-tertiary); }
-    .fq-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .fq-nav-btn:disabled { opacity: .3; cursor: default; }
     .fq-nav-btn:disabled:hover { background: transparent; }
     .fq-nav-btn svg { width: 32px; height: 32px; }
-    .fq-page-label {
-      font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
-      line-height: 24px; color: var(--text-primary); white-space: nowrap;
+    .fq-page { font-size: 16px; color: var(--text-primary); white-space: nowrap; }
+
+    /* Options list */
+    .fq-options { display: flex; flex-direction: column; gap: 12px; padding: 8px 24px 24px; }
+
+    /* Option row */
+    .fq-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-secondary); cursor: pointer;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      user-select: none;
     }
-    .fq-header-actions { display: flex; align-items: center; gap: 2px; }
-    .fq-toggle-btn, .fq-close-btn {
-      width: 28px; height: 28px;
-      border: none; background: transparent; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text-tertiary); border-radius: 6px;
-      transition: background var(--transition), color var(--transition);
-    }
-    .fq-toggle-btn:hover, .fq-close-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-    .fq-toggle-btn svg, .fq-close-btn svg { width: 18px; height: 18px; transition: transform .2s ease; }
-    .fq-modal.collapsed .fq-toggle-btn svg { transform: rotate(180deg); }
-    /* Body */
-    .fq-body { overflow: hidden; transition: max-height .25s ease, opacity .2s ease; max-height: 800px; }
-    .fq-modal.collapsed .fq-body { max-height: 0; opacity: 0; }
-    .fq-cards { display: flex; flex-direction: column; gap: 12px; padding: 8px 24px 24px; }
-    .fq-card {
-      display: flex; align-items: center; gap: 12px;
-      padding: 16px 24px 16px 16px; border-radius: var(--radius-sm);
-      border: 1px solid var(--border-secondary);
-      background: var(--bg-secondary);
-      cursor: pointer;
-      transition: border-color .15s ease, box-shadow .15s ease;
-      user-select: none; position: relative;
-    }
-    .fq-card:hover {
-      border-color: #693bff;
-      box-shadow: 0 4px 8px rgba(18,0,69,.05), 0 2px 4px rgba(18,0,69,.03);
-    }
-    .fq-card.selected { border-color: #693bff; }
+    .fq-option:hover { border-color: var(--accent); }
+    .fq-option.selected { border-color: var(--accent); }
+
+    .fq-option-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+
     /* Radio */
     .fq-radio {
       width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
-      border: 1px solid #cacace; background: var(--bg-secondary);
-      transition: border-color .15s, background .15s;
+      border: 1px solid var(--gray-400); background: #fff;
       display: flex; align-items: center; justify-content: center;
+      transition: border-color var(--transition), background var(--transition);
     }
-    .fq-card:hover .fq-radio { border-color: #693bff; }
-    .fq-card.selected .fq-radio { border-color: #693bff; background: #693bff; }
-    .fq-radio-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
-    .fq-card.selected .fq-radio-dot { opacity: 1; }
+    .fq-option:hover .fq-radio { border-color: var(--accent); }
+    .fq-option.selected .fq-radio { border-color: var(--accent); background: var(--accent); }
+    .fq-radio-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #fff;
+      opacity: 0; transition: opacity .15s;
+    }
+    .fq-option.selected .fq-radio-dot { opacity: 1; }
+
     /* Checkbox */
     .fq-checkbox {
       width: 18px; height: 18px; flex-shrink: 0; border-radius: 4px;
-      border: 1px solid #cacace; background: var(--bg-secondary);
-      transition: border-color .15s, background .15s;
+      border: 1px solid var(--gray-400); background: #fff;
       display: flex; align-items: center; justify-content: center;
+      transition: border-color var(--transition), background var(--transition);
     }
-    .fq-card:hover .fq-checkbox { border-color: #693bff; }
-    .fq-card.selected .fq-checkbox { border-color: #693bff; background: #693bff; }
+    .fq-option:hover .fq-checkbox { border-color: var(--accent); }
+    .fq-option.selected .fq-checkbox { border-color: var(--accent); background: var(--accent); }
     .fq-check-icon { opacity: 0; transition: opacity .15s; }
-    .fq-card.selected .fq-check-icon { opacity: 1; }
-    /* Label & enter hint */
-    .fq-label { flex: 1; font-size: 16px; font-weight: 500; color: var(--text-primary); line-height: 24px; }
-    .fq-dash {
-      flex-shrink: 0; font-size: 16px; font-weight: 400; color: var(--text-tertiary);
-      opacity: 0; transition: opacity .15s; line-height: 1;
+    .fq-option.selected .fq-check-icon { opacity: 1; }
+
+    /* Label */
+    .fq-label {
+      font-size: 14px; font-weight: 400; color: var(--text-primary);
+      line-height: 21px; flex: 1; min-width: 0;
     }
-    .fq-card:hover .fq-dash,
-    .fq-card.selected .fq-dash { opacity: 1; }
-    /* Custom inline input row */
-    .fq-card-custom { gap: 10px; }
-    .fq-card-custom svg.fq-pencil { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
+
+    /* Shortcut badge */
+    .fq-kbd {
+      flex-shrink: 0; min-width: 29px; height: 29px; padding: 0 8px;
+      background: var(--gray-250); border: 1px solid var(--gray-400);
+      border-radius: var(--radius-xs);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500; color: var(--text-placeholder);
+      line-height: 1; font-family: 'Inter', sans-serif;
+    }
+
+    /* Custom (freeform) row */
+    .fq-option-custom { gap: 10px; }
+    .fq-custom-pencil {
+      width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary);
+    }
     .fq-custom-input {
       flex: 1; border: none; outline: none; background: transparent;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary);
-      line-height: 21px;
+      font-family: 'Inter', sans-serif; font-size: 16px; color: var(--text-primary);
+      line-height: 24px; min-width: 0;
     }
     .fq-custom-input::placeholder { color: var(--text-placeholder); }
-    .fq-card-custom:hover .fq-pencil, .fq-card-custom:focus-within .fq-pencil { color: var(--text-secondary); }
-    .fq-card-custom:focus-within { border-color: #693bff; }
-    /* Footer / submit */
-    .fq-footer { display: flex; justify-content: flex-end; padding: 12px 24px 24px; }
-    .fq-submit {
-      height: 36px; padding: 0 20px;
-      background: var(--brand-purple); color: #fff;
-      border: none; border-radius: var(--radius-sm);
-      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
-      cursor: pointer; transition: opacity .15s;
-    }
-    .fq-submit:hover { opacity: 0.88; }
-    /* Disabled state (post-submit) */
-    .fq-modal.disabled {
-      background: #f2f0f9;
-    }
-    .fq-modal.disabled .fq-header {
-      background: #f2f2f3;
-      border-radius: var(--radius-md);
-      padding: 24px;
-    }
-    .fq-modal.disabled .fq-title {
-      font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
-      line-height: 24px; color: #949399;
-    }
-    .fq-modal.disabled .fq-page-label { color: #949399; }
 
-    /* ─── Prompt input ────────────────────────────────────── */
-    .prompt-wrap { width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto; }
+    /* Footer / submit */
+    .fq-footer {
+      display: flex; justify-content: flex-end;
+      padding: 0 24px 24px;
+    }
+    .fq-submit {
+      height: 36px; padding: 0 16px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: opacity var(--transition);
+    }
+    .fq-submit:hover { opacity: .88; }
+
+    /* Disabled (submitted) card state */
+    .fq-card.submitted {
+      background: #f7f5ff;
+      border-color: var(--border-secondary);
+    }
+    .fq-card.submitted .fq-title {
+      font-family: 'Inter', sans-serif; font-weight: 400; font-size: 15px;
+      color: #949399;
+    }
+    .fq-card.submitted .fq-page { color: #949399; }
+
+    /* ─── Prompt box ──────────────────────────────────────── */
+    .prompt-wrap {
+      width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto;
+    }
     .prompt-box {
-      position: relative;
-      background: rgba(255,255,255,.85);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-md);
+      position: relative; background: #fff;
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-md);
       box-shadow: var(--shadow-lg);
-      padding: 16px; display: flex; flex-direction: column; gap: 12px;
-      backdrop-filter: blur(8px);
-      transition: border-color var(--transition), box-shadow var(--transition);
     }
-    .prompt-box:focus-within {
-      border-color: rgba(124,123,132,.45);
-      box-shadow: 0 8px 24px rgba(18,0,69,.09), 0 4px 10px rgba(18,0,69,.05);
-    }
+    .prompt-textarea-row { padding: 14px 16px 0; }
     .prompt-textarea {
-      width: 100%; min-height: 28px; max-height: 200px;
-      background: transparent; border: none; outline: none; resize: none;
-      font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400;
-      color: var(--text-primary); line-height: 1.5; padding: 4px 4px 0;
+      width: 100%; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 15px; line-height: 24px;
+      color: var(--text-primary); background: transparent;
+      max-height: 200px; overflow-y: auto;
     }
     .prompt-textarea::placeholder { color: var(--text-placeholder); }
     .prompt-actions {
-      display: flex; align-items: center;
-      height: 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 12px;
     }
-    .prompt-left { display: flex; align-items: center; gap: 4px; }
-    .prompt-right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
-    .action-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      height: 36px; padding: 0 10px;
-      border-radius: var(--radius-sm); border: none; background: transparent;
-      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
-      color: var(--text-primary); cursor: pointer;
-      transition: background var(--transition);
-    }
-    .action-btn:hover { background: var(--bg-primary); }
-    .action-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-    .model-selector {
-      display: inline-flex; align-items: center; gap: 6px;
-      height: 36px; padding: 0 8px;
-      border-radius: var(--radius-sm); background: transparent; border: none;
-      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
-      color: var(--text-secondary); cursor: pointer;
-      transition: background var(--transition);
-    }
-    .model-selector:hover { background: var(--bg-primary); }
-    .model-selector .model-logo {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--bg-primary);
-      display: flex; align-items: center; justify-content: center; font-size: 12px;
-    }
-    .model-selector svg { width: 14px; height: 14px; color: var(--text-tertiary); }
-    .mic-btn {
-      width: 36px; height: 36px; border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      background: transparent; border: none; cursor: pointer;
-      color: var(--text-tertiary);
+    .prompt-actions-left { display: flex; align-items: center; gap: 2px; }
+    .prompt-actions-right { display: flex; align-items: center; gap: 4px; }
+    .prompt-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
       transition: background var(--transition), color var(--transition);
     }
-    .mic-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
-    .mic-btn svg { width: 20px; height: 20px; }
-    .send-btn {
-      width: 36px; height: 36px; border-radius: var(--radius-sm);
+    .prompt-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-btn svg { width: 16px; height: 16px; }
+    .prompt-btn-divider { width: 1px; height: 18px; background: var(--border-secondary); margin: 0 2px; }
+    .prompt-auto-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition);
+    }
+    .prompt-auto-btn:hover { background: var(--bg-tertiary); }
+    .prompt-auto-btn svg { width: 14px; height: 14px; }
+    .prompt-icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: center;
-      background: var(--text-primary); border: none; cursor: pointer; color: white;
-      transition: background var(--transition), opacity var(--transition), transform var(--transition);
-      opacity: 0; pointer-events: none; transform: scale(0.85);
+      border: none; background: transparent; cursor: pointer;
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
     }
-    .send-btn.visible { opacity: 1; pointer-events: auto; transform: scale(1); }
-    .send-btn:hover { background: #1a1a2e; }
-    .send-btn svg { width: 18px; height: 18px; }
-
-    /* ─── AI Tools popover ────────────────────────────────── */
-    .action-btn.active {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .aitools-popover {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: 12px;
-      box-shadow: 0 16px 40px rgba(18,0,69,.12), 0 4px 12px rgba(18,0,69,.07);
-      overflow: hidden;
-      z-index: 100;
-      display: none;
-    }
-    .aitools-popover.open { display: block; }
-
-    .aitools-search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-secondary);
-    }
-    .aitools-search svg { width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0; }
-    .aitools-search input {
-      flex: 1;
-      border: none;
-      outline: none;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      color: var(--text-primary);
-      background: transparent;
-    }
-    .aitools-search input::placeholder { color: var(--text-placeholder); }
-    .aitools-kbd {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      padding: 2px 6px;
-      border-radius: 5px;
-      border: 1px solid var(--border-secondary);
-      background: var(--bg-primary);
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-tertiary);
-      white-space: nowrap;
-      flex-shrink: 0;
-      letter-spacing: 0;
-    }
-
-    .aitools-columns {
-      display: flex;
-    }
-    .aitools-col {
-      flex: 1;
-      padding: 12px 0;
-    }
-    .aitools-col + .aitools-col {
-      border-left: 1px solid var(--border-secondary);
-      overflow-y: auto;
-      max-height: 220px;
-    }
-    .aitools-col + .aitools-col::-webkit-scrollbar { width: 4px; }
-    .aitools-col + .aitools-col::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
-    .aitools-col-label {
-      padding: 2px 14px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-
-    .aitools-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 14px;
-      cursor: pointer;
-      transition: background var(--transition);
-    }
-    .aitools-item:hover { background: var(--bg-primary); }
-    .aitools-item.hidden { display: none; }
-
-    .aitools-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      background: var(--bg-primary);
-    }
-    .aitools-icon svg { width: 16px; height: 16px; }
-    .aitools-icon img { width: 18px; height: 18px; }
-
-    .aitools-info { flex: 1; min-width: 0; }
-    .aitools-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .aitools-desc {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      margin-top: 1px;
-    }
-
-    /* Toggle switch */
-    .toggle {
-      position: relative;
-      width: 32px;
-      height: 18px;
-      flex-shrink: 0;
-    }
-    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .toggle-track {
-      position: absolute;
-      inset: 0;
-      background: var(--border-secondary);
-      border-radius: 9px;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .toggle-track::after {
-      content: '';
-      position: absolute;
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: white;
-      top: 3px; left: 3px;
-      transition: transform .2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.2);
-    }
-    .toggle input:checked + .toggle-track { background: var(--brand-purple); }
-    .toggle input:checked + .toggle-track::after { transform: translateX(14px); }
-
-    .aitools-empty {
-      padding: 20px 14px;
-      font-size: 13px;
-      color: var(--text-tertiary);
-      text-align: center;
-      display: none;
-    }
-
-    /* ─── Search modal ────────────────────────────────────── */
-    .search-backdrop {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(37,36,41,.45); backdrop-filter: blur(3px);
-      display: none; align-items: flex-start; justify-content: center;
-      padding-top: max(80px, 13vh);
-    }
-    .search-backdrop.open { display: flex; }
-    .search-modal {
-      width: min(700px, calc(100vw - 32px));
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-sm);
-      box-shadow: 0 8px 15px -1px rgba(18,0,69,.08), 0 4px 7px rgba(18,0,69,.05);
-      overflow: hidden;
-      animation: s-in .15s ease;
-    }
-    @keyframes s-in {
-      from { opacity:0; transform:translateY(-6px) scale(.98); }
-      to   { opacity:1; transform:translateY(0)    scale(1);   }
-    }
-    /* Input row */
-    .search-input-row {
-      display: flex; align-items: center; gap: 8px;
-      min-height: 44px; padding: 0 16px;
-      border-bottom: 1px solid var(--border-secondary);
-    }
-    .search-input-icon { width:16px; height:16px; color:var(--text-tertiary); flex-shrink:0; }
-    .search-field {
-      flex:1; border:none; outline:none; min-width:0;
-      font-family:'Inter',sans-serif; font-size:16px; font-weight:400;
-      color:var(--text-primary); background:transparent;
-    }
-    .search-field::placeholder { color:var(--text-placeholder); }
-    .search-clear {
-      width:20px; height:20px; border-radius:50%;
-      border:none; cursor:pointer;
-      background:var(--bg-tertiary); color:var(--text-tertiary);
-      display:none; align-items:center; justify-content:center;
-      flex-shrink:0;
-      transition:background var(--transition), color var(--transition);
-    }
-    .search-clear.vis { display:flex; }
-    .search-clear:hover { background:var(--border-secondary); color:var(--text-primary); }
-    .search-clear svg { width:9px; height:9px; }
-    /* Label */
-    .search-label {
-      padding: 10px 16px 4px;
-      font-size:12px; font-weight:500; line-height:18px;
-      color:var(--text-tertiary); min-height:32px;
-    }
-    /* Body scroll area */
-    .search-body { max-height:360px; overflow-y:auto; }
-    .search-body::-webkit-scrollbar { width:4px; }
-    .search-body::-webkit-scrollbar-thumb { background:var(--border-secondary); border-radius:2px; }
-    .search-list { padding: 0 8px 8px; }
-    /* History rows */
-    .s-history-row {
-      display:flex; align-items:center; height:36px; padding:0 8px; gap:8px;
-      border-radius:var(--radius-sm); cursor:pointer;
-      transition:background var(--transition);
-    }
-    .s-history-row:hover, .s-history-row.active { background:var(--bg-tertiary); }
-    .s-history-title {
-      flex:1; min-width:0;
-      font-size:14px; color:var(--text-primary);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    }
-    .s-history-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
-    .s-history-date { font-size:13px; color:var(--text-tertiary); white-space:nowrap; }
-    .s-history-del {
-      width:18px; height:18px; border-radius:50%;
-      border:none; background:transparent; cursor:pointer; color:var(--text-tertiary);
-      display:none; align-items:center; justify-content:center;
-      transition:background var(--transition), color var(--transition);
-    }
-    .s-history-row:hover .s-history-del { display:flex; }
-    .s-history-del:hover { background:var(--border-secondary); color:var(--text-primary); }
-    .s-history-del svg { width:10px; height:10px; }
-    /* Result rows */
-    .s-result-row {
-      display:flex; align-items:center; gap:12px;
-      min-height:59px; padding:8px 8px 8px 16px;
-      border-radius:var(--radius-sm); cursor:pointer;
-      transition:background var(--transition);
-    }
-    .s-result-row:hover, .s-result-row.active { background:rgba(140,117,255,.05); }
-    .s-result-content { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
-    .s-result-title {
-      font-size:14px; color:var(--text-primary); line-height:21px;
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    }
-    .s-result-snippet {
-      font-size:12px; color:var(--text-tertiary); line-height:18px;
-      overflow:hidden; display:-webkit-box;
-      -webkit-line-clamp:2; -webkit-box-orient:vertical;
-    }
-    .s-result-title mark, .s-result-snippet mark { background:none; font-weight:700; color:inherit; }
-    .s-result-enter {
-      font-size:14px; color:var(--text-tertiary); flex-shrink:0;
-      opacity:0; transition:opacity var(--transition);
-    }
-    .s-result-row:hover .s-result-enter,
-    .s-result-row.active .s-result-enter { opacity:1; }
-    /* Skeleton */
-    .search-skeleton { padding:8px 16px 14px; display:flex; flex-direction:column; gap:14px; }
-    .sk-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .sk-bar {
-      height:13px; border-radius:4px;
-      background:linear-gradient(90deg,var(--bg-tertiary) 25%,rgba(124,123,132,.18) 50%,var(--bg-tertiary) 75%);
-      background-size:400% 100%; animation:sk-pulse 1.5s ease infinite;
-    }
-    @keyframes sk-pulse {
-      0%  { background-position:100% 50%; }
-      100%{ background-position:0%   50%; }
-    }
-    /* Empty / no-results */
-    .search-empty {
-      display:flex; flex-direction:column; align-items:center;
-      padding:28px 16px; gap:6px; text-align:center;
-    }
-    .search-empty svg { width:28px; height:28px; color:var(--text-tertiary); margin-bottom:2px; }
-    .search-empty p { font-size:14px; color:var(--text-tertiary); line-height:21px; }
-
-    /* ─── Version switcher ────────────────────────────────── */
-    /* ─── Search error states ────────────────────────────── */
-    .search-error-state { display:flex; gap:12px; padding:20px 16px 24px; align-items:flex-start; }
-    .search-error-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .search-error-icon.api     { background:#fff0f0; color:#e53e3e; }
-    .search-error-icon.timeout { background:#fffbeb; color:#d97706; }
-    .search-error-icon.offline { background:#ede9ff; color:#6c47ff; }
-    .search-error-icon svg { width:16px; height:16px; }
-    .search-error-title { font-size:14px; font-weight:500; color:var(--text-primary); line-height:21px; margin-bottom:4px; }
-    .search-error-msg   { font-size:13px; color:var(--text-tertiary); line-height:20px; margin-bottom:12px; }
-    .search-error-actions { display:flex; gap:12px; }
-    .search-error-retry  { font-size:13px; font-weight:500; color:var(--brand-purple); background:none; border:none; cursor:pointer; padding:0; font-family:'Inter',sans-serif; }
-    .search-error-cancel { font-size:13px; font-weight:500; color:var(--text-tertiary); background:none; border:none; cursor:pointer; padding:0; font-family:'Inter',sans-serif; }
-    .search-tooshort { padding:14px 16px 18px; font-size:13px; color:var(--text-tertiary); display:flex; align-items:center; gap:6px; }
-    .search-tooshort svg { width:15px; height:15px; flex-shrink:0; }
-    .search-toast {
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(4px);
-      background:var(--text-primary); color:white; font-size:13px;
-      padding:10px 16px; border-radius:8px;
-      box-shadow:0 4px 12px rgba(18,0,69,.18);
-      z-index:9999; opacity:0; pointer-events:none;
-      transition:opacity .2s ease, transform .2s ease; white-space:nowrap;
-    }
-    .search-toast.show { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
-
-    .version-switcher {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 9999;
-      font-family: 'Inter', sans-serif;
-    }
-    .version-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-full);
-      box-shadow: 0 2px 8px rgba(18,0,69,.08);
-      cursor: pointer;
-      user-select: none;
-    }
-    .version-trigger-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-    .version-trigger-desc {
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-    .version-trigger svg {
-      width: 14px; height: 14px;
-      color: var(--text-tertiary);
-      transition: transform var(--transition);
-    }
-    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
-    .version-dropdown {
-      position: absolute;
-      bottom: calc(100% + 6px);
-      left: 0;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-sm);
-      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
-      padding: 4px;
-      min-width: 160px;
-      display: none;
-    }
-    .version-switcher.open .version-dropdown { display: block; }
-    .version-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background var(--transition);
-    }
-    .version-option:hover { background: var(--bg-primary); }
-    .version-option.current { background: var(--bg-primary); }
-    .version-option-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      min-width: 22px;
-    }
-    .version-option-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .version-option-check {
-      margin-left: auto;
-      width: 14px; height: 14px;
-      color: var(--brand-purple);
-      opacity: 0;
-    }
-    .version-option.current .version-option-check { opacity: 1; }
+    .prompt-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-icon-btn svg { width: 18px; height: 18px; }
   </style>
 </head>
 <body>
+<div class="body-layout">
 
-  <!-- Top Nav -->
-  <!-- Body -->
-  <div class="body-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <a class="sidebar-logo" href="#" onclick="if(document.getElementById('sidebar').classList.contains('collapsed')){event.preventDefault();document.getElementById('sidebar').classList.remove('collapsed');}">
-          <div class="logo-emblem">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <span class="sidebar-logo-name">nexos<span class="ai-suffix">.ai</span></span>
-        </a>
-        <button class="icon-btn collapse-btn" onclick="document.getElementById('sidebar').classList.add('collapsed')" title="Collapse sidebar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
-        </button>
-      </div>
-      <div class="sidebar-quick">
-        <div class="sidebar-quick-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-          <span>New chat</span>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
         </div>
-        <div class="sidebar-quick-item" onclick="openSearch()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <span>Search chats</span>
-        </div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-nav">
-        <div class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-          <span class="nav-label">Agents</span>
-        </div>
-        <div class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          <span class="nav-label">Projects</span>
-        </div>
-      </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-content">
-        <div class="sidebar-section">
-          <div class="sidebar-section-header">
-            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
-            <span class="sidebar-section-label">Agents</span>
-            <button class="sidebar-section-add">+</button>
-          </div>
-          <div class="sidebar-link"><span class="sidebar-link-icon">🏃</span>Sprint Architect</div>
-          <div class="sidebar-link"><span class="sidebar-link-icon">✨</span>Sentiment Strategist</div>
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-section-header">
-            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
-            <span class="sidebar-section-label">Recent Chats</span>
-          </div>
-          <div class="sidebar-link active">Cybersecurity market trends for 2026</div>
-          <div class="sidebar-link">EV Market Trends Analysis</div>
-          <div class="sidebar-link">Generate an image bursting out of the pa...</div>
-          <div class="sidebar-link">Target Audience Brainstorming</div>
-        </div>
-      </div>
-      <div class="sidebar-footer">
-        <div class="sidebar-avatar">A</div>
-        <span class="sidebar-user-email">andrzej@nexos.ai</span>
-      </div>
-    </aside>
+        <span class="logo-name">nexos<sup>ai</sup></span>
+      </a>
+      <button class="icon-btn" title="Collapse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
+    </div>
 
-    <!-- Main -->
-    <main class="main-area">
-      <!-- Chat thread -->
-      <div class="chat-thread" id="chat-thread">
-        <div class="chat-messages" id="chat-messages">
-          <!-- User message -->
-          <div class="msg-row user">
-            <div class="msg-bubble user">I want good marketing plan</div>
-          </div>
-          <!-- AI response -->
-          <div class="msg-row ai" id="ai-msg-1">
-            <div class="ai-meta">
-              <div class="ai-badge">
-                <div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
-                GPT-4o mini · Search Preview
-              </div>
-            </div>
-            <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>
-          </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        New chat
+      </div>
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Search chats
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Agents</span>
+        <button class="sidebar-section-add">+</button>
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#693bff"></div>
+        Sprint Architect
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#f59e0b"></div>
+        Sentiment Strategist
+      </div>
+
+      <div class="sidebar-section-header" style="margin-top:8px">
+        <span class="sidebar-section-label">Recent Chats</span>
+      </div>
+      <div class="sidebar-link active"><span class="sidebar-link-icon">💬</span>Cybersecurity market trends for 2026</div>
+      <div class="sidebar-link"><span class="sidebar-link-icon">💬</span>EV Market Trends Analysis</div>
+      <div class="sidebar-link"><span class="sidebar-link-icon">💬</span>Generate an image bursting out of the pa…</div>
+      <div class="sidebar-link"><span class="sidebar-link-icon">💬</span>Target Audience Brainstorming</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar">A</div>
+      <span class="sidebar-email">andrzej@nexos.ai</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <div class="chat-thread" id="chat-thread">
+      <div class="chat-messages" id="chat-messages">
+
+        <!-- User message -->
+        <div class="msg-row user">
+          <div class="msg-bubble user">I want to create a campaign</div>
         </div>
-        <!-- Interactive chat card (inline) -->
-        <div class="fq-wrap" id="fq-wrap">
-          <div class="fq-modal" id="fq-modal">
-            <div class="fq-header">
-              <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
-              <div class="fq-header-right">
-                <div class="fq-changer">
-                  <button class="fq-nav-btn" id="fq-prev" onclick="fqGoStep(fq_step - 1)" aria-label="Previous" disabled>
-                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 L12 16 L20 24"/></svg>
-                  </button>
-                  <span class="fq-page-label" id="fq-page-label">1 of 2</span>
-                  <button class="fq-nav-btn" id="fq-next" onclick="fqGoStep(fq_step + 1)" aria-label="Next" disabled>
-                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 L20 16 L12 24"/></svg>
-                  </button>
-                </div>
-                <div class="fq-header-actions">
-                  <button class="fq-toggle-btn" id="fq-toggle-btn" onclick="fqToggle()" aria-label="Collapse">
-                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6 L9 12 L14 6"/></svg>
-                  </button>
-                  <button class="fq-close-btn" onclick="fqClose()" aria-label="Close">
-                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4 L14 14 M14 4 L4 14"/></svg>
-                  </button>
-                </div>
-              </div>
+
+        <!-- AI message -->
+        <div class="msg-row ai">
+          <div class="ai-badge">
+            <div class="ai-badge-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
             </div>
-            <div class="fq-body" id="fq-body">
-              <div class="fq-cards" id="fq-cards"></div>
-              <div class="fq-footer" id="fq-footer" style="display:none">
-                <button class="fq-submit" onclick="fqSubmit()">Submit</button>
-              </div>
+            GPT-4o mini · Search Preview
+          </div>
+          <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>
+        </div>
+
+      </div>
+
+      <!-- Interactive card (inline, below messages) -->
+      <div class="fq-wrap" id="fq-wrap">
+        <div class="fq-card" id="fq-card">
+          <div class="fq-header">
+            <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+            <div class="fq-changer">
+              <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
+                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
+              </button>
+              <span class="fq-page" id="fq-page">1 of 2</span>
+              <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
+                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
+              </button>
             </div>
           </div>
-        </div>
-      </div>
-
-        <div class="prompt-wrap">
-          <div class="prompt-box">
-            <textarea class="prompt-textarea" id="prompt"
-              placeholder="Ask a follow up"
-              rows="1"
-              oninput="onInput(this)"
-              onkeydown="onPromptKey(event)"></textarea>
-            <!-- AI Tools Popover (anchored to prompt-box) -->
-            <div class="aitools-popover" id="aitools-popover">
-              <div class="aitools-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="aitools-search" placeholder="Search" oninput="filterAITools(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off" />
-                <span class="aitools-kbd" style="display:none"></span>
-              </div>
-              <div class="aitools-columns">
-                <div class="aitools-col" id="col-capabilities">
-                  <div class="aitools-col-label">AI Capabilities</div>
-                  <div class="aitools-item" data-name="deep research">
-                    <div class="aitools-icon" style="background:#ede9ff"><svg viewBox="0 0 24 24" fill="none" stroke="#6c47ff" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Deep research</div><div class="aitools-desc">Perform advanced research</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="web search">
-                    <div class="aitools-icon" style="background:#e0f2fe"><svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Web search</div><div class="aitools-desc">Find online information</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="extended thinking">
-                    <div class="aitools-icon" style="background:#fef9c3"><svg viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6L15 17H9l-.7-2C6.3 13.7 5 11.5 5 9a7 7 0 0 1 7-7Z"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Extended thinking</div><div class="aitools-desc">Find online information</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-empty" id="empty-capabilities">No results</div>
-                </div>
-                <div class="aitools-col" id="col-integrations">
-                  <div class="aitools-col-label">Integrations</div>
-                  <div class="aitools-item" data-name="microsoft sharepoint sharepoint">
-                    <div class="aitools-icon" style="background:#f0f4ff"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><circle cx="7" cy="7" r="5.5" fill="#036C70"/><circle cx="11" cy="10" r="5" fill="#1A9BA1"/><circle cx="7.5" cy="13" r="3.5" fill="#37C6D0"/><rect x="5" y="5" width="8" height="10" rx="1" fill="white" opacity=".15"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Microsoft Sharepoint</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="slack">
-                    <div class="aitools-icon" style="background:#f9f0ff"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M5.5 11.5a1.5 1.5 0 0 1-3 0V6a1.5 1.5 0 0 1 3 0v5.5Z" fill="#E01E5A"/><path d="M12 5.5a1.5 1.5 0 0 1 0-3h.5A1.5 1.5 0 0 1 14 4v1.5H12Z" fill="#E01E5A"/><path d="M12.5 5.5H7a1.5 1.5 0 0 1 0-3h5.5a1.5 1.5 0 0 1 0 3Z" fill="#36C5F0"/><path d="M14 12a1.5 1.5 0 0 1-3 0V6a1.5 1.5 0 0 1 3 0v6Z" fill="#2EB67D"/><path d="M6 12.5a1.5 1.5 0 0 1 0 3H5.5A1.5 1.5 0 0 1 4 14v-1.5H6Z" fill="#2EB67D"/><path d="M5.5 12.5H11a1.5 1.5 0 0 1 0 3H5.5a1.5 1.5 0 0 1 0-3Z" fill="#ECB22E"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Slack</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="microsoft teams teams">
-                    <div class="aitools-icon" style="background:#f0f4ff"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M10.5 7h4a1 1 0 0 1 1 1v3.5a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V8a1 1 0 0 1 .5-.866V7Z" fill="#5059C9"/><circle cx="13" cy="5" r="1.5" fill="#5059C9"/><circle cx="8" cy="4.5" r="2" fill="#7B83EB"/><path d="M4 8h8a1 1 0 0 1 1 1v4a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9a1 1 0 0 1 1-1Z" fill="#7B83EB"/><path d="M8 8v8" stroke="white" stroke-width="1.2"/><path d="M5 11h6" stroke="white" stroke-width="1.2"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Microsoft Teams</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="google drive drive">
-                    <div class="aitools-icon" style="background:#f0fdf4"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M1.5 13.5 4 9l3 5.5H1.5Z" fill="#0F9D58"/><path d="M6.5 14.5h5L9 9.5 6.5 14.5Z" fill="#00832D"/><path d="M9 9.5l2.5 5 3-5.5L11 3.5 9 9.5Z" fill="#FBBC04"/><path d="M7 3.5l2 6 2-6-2-3.5L7 3.5Z" fill="#4285F4"/><path d="M4 9l3 5.5h5L9 9.5 7 3.5 4 9Z" fill="#34A853"/><path d="M7 3.5l4 0 3.5 6-3-5.5-4 0L4 9l-2.5 4.5 2.5-4.5L7 3.5Z" fill="#EA4335"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Google Drive</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="notion">
-                    <div class="aitools-icon" style="background:#f5f5f5"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><rect width="18" height="18" rx="3" fill="white"/><path d="M4 3.5h6.5l4 4V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z" fill="#1a1a1a"/><path d="M10.5 3.5V7.5H14.5" fill="none" stroke="white" stroke-width=".8"/><path d="M6 7.5h6M6 9.5h6M6 11.5h4" stroke="white" stroke-width=".8" stroke-linecap="round"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">Notion</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-item" data-name="github">
-                    <div class="aitools-icon" style="background:#f6f8fa"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 1.5a7.5 7.5 0 0 0-2.372 14.621c.375.068.513-.163.513-.362 0-.179-.007-.653-.01-1.28-2.086.454-2.527-.996-2.527-.996-.341-.867-.833-1.098-.833-1.098-.68-.465.052-.456.052-.456.752.053 1.148.772 1.148.772.668 1.145 1.753.814 2.18.623.068-.484.261-.814.475-1.001-1.665-.19-3.416-.833-3.416-3.707 0-.818.292-1.488.772-2.012-.077-.19-.334-.952.073-1.985 0 0 .63-.201 2.063.769A7.18 7.18 0 0 1 9 6.299c.638.003 1.28.086 1.88.253 1.43-.97 2.06-.769 2.06-.769.408 1.033.151 1.795.074 1.985.48.524.771 1.194.771 2.012 0 2.882-1.754 3.515-3.424 3.7.269.232.508.69.508 1.39 0 1.003-.009 1.813-.009 2.06 0 .2.135.434.517.36A7.501 7.501 0 0 0 9 1.5Z" fill="#1a1a1a"/></svg></div>
-                    <div class="aitools-info"><div class="aitools-name">GitHub</div></div>
-                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
-                  </div>
-                  <div class="aitools-empty" id="empty-integrations">No results</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="prompt-actions">
-              <div class="prompt-left">
-                <button class="action-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
-                  Attach
-                </button>
-                <button class="action-btn" id="aitools-btn" onclick="toggleAITools(event)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 4.5 20.3 12 17l7.5 3.3ZM12 3v14"/></svg>
-                  AI Tools
-                </button>
-              </div>
-
-              <div class="prompt-right">
-                <button class="model-selector">
-                  <div class="model-logo">✦</div>
-                  Auto
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                <button class="mic-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
-                </button>
-                <button class="send-btn" id="send">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
-                </button>
-              </div>
-            </div>
+          <div class="fq-options" id="fq-options"></div>
+          <div class="fq-footer" id="fq-footer" style="display:none">
+            <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
 
-  <script>
-    function onInput(ta) {
-      ta.style.height = 'auto';
-      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
-      document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
-    }
+    <!-- Prompt -->
+    <div class="prompt-wrap">
+      <div class="prompt-box">
+        <div class="prompt-textarea-row">
+          <textarea class="prompt-textarea" id="prompt-input" rows="1"
+            placeholder="Ask for a follow up"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
+        <div class="prompt-actions">
+          <div class="prompt-actions-left">
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Attach
+            </button>
+            <div class="prompt-btn-divider"></div>
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Tools
+            </button>
+          </div>
+          <div class="prompt-actions-right">
+            <button class="prompt-auto-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Auto
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <button class="prompt-icon-btn" title="Expand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 
-    function onPromptKey(e) {
-      if (e.key !== 'Enter' || e.shiftKey) return;
-      const ta = e.target;
-      if (!ta.value.trim()) return;
-      // If FQ card is still active, collapse it to disabled summary
-      if (!fq_done) {
-        fq_done = true;
-        fqCollapseToSummary();
-      }
-    }
+<script>
+  // ─── Data ─────────────────────────────────────────────────
+  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
+  const STEP2 = ['100–1000', '1001–5000', '5000+', 'Custom'];
 
-    function toggleAITools(e) {
-      e.stopPropagation();
-      const popover = document.getElementById('aitools-popover');
-      const btn = document.getElementById('aitools-btn');
-      const isOpen = popover.classList.toggle('open');
-      btn.classList.toggle('active', isOpen);
-      if (isOpen) {
-        setTimeout(() => document.getElementById('aitools-search').focus(), 50);
-      }
-    }
+  const RESPONSES = {
+    0: 'Great choice. Here\'s a tailored PPC Facebook Ads marketing plan for your business — covering audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
+    1: 'Perfect. For PPC Google Ads, I\'ll build around keyword strategy, match types, ad copy best practices, bidding strategies, and conversion tracking to drive qualified traffic.',
+    2: 'Excellent. An SEO campaign is a strong long-term investment. Your plan will cover technical SEO, on-page optimisation, content strategy, link building, and measurable milestones.',
+    3: 'No problem — I\'ll build a fully custom marketing plan around your specific needs. Tell me more about your target audience, product, and goals.',
+  };
 
-    function filterAITools(query) {
-      const q = query.trim().toLowerCase();
+  // State
+  let step = 1;
+  let s1sel = null;   // index or null
+  let s2sel = new Set();
+  let done = false;
 
-      const capItems = document.querySelectorAll('#col-capabilities .aitools-item');
-      const intItems = document.querySelectorAll('#col-integrations .aitools-item');
+  // ─── Render ────────────────────────────────────────────────
+  function render() {
+    const opts = document.getElementById('fq-options');
+    const footer = document.getElementById('fq-footer');
+    const title = document.getElementById('fq-title');
+    const page = document.getElementById('fq-page');
+    const prev = document.getElementById('fq-prev');
+    const next = document.getElementById('fq-next');
 
-      let capVisible = 0, intVisible = 0;
+    page.textContent = step + ' of 2';
+    prev.disabled = step === 1;
+    next.disabled = step === 2 || s1sel === null;
 
-      capItems.forEach(item => {
-        const match = !q || item.dataset.name.includes(q);
-        item.classList.toggle('hidden', !match);
-        if (match) capVisible++;
-      });
-
-      intItems.forEach(item => {
-        const match = !q || item.dataset.name.includes(q);
-        item.classList.toggle('hidden', !match);
-        if (match) intVisible++;
-      });
-
-      document.getElementById('empty-capabilities').style.display = capVisible === 0 ? 'block' : 'none';
-      document.getElementById('empty-integrations').style.display = intVisible === 0 ? 'block' : 'none';
-    }
-
-    function handleSearchKey(e) {
-      if (e.key !== 'Enter') return;
-      // Collect all visible items across both columns
-      const allItems = [
-        ...document.querySelectorAll('#col-capabilities .aitools-item:not(.hidden)'),
-        ...document.querySelectorAll('#col-integrations .aitools-item:not(.hidden)')
-      ];
-      if (allItems.length === 1) {
-        const checkbox = allItems[0].querySelector('input[type="checkbox"]');
-        if (checkbox) checkbox.checked = !checkbox.checked;
-      }
-    }
-
-    // CMD+K now opens search (see below)
-
-    // Close popover when clicking outside
-    document.addEventListener('click', (e) => {
-      const popover = document.getElementById('aitools-popover');
-      const btn = document.getElementById('aitools-btn');
-      if (!popover.contains(e.target) && !btn.contains(e.target)) {
-        popover.classList.remove('open');
-        btn.classList.remove('active');
-      }
-    });
-
-    // ─── Follow-up questions ───────────────────────────────
-    const FQ_STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
-    const FQ_STEP2 = ['100–1000', '1001–5000', '5000+'];
-    const FQ_RESPONSES_MAP = {
-      0: 'Great choice! Here\'s a tailored PPC Facebook Ads marketing plan for your business. I\'ll focus on audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
-      1: 'Perfect. For PPC Google Ads, I\'ll build a plan around keyword strategy, match types, ad copy best practices, bidding strategies, and conversion tracking to drive qualified traffic.',
-      2: 'Excellent. An SEO campaign is a strong long-term investment. Your plan will cover technical SEO, on-page optimisation, content strategy, link building, and measurable milestones.',
-      3: 'No problem — tell me more about what you have in mind. You can describe your target audience, product, and goals, and I\'ll build a custom plan around your specific needs.',
-    };
-
-    let fq_step = 1;
-    let fq_step1_sel = null;   // index into FQ_STEP1, or null
-    let fq_step2_sel = new Set();
-    let fq_done = false;
-
-    const PENCIL_SVG = `<svg class="fq-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`;
-
-    function fqRender() {
-      const cards = document.getElementById('fq-cards');
-      const footer = document.getElementById('fq-footer');
-      const title = document.getElementById('fq-title');
-      const pageLabel = document.getElementById('fq-page-label');
-      const prevBtn = document.getElementById('fq-prev');
-      const nextBtn = document.getElementById('fq-next');
-
-      pageLabel.textContent = fq_step + ' of 2';
-      prevBtn.disabled = fq_step === 1;
-      nextBtn.disabled = fq_step === 2 || fq_step1_sel === null;
-
-      if (fq_step === 1) {
-        title.textContent = 'What kind of campaign do you need?';
-        const isOther = fq_step1_sel === FQ_STEP1.length - 1;
-        cards.innerHTML = FQ_STEP1.map((opt, i) => {
-          const isLast = i === FQ_STEP1.length - 1;
-          const sel = fq_step1_sel === i;
-          if (isLast && sel) {
-            return `<div class="fq-card fq-card-custom selected" onclick="event.stopPropagation()">
-              ${PENCIL_SVG}
-              <input class="fq-custom-input" id="fq-custom-s1" type="text" placeholder="Custom campaign" />
-              <span class="fq-dash">—</span>
-            </div>`;
-          }
-          return `<div class="fq-card${sel ? ' selected' : ''}" onclick="fqStep1Select(${i})">
-            <div class="fq-radio"><div class="fq-radio-dot"></div></div>
-            <div class="fq-label">${opt}</div>
-            <span class="fq-dash">—</span>
+    if (step === 1) {
+      title.textContent = 'What kind of campaign do you need?';
+      opts.innerHTML = STEP1.map((label, i) => {
+        const isCustom = i === STEP1.length - 1;
+        const sel = s1sel === i;
+        if (isCustom) {
+          return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s1pick(${i})" id="fq-opt-${i}">
+            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <input class="fq-custom-input" id="s1-input" type="text" placeholder="Custom"
+              onclick="event.stopPropagation(); s1pick(${i})"
+              onkeydown="if(event.key==='Enter'){fqNav(1)}" />
+            <div class="fq-kbd">4</div>
           </div>`;
-        }).join('');
-        footer.style.display = isOther ? 'flex' : 'none';
-      } else {
-        title.textContent = 'What is your budget?';
-        cards.innerHTML = FQ_STEP2.map((opt, i) => {
-          const sel = fq_step2_sel.has(i);
-          return `<div class="fq-card${sel ? ' selected' : ''}" onclick="fqStep2Toggle(${i})">
+        }
+        return `<div class="fq-option${sel ? ' selected' : ''}" onclick="s1pick(${i})" id="fq-opt-${i}">
+          <div class="fq-option-left">
+            <div class="fq-radio"><div class="fq-radio-dot"></div></div>
+            <div class="fq-label">${label}</div>
+          </div>
+          <div class="fq-kbd">${i + 1}</div>
+        </div>`;
+      }).join('');
+      footer.style.display = 'none';
+
+    } else {
+      title.textContent = 'What is your budget?';
+      opts.innerHTML = STEP2.map((label, i) => {
+        const isCustom = i === STEP2.length - 1;
+        const sel = s2sel.has(i);
+        if (isCustom) {
+          return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
+            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <input class="fq-custom-input" id="s2-input" type="text" placeholder="Custom"
+              onclick="event.stopPropagation(); s2toggle(${i})" />
+            <div class="fq-kbd">4</div>
+          </div>`;
+        }
+        return `<div class="fq-option${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
+          <div class="fq-option-left">
             <div class="fq-checkbox">
               <svg class="fq-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
                 <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div class="fq-label">${opt}</div>
-            <span class="fq-dash">—</span>
-          </div>`;
-        }).join('');
-        footer.style.display = 'flex';
-      }
+            <div class="fq-label">${label}</div>
+          </div>
+          <div class="fq-kbd">${i + 1}</div>
+        </div>`;
+      }).join('');
+      footer.style.display = 'flex';
     }
+  }
 
-    function fqStep1Select(idx) {
-      if (fq_done) return;
-      fq_step1_sel = idx;
-      fqRender();
-      const isOther = idx === FQ_STEP1.length - 1;
-      if (isOther) {
-        const inp = document.getElementById('fq-custom-s1');
-        if (inp) inp.focus();
-      } else {
-        // auto-advance to step 2 after brief delay
-        setTimeout(() => fqGoStep(2), 420);
-      }
+  // ─── Interactions ──────────────────────────────────────────
+  function s1pick(idx) {
+    if (done) return;
+    s1sel = idx;
+    render();
+    const isCustom = idx === STEP1.length - 1;
+    if (isCustom) {
+      const inp = document.getElementById('s1-input');
+      if (inp) inp.focus();
+    } else {
+      setTimeout(() => fqNav(1), 380);
     }
+  }
 
-    function fqStep2Toggle(idx) {
-      if (fq_done) return;
-      if (fq_step2_sel.has(idx)) fq_step2_sel.delete(idx);
-      else fq_step2_sel.add(idx);
-      fqRender();
+  function s2toggle(idx) {
+    if (done) return;
+    if (s2sel.has(idx)) s2sel.delete(idx);
+    else s2sel.add(idx);
+    render();
+    if (idx === STEP2.length - 1) {
+      const inp = document.getElementById('s2-input');
+      if (inp) inp.focus();
     }
+  }
 
-    function fqGoStep(n) {
-      if (n < 1 || n > 2) return;
-      if (n === 2 && fq_step1_sel === null) return;
-      fq_step = n;
-      fqRender();
+  function fqNav(dir) {
+    const n = step + dir;
+    if (n < 1 || n > 2) return;
+    if (n === 2 && s1sel === null) return;
+    step = n;
+    render();
+  }
+
+  // ─── Submit ────────────────────────────────────────────────
+  function fqSubmit() {
+    if (done) return;
+    done = true;
+
+    // Build label
+    let label = STEP1[s1sel] || '';
+    if (s1sel === STEP1.length - 1) {
+      const inp = document.getElementById('s1-input');
+      if (inp && inp.value.trim()) label = inp.value.trim();
     }
-
-    function fqToggle() {
-      const modal = document.getElementById('fq-modal');
-      const btn = document.getElementById('fq-toggle-btn');
-      const isCollapsed = modal.classList.toggle('collapsed');
-      btn.setAttribute('aria-label', isCollapsed ? 'Expand' : 'Collapse');
-    }
-
-    function fqClose() {
-      const wrap = document.getElementById('fq-wrap');
-      if (!wrap) return;
-      wrap.style.transition = 'opacity .15s ease';
-      wrap.style.opacity = '0';
-      setTimeout(() => wrap.remove(), 150);
-    }
-
-    function fqCollapseToSummary() {
-      const modal = document.getElementById('fq-modal');
-      if (!modal) return;
-      modal.style.transition = 'opacity .15s ease';
-      modal.style.opacity = '0';
-      setTimeout(() => {
-        modal.classList.add('disabled', 'collapsed');
-        modal.style.opacity = '';
-        modal.style.transition = '';
-        // Replace header content with disabled version
-        const header = modal.querySelector('.fq-header');
-        header.innerHTML = `
-          <p class="fq-title">What kind of campaign do you need?</p>
-          <div class="fq-header-right">
-            <div class="fq-changer">
-              <span class="fq-page-label">2 questions</span>
-            </div>
-          </div>`;
-      }, 150);
-    }
-
-    function fqSubmit() {
-      if (fq_done) return;
-      fq_done = true;
-
-      // Build summary label
-      let label = FQ_STEP1[fq_step1_sel] || '';
-      if (fq_step1_sel === FQ_STEP1.length - 1) {
-        const inp = document.getElementById('fq-custom-s1');
-        if (inp && inp.value.trim()) label = inp.value.trim();
-      }
-      if (fq_step2_sel.size > 0) {
-        const budgets = [...fq_step2_sel].map(i => FQ_STEP2[i]).join(', ');
-        label += ' · Budget: ' + budgets;
-      }
-
-      const responseText = FQ_RESPONSES_MAP[fq_step1_sel] ||
-        'Thanks! I\'ll put together a custom marketing plan tailored to your needs.';
-
-      // Collapse card to disabled summary
-      fqCollapseToSummary();
-
-      // Append user message
-      const msgs = document.getElementById('chat-messages');
-      const userRow = document.createElement('div');
-      userRow.className = 'msg-row user';
-      userRow.innerHTML = `<div class="msg-bubble user">${label}</div>`;
-      msgs.appendChild(userRow);
-      const thread = document.getElementById('chat-thread');
-      thread.scrollTop = thread.scrollHeight;
-
-      // Show AI typing then response
-      const aiRow = document.createElement('div');
-      aiRow.className = 'msg-row ai';
-      aiRow.innerHTML = `<div class="ai-meta"><div class="ai-badge"><div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>GPT-4o mini · Search Preview</div></div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-      msgs.appendChild(aiRow);
-      thread.scrollTop = thread.scrollHeight;
-      setTimeout(() => {
-        aiRow.innerHTML = `<div class="ai-meta"><div class="ai-badge"><div class="ai-badge-dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>GPT-4o mini · Search Preview</div></div><div class="msg-bubble ai">${responseText}</div>`;
-        thread.scrollTop = thread.scrollHeight;
-      }, 1400);
-    }
-
-    // FQ keyboard shortcuts
-    document.addEventListener('keydown', e => {
-      const modal = document.getElementById('fq-modal');
-      if (!modal || fq_done || modal.classList.contains('collapsed')) return;
-      // Don't hijack when typing in inputs
-      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-
-      const num = parseInt(e.key);
-      if (num >= 1 && !isNaN(num)) {
-        if (fq_step === 1 && num <= FQ_STEP1.length) {
-          e.preventDefault();
-          fqStep1Select(num - 1);
-        } else if (fq_step === 2 && num <= FQ_STEP2.length) {
-          e.preventDefault();
-          fqStep2Toggle(num - 1);
+    if (s2sel.size > 0) {
+      const budgets = [...s2sel].map(i => {
+        if (i === STEP2.length - 1) {
+          const inp = document.getElementById('s2-input');
+          return (inp && inp.value.trim()) ? inp.value.trim() : 'Custom';
         }
-        return;
-      }
-      if (e.key === 'Escape') fqToggle();
-    });
-
-    // Initial render
-    fqRender();
-
-    // ─── Search ────────────────────────────────────────────
-    const CHATS = [
-      { id:1,  title:'Cybersecurity market trends for 2026',       content:'This trend we noticed within Cyber Security domains and various companies in the US which have contributed to major shifts in the cybersecurity landscape over recent quarters, affecting both enterprise and SMB segments worldwide.',       date: new Date(Date.now()-864e5) },
-      { id:2,  title:'EV Market Trends Analysis',                  content:'Electric vehicle market analysis covering adoption rates, battery technology improvements, and the competitive landscape among major manufacturers in North America and Europe for Q4 2025.',                                           date: new Date(Date.now()-864e5*2) },
-      { id:3,  title:'Generate an image bursting out of the page', content:'I need a creative image that visually pops off the screen, with elements that appear to be jumping out toward the viewer in a dynamic 3D effect, suitable for marketing materials and social media campaigns.',                       date: new Date(Date.now()-864e5*8) },
-      { id:4,  title:'Target Audience Brainstorming',              content:'Brainstorming session to identify ideal customer profiles, user personas, and target demographics for the new product launch campaign planned for Q1 2026.',                                                                           date: new Date(Date.now()-864e5*10) },
-      { id:5,  title:'Summary of the user research',               content:'Key findings from the user research sessions, including pain points, user journeys, and actionable recommendations for improving the onboarding experience and reducing time-to-value for new customers.',                             date: new Date(Date.now()-864e5*12) },
-      { id:6,  title:'Data trends analysis',                       content:'Comprehensive analysis of Q4 data trends showing significant growth in user engagement metrics and revenue performance across all major markets and product lines.',                                                                  date: new Date(Date.now()-864e5*14) },
-      { id:7,  title:'Columbus trips',                             content:'Planning a road trip to Columbus, Ohio. Exploring popular landmarks, restaurants, hotels, and activities for a weekend getaway including the Short North district and Franklin Park Conservatory.',                                  date: new Date(Date.now()-864e5*20) },
-      { id:8,  title:'Moto trip plan',                             content:'Planning an epic motorcycle adventure through the mountain routes of Colorado and Utah, covering scenic byways, camping spots along the way, and must-see locations.',                                                              date: new Date(Date.now()-864e5*22) },
-      { id:9,  title:'IT system queries',                          content:'Investigating slow database queries and optimizing SQL performance for the internal IT system, focusing on reducing response times by 40% through better indexing and query restructuring.',                                         date: new Date(Date.now()-864e5*25) },
-      { id:10, title:'Sprint Architect design review',             content:'Review of the sprint architecture decisions including microservices design, API contracts, and deployment pipeline improvements planned for Q1 2026 delivery cycle.',                                                              date: new Date(Date.now()-864e5*30) },
-      { id:11, title:'Sentiment Strategist framework',             content:'Building a sentiment analysis framework to process customer feedback at scale, identifying positive and negative trends in product reviews across all support channels.',                                                           date: new Date(Date.now()-864e5*35) },
-      { id:99, title:'Q3 Revenue Planning',                        content:'Quarterly revenue planning session covering targets, forecasts and budget allocation for all departments in Q3 2025.',                                                                                                                date: new Date(Date.now()-864e5*5),  deleted:true },
-    ];
-
-    let searchHistory = [
-      { id:1, title:'Most unexpected errors',  date: new Date() },
-      { id:2, title:'Cyber security trends',   date: new Date(Date.now()-864e5) },
-      { id:3, title:'Columbus trips',          date: new Date(Date.now()-864e5*11) },
-      { id:4, title:'Moto trip plan',          date: new Date(Date.now()-864e5*11) },
-      { id:5, title:'IT system queries',       date: new Date(Date.now()-864e5*13) },
-    ];
-    let _searchTimer = null, _searchResults = [], _activeIdx = -1, _currentQuery = '';
-
-    function openSearch() {
-      document.getElementById('search-backdrop').classList.add('open');
-      setTimeout(() => document.getElementById('search-field').focus(), 40);
-      _renderHistory();
-      _activeIdx = -1;
+        return STEP2[i];
+      }).join(', ');
+      label += ' · Budget: ' + budgets;
     }
 
-    function closeSearch() {
-      document.getElementById('search-backdrop').classList.remove('open');
-      document.getElementById('search-field').value = '';
-      document.getElementById('search-clear').classList.remove('vis');
-      _activeIdx = -1;
-    }
+    const responseText = RESPONSES[s1sel] || RESPONSES[3];
 
-    function clearSearch() {
-      document.getElementById('search-field').value = '';
-      document.getElementById('search-field').focus();
-      document.getElementById('search-clear').classList.remove('vis');
-      _renderHistory();
-      _activeIdx = -1;
-    }
+    // Collapse card to submitted state
+    const card = document.getElementById('fq-card');
+    card.style.transition = 'opacity .15s';
+    card.style.opacity = '0';
+    setTimeout(() => {
+      card.classList.add('submitted');
+      card.style.opacity = '';
+      card.style.transition = '';
+      document.getElementById('fq-title').textContent = 'What kind of campaign do you need?';
+      document.getElementById('fq-page').textContent = '2 questions';
+      document.getElementById('fq-prev').style.display = 'none';
+      document.getElementById('fq-next').style.display = 'none';
+      document.getElementById('fq-options').innerHTML = '';
+      document.getElementById('fq-footer').style.display = 'none';
+    }, 150);
 
-    function _getErrorType(q) {
-      const l = q.toLowerCase();
-      if (l.includes('error') || l.includes('fail'))       return 'api';
-      if (l.includes('timeout') || l.includes('slow'))     return 'timeout';
-      if (l.includes('offline') || l.includes('network'))  return 'offline';
-      return null;
-    }
+    // Append user message
+    const msgs = document.getElementById('chat-messages');
 
-    function onSearchInput(val) {
-      document.getElementById('search-clear').classList.toggle('vis', val.length > 0);
-      clearTimeout(_searchTimer);
-      _activeIdx = -1;
-      _currentQuery = val;
-      if (!val.trim()) { _renderHistory(); return; }
-      if (val.trim().length === 1) { _renderTooShort(); return; }
-      const errType = _getErrorType(val.trim());
-      _renderSkeleton();
-      _searchTimer = setTimeout(() => {
-        if (errType) { _renderError(errType); return; }
-        const q = val.trim().toLowerCase();
-        _searchResults = CHATS.filter(c =>
-          c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q)
-        );
-        _renderResults(val.trim());
-      }, errType === 'timeout' ? 3000 : 220);
-    }
+    const userRow = document.createElement('div');
+    userRow.className = 'msg-row user';
+    userRow.innerHTML = `<div class="msg-bubble user">${label}</div>`;
+    msgs.appendChild(userRow);
 
-    function _renderError(type) {
-      document.getElementById('search-label').textContent = '';
-      const cfg = {
-        api: {
-          cls:'api',
-          icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-          title:"Search couldn\u2019t be completed",
-          msg:'There was a server error processing your request.',
-          actions:'<button class="search-error-retry" onclick="_retrySearch()">Retry</button>'
-        },
-        timeout: {
-          cls:'timeout',
-          icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-          title:'Search is taking too long',
-          msg:'Your search took longer than expected.',
-          actions:'<button class="search-error-retry" onclick="_retrySearch()">Retry</button><button class="search-error-cancel" onclick="clearSearch()">Cancel</button>'
-        },
-        offline: {
-          cls:'offline',
-          icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>',
-          title:'No internet connection',
-          msg:'Check your connection and try again.',
-          actions:'<button class="search-error-retry" onclick="_retrySearch()">Retry</button>'
-        },
-      };
-      const c = cfg[type];
-      document.getElementById('search-body').innerHTML = `<div class="search-error-state">
-        <div class="search-error-icon ${c.cls}">${c.icon}</div>
-        <div class="search-error-content">
-          <p class="search-error-title">${c.title}</p>
-          <p class="search-error-msg">${c.msg}</p>
-          <div class="search-error-actions">${c.actions}</div>
-        </div>
-      </div>`;
-    }
-
-    function _renderTooShort() {
-      document.getElementById('search-label').textContent = '';
-      document.getElementById('search-body').innerHTML = `<div class="search-tooshort">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Enter at least 2 characters to search
-      </div>`;
-    }
-
-    function _retrySearch() {
-      if (_currentQuery) onSearchInput(_currentQuery);
-    }
-
-    function _showToast(msg) {
-      const t = document.getElementById('search-toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    function onSearchKey(e) {
-      const rows = [...document.querySelectorAll('#search-body .s-result-row, #search-body .s-history-row')];
-      if (e.key === 'Escape') { closeSearch(); return; }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        _activeIdx = Math.min(_activeIdx + 1, rows.length - 1);
-        _updateActive(rows); return;
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        _activeIdx = Math.max(_activeIdx - 1, -1);
-        _updateActive(rows); return;
-      }
-      if (e.key === 'Enter' && _activeIdx >= 0 && rows[_activeIdx]) {
-        rows[_activeIdx].click(); return;
-      }
-    }
-
-    function _updateActive(rows) {
-      rows.forEach((r, i) => r.classList.toggle('active', i === _activeIdx));
-      if (_activeIdx >= 0 && rows[_activeIdx]) rows[_activeIdx].scrollIntoView({ block:'nearest' });
-    }
-
-    function _renderHistory() {
-      const label = document.getElementById('search-label');
-      const body  = document.getElementById('search-body');
-      if (searchHistory.length === 0) {
-        label.textContent = '';
-        body.innerHTML = `<div class="search-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <p>Your searched chats will appear here</p>
-        </div>`;
-      } else {
-        label.textContent = 'Search history';
-        body.innerHTML = `<div class="search-list">${searchHistory.map(h => `
-          <div class="s-history-row" onclick="_pickHistory(${h.id})">
-            <span class="s-history-title">${_esc(h.title)}</span>
-            <span class="s-history-date">${_relDate(h.date)}</span>
-          </div>`).join('')}</div>`;
-      }
-    }
-
-    function _renderSkeleton() {
-      document.getElementById('search-label').textContent = 'Search history';
-      document.getElementById('search-body').innerHTML = `<div class="search-skeleton">
-        <div class="sk-row"><div class="sk-bar" style="width:61%"></div><div class="sk-bar" style="width:34px"></div></div>
-        <div class="sk-row"><div class="sk-bar" style="width:46%"></div><div class="sk-bar" style="width:42px"></div></div>
-      </div>`;
-    }
-
-    function _renderResults(q) {
-      const label = document.getElementById('search-label');
-      const body  = document.getElementById('search-body');
-      label.textContent = 'Results';
-      if (_searchResults.length === 0) {
-        body.innerHTML = `<div class="search-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.172 16.172a4 4 0 0 1 5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-          <p>No results found for your search</p>
-        </div>`;
-      } else {
-        body.innerHTML = `<div class="search-list">${_searchResults.map(c => {
-          const th = _hl(c.title, q);
-          const sh = _hl(_snippet(c.content, q), q);
-          return `<div class="s-result-row" onclick="_openResult(${c.id})">
-            <div class="s-result-content">
-              <div class="s-result-title">${th}</div>
-              <div class="s-result-snippet">${sh}</div>
-            </div>
-            <span class="s-result-enter">↵</span>
-          </div>`;
-        }).join('')}</div>`;
-      }
-      _activeIdx = -1;
-    }
-
-    function _pickHistory(id) {
-      const h = searchHistory.find(x => x.id === id);
-      if (!h) return;
-      const f = document.getElementById('search-field');
-      f.value = h.title;
-      document.getElementById('search-clear').classList.add('vis');
-      onSearchInput(h.title);
-    }
-
-    function _delHistory(e, id) {
-      e.stopPropagation();
-      searchHistory = searchHistory.filter(h => h.id !== id);
-      const val = document.getElementById('search-field').value;
-      if (!val.trim()) _renderHistory();
-    }
-
-    function _openResult(chatId) {
-      const chat = CHATS.find(c => c.id === chatId);
-      if (chat && chat.deleted) {
-        _showToast('This chat is no longer available');
-        return;
-      }
-      if (chat) {
-        // Deduplicate and prepend to history
-        searchHistory = searchHistory.filter(h => h.title.toLowerCase() !== chat.title.toLowerCase());
-        searchHistory.unshift({ id: Date.now(), title: chat.title, date: new Date() });
-        if (searchHistory.length > 10) searchHistory.pop();
-        // Visual feedback: mark matching sidebar link as active
-        document.querySelectorAll('.sidebar-link').forEach(el => {
-          const match = el.textContent.trim().replace(/\u2026$/, '');
-          el.classList.toggle('active', chat.title.startsWith(match.slice(0, match.length)));
-        });
-      }
-      closeSearch();
-    }
-
-    function _hl(text, q) {
-      const escaped = _esc(text);
-      const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
-      return escaped.replace(re, '<mark>$1</mark>');
-    }
-
-    function _snippet(content, q) {
-      const li = content.toLowerCase().indexOf(q.toLowerCase());
-      if (li === -1) return content.length > 110 ? content.slice(0, 110) + '…' : content;
-      const s = Math.max(0, li - 35), e = Math.min(content.length, li + q.length + 75);
-      return (s > 0 ? '…' : '') + content.slice(s, e) + (e < content.length ? '…' : '');
-    }
-
-    function _relDate(d) {
-      const days = Math.floor((Date.now() - d) / 864e5);
-      if (days === 0) return 'Today';
-      if (days === 1) return 'Yesterday';
-      return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-    }
-
-    function _esc(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ⌘K / Ctrl+K opens search
-    document.addEventListener('keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (!document.getElementById('search-backdrop').classList.contains('open')) openSearch();
-      }
-    });
-
-    function toggleVersionDropdown(e) {
-      e.stopPropagation();
-      document.getElementById('version-switcher').classList.toggle('open');
-    }
-    document.addEventListener('click', () => {
-      document.getElementById('version-switcher').classList.remove('open');
-    });
-
-  </script>
-
-  <!-- Search Modal -->
-  <div class="search-backdrop" id="search-backdrop" onclick="closeSearch()">
-    <div class="search-modal" onclick="event.stopPropagation()">
-      <div class="search-input-row">
-        <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input
-          type="text"
-          class="search-field"
-          id="search-field"
-          placeholder="Search for chats"
-          autocomplete="off"
-          spellcheck="false"
-          oninput="onSearchInput(this.value)"
-          onkeydown="onSearchKey(event)"
-        />
-        <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Clear">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
+    // Typing indicator
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai';
+    aiRow.innerHTML = `
+      <div class="ai-badge">
+        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+        GPT-4o mini · Search Preview
       </div>
-      <div class="search-label" id="search-label"></div>
-      <div class="search-body" id="search-body"></div>
-    </div>
-  </div>
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>`;
+    msgs.appendChild(aiRow);
 
-  <div class="search-toast" id="search-toast"></div>
+    const thread = document.getElementById('chat-thread');
+    thread.scrollTop = thread.scrollHeight;
 
-  <!-- Version Switcher -->
-  <div class="version-switcher" id="version-switcher">
-    <div class="version-trigger" onclick="toggleVersionDropdown(event)">
-      <span class="version-trigger-label">V4</span>
-      <span class="version-trigger-desc">Follow-up</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-    </div>
-    <div class="version-dropdown">
-      <a class="version-option" href="v1.html">
-        <span class="version-option-label">V1</span>
-        <span class="version-option-desc">AI Tools</span>
-        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      </a>
-      <a class="version-option" href="v2.html">
-        <span class="version-option-label">V2</span>
-        <span class="version-option-desc">Audio Input</span>
-        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      </a>
-      <a class="version-option" href="v3.html">
-        <span class="version-option-label">V3</span>
-        <span class="version-option-desc">Search</span>
-        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      </a>
-      <a class="version-option current" href="v4.html">
-        <span class="version-option-label">V4</span>
-        <span class="version-option-desc">Follow-up</span>
-        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      </a>
-      <a class="version-option" href="canvas.html">
-        <span class="version-option-label">V5</span>
-        <span class="version-option-desc">Canvas</span>
-        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      </a>
-    </div>
-  </div>
+    // Show response after delay
+    setTimeout(() => {
+      aiRow.innerHTML = `
+        <div class="ai-badge">
+          <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+          GPT-4o mini · Search Preview
+        </div>
+        <div class="reasoning-wrap">
+          <button class="reasoning-toggle open" onclick="toggleReasoning(this)" aria-expanded="true">
+            Reasoning
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="reasoning-body open">
+            I am preparing a full campaign strategy tailored to your selected campaign type and budget range — covering audience targeting, creative approach, and KPIs.
+          </div>
+        </div>
+        <div class="msg-bubble ai">${responseText}</div>
+        <div class="skeleton-wrap">
+          <div class="skeleton-line" style="width:88%"></div>
+          <div class="skeleton-line" style="width:72%"></div>
+          <div class="skeleton-line" style="width:80%"></div>
+        </div>`;
 
+      thread.scrollTop = thread.scrollHeight;
+
+      // Update prompt placeholder
+      document.getElementById('prompt-input').placeholder = 'As a follow up';
+    }, 1400);
+  }
+
+  function toggleReasoning(btn) {
+    btn.classList.toggle('open');
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.setAttribute('aria-expanded', body.classList.contains('open'));
+  }
+
+  // ─── Keyboard shortcuts ────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (done) return;
+    const active = document.activeElement;
+    const inInput = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA';
+
+    const num = parseInt(e.key);
+    if (!isNaN(num) && num >= 1 && !inInput) {
+      if (step === 1 && num <= STEP1.length) {
+        e.preventDefault(); s1pick(num - 1);
+      } else if (step === 2 && num <= STEP2.length) {
+        e.preventDefault(); s2toggle(num - 1);
+      }
+    }
+    if (e.key === 'Enter' && step === 2 && !inInput) {
+      e.preventDefault(); fqSubmit();
+    }
+  });
+
+  // ─── Init ──────────────────────────────────────────────────
+  render();
+</script>
 </body>
 </html>
