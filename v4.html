@@ -1113,7 +1113,7 @@
     });
 
     // ─── Follow-up questions ───────────────────────────────
-    const FQ_STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Other'];
+    const FQ_STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
     const FQ_STEP2 = ['100–1000', '1001–5000', '5000+'];
     const FQ_RESPONSES_MAP = {
       0: 'Great choice! Here\'s a tailored PPC Facebook Ads marketing plan for your business. I\'ll focus on audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
@@ -1150,7 +1150,7 @@
           if (isLast && sel) {
             return `<div class="fq-card fq-card-custom selected" onclick="event.stopPropagation()">
               ${PENCIL_SVG}
-              <input class="fq-custom-input" id="fq-custom-s1" type="text" placeholder="Describe your campaign" />
+              <input class="fq-custom-input" id="fq-custom-s1" type="text" placeholder="Custom campaign" />
               <span class="fq-dash">—</span>
             </div>`;
           }
