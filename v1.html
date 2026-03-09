@@ -258,7 +258,7 @@
     .send-btn:hover { background: #1a1a2e; }
     .send-btn svg { width: 18px; height: 18px; }
 
-    /* ─── AI Tools popover ────────────────────────────────── */
+    /* ─── Tools popover ────────────────────────────────── */
     .action-btn.active {
       background: var(--bg-primary);
       color: var(--text-primary);
@@ -588,7 +588,7 @@
               placeholder="Ask anything to start the chat"
               rows="1"
               oninput="onInput(this)"></textarea>
-            <!-- AI Tools Popover (anchored to prompt-box) -->
+            <!-- Tools Popover (anchored to prompt-box) -->
             <div class="aitools-popover" id="aitools-popover">
               <div class="aitools-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -660,7 +660,7 @@
                 </button>
                 <button class="action-btn" id="aitools-btn" onclick="toggleAITools(event)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 4.5 20.3 12 17l7.5 3.3ZM12 3v14"/></svg>
-                  AI Tools
+                  Tools
                 </button>
               </div>
 
@@ -782,13 +782,13 @@
     document.addEventListener('keydown', (e) => {
       const tag = document.activeElement.tagName;
 
-      // "/" when not in an input and prompt is empty — open AI Tools
+      // "/" when not in an input and prompt is empty — open Tools
       if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA' && !document.getElementById('prompt').value.trim()) {
         e.preventDefault();
         openAITools();
       }
 
-      // Escape — close AI Tools, return focus to textarea
+      // Escape — close Tools, return focus to textarea
       if (e.key === 'Escape') {
         const popover = document.getElementById('aitools-popover');
         if (popover.classList.contains('open')) {
@@ -819,13 +819,13 @@
   <div class="version-switcher" id="version-switcher">
     <div class="version-trigger" onclick="toggleVersionDropdown(event)">
       <span class="version-trigger-label">V1</span>
-      <span class="version-trigger-desc">AI Tools</span>
+      <span class="version-trigger-desc">Tools</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
     <div class="version-dropdown">
       <a class="version-option current" href="v1.html">
         <span class="version-option-label">V1</span>
-        <span class="version-option-desc">AI Tools</span>
+        <span class="version-option-desc">Tools</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
       <a class="version-option" href="v2.html">
