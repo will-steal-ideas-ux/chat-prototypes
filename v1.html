@@ -688,8 +688,7 @@
     function onInput(ta) {
       // Slash command trigger — same style as Claude
       if (ta.value === '/') {
-        ta.value = '';
-        openAITools(false); // focus stays in prompt
+        openAITools(false); // focus stays in prompt, / stays typed
         return;
       }
       ta.style.height = 'auto';
