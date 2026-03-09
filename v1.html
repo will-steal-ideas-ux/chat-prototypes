@@ -686,19 +686,45 @@
 
   <script>
     function onInput(ta) {
+      // Slash command trigger — same style as Claude
+      if (ta.value === '/') {
+        ta.value = '';
+        openAITools();
+        return;
+      }
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
       document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
     }
 
+    function openAITools() {
+      const popover = document.getElementById('aitools-popover');
+      const btn = document.getElementById('aitools-btn');
+      popover.classList.add('open');
+      btn.classList.add('active');
+      setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+    }
+
+    function closeAITools() {
+      const popover = document.getElementById('aitools-popover');
+      const btn = document.getElementById('aitools-btn');
+      popover.classList.remove('open');
+      btn.classList.remove('active');
+      // Reset search
+      const search = document.getElementById('aitools-search');
+      if (search.value) {
+        search.value = '';
+        filterAITools('');
+      }
+    }
+
     function toggleAITools(e) {
       e.stopPropagation();
       const popover = document.getElementById('aitools-popover');
-      const btn = document.getElementById('aitools-btn');
-      const isOpen = popover.classList.toggle('open');
-      btn.classList.toggle('active', isOpen);
-      if (isOpen) {
-        setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+      if (popover.classList.contains('open')) {
+        closeAITools();
+      } else {
+        openAITools();
       }
     }
 
@@ -752,18 +778,22 @@
       }
     }
 
-    // "/" global shortcut (when not focused in an input)
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       const tag = document.activeElement.tagName;
+
+      // "/" when not in an input — open AI Tools
       if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
         e.preventDefault();
+        openAITools();
+      }
+
+      // Escape — close AI Tools, return focus to textarea
+      if (e.key === 'Escape') {
         const popover = document.getElementById('aitools-popover');
-        const btn = document.getElementById('aitools-btn');
-        const isOpen = !popover.classList.contains('open');
-        popover.classList.toggle('open', isOpen);
-        btn.classList.toggle('active', isOpen);
-        if (isOpen) {
-          setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+        if (popover.classList.contains('open')) {
+          closeAITools();
+          document.getElementById('prompt').focus();
         }
       }
     });
@@ -773,8 +803,7 @@
       const popover = document.getElementById('aitools-popover');
       const btn = document.getElementById('aitools-btn');
       if (!popover.contains(e.target) && !btn.contains(e.target)) {
-        popover.classList.remove('open');
-        btn.classList.remove('active');
+        closeAITools();
       }
       document.getElementById('version-switcher').classList.remove('open');
     });
