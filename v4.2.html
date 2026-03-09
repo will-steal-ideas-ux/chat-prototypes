@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexos.ai — V4</title>
+  <title>Nexos.ai — V4.2</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -327,7 +327,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 14px; font-weight: 500; color: var(--text-placeholder);
       line-height: 1; font-family: 'Inter', sans-serif;
+      opacity: 0; transition: opacity var(--transition);
     }
+    .fq-option:hover .fq-kbd { opacity: 1; }
 
     /* Custom (freeform) row */
     .fq-option-custom { gap: 10px; }
@@ -551,32 +553,34 @@
 
       </div>
 
-      <!-- Interactive card (inline, below messages) -->
-      <div class="fq-wrap" id="fq-wrap">
-        <div class="fq-card" id="fq-card">
-          <div class="fq-header">
-            <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
-            <div class="fq-changer">
-              <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
-              </button>
-              <span class="fq-page" id="fq-page">Step 1 of 2</span>
-              <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
-              </button>
-            </div>
+      </div>
+    </div>
+
+    <!-- Follow-up card (replaces prompt) -->
+    <div class="fq-wrap" id="fq-wrap">
+      <div class="fq-card" id="fq-card">
+        <div class="fq-header">
+          <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+          <div class="fq-changer">
+            <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
+            </button>
+            <span class="fq-page" id="fq-page">Step 1 of 2</span>
+            <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
+            </button>
           </div>
-          <div class="fq-options" id="fq-options"></div>
-          <div class="fq-footer" id="fq-footer" style="display:none">
-            <button class="fq-skip" onclick="fqSkip()">Skip</button>
-            <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
-          </div>
+        </div>
+        <div class="fq-options" id="fq-options"></div>
+        <div class="fq-footer" id="fq-footer" style="display:none">
+          <button class="fq-skip" onclick="fqSkip()">Skip</button>
+          <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
         </div>
       </div>
     </div>
 
-    <!-- Prompt -->
-    <div class="prompt-wrap">
+    <!-- Prompt (hidden while follow-up card is shown) -->
+    <div class="prompt-wrap" id="prompt-wrap" style="display:none">
       <div class="prompt-box">
         <div class="prompt-textarea-row">
           <textarea class="prompt-textarea" id="prompt-input" rows="1"
@@ -767,7 +771,10 @@
     const wrap = document.getElementById('fq-wrap');
     wrap.style.transition = 'opacity .15s';
     wrap.style.opacity = '0';
-    wrapTimer = setTimeout(() => { wrap.remove(); wrapTimer = null; }, 150);
+    wrapTimer = setTimeout(() => {
+      wrap.remove(); wrapTimer = null;
+      document.getElementById('prompt-wrap').style.display = '';
+    }, 150);
 
     // Append user message
     const msgs = document.getElementById('chat-messages');
@@ -831,6 +838,7 @@
     done = true;
     const wrap = document.getElementById('fq-wrap');
     if (wrap) { wrap.style.transition = 'none'; wrap.remove(); }
+    document.getElementById('prompt-wrap').style.display = '';
     const promptBox = document.querySelector('.prompt-box');
     promptBox.classList.remove('working');
     document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
@@ -888,8 +896,8 @@
 </script>
   <div class="version-switcher" id="version-switcher">
     <div class="version-trigger" onclick="toggleVersionDropdown(event)">
-      <span class="version-trigger-label">V4</span>
-      <span class="version-trigger-desc">Follow-up</span>
+      <span class="version-trigger-label">V4.2</span>
+      <span class="version-trigger-desc">Card in Prompt</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
     <div class="version-dropdown">
@@ -908,7 +916,7 @@
         <span class="version-option-desc">Search</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
-      <a class="version-option current" href="v4.html">
+      <a class="version-option" href="v4.html">
         <span class="version-option-label">V4</span>
         <span class="version-option-desc">Follow-up</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
@@ -918,7 +926,7 @@
         <span class="version-option-desc">Hover Shortcuts</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
-      <a class="version-option" href="v4.2.html">
+      <a class="version-option current" href="v4.2.html">
         <span class="version-option-label">V4.2</span>
         <span class="version-option-desc">Card in Prompt</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
