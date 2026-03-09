@@ -587,7 +587,8 @@
             <textarea class="prompt-textarea" id="prompt"
               placeholder="Ask anything to start the chat"
               rows="1"
-              oninput="onInput(this)"></textarea>
+              oninput="onInput(this)"
+              onkeydown="onPromptKeydown(event)"></textarea>
             <!-- Tools Popover (anchored to prompt-box) -->
             <div class="aitools-popover" id="aitools-popover">
               <div class="aitools-search">
@@ -686,14 +687,44 @@
 
   <script>
     function onInput(ta) {
-      // Slash command trigger — same style as Claude
+      const popover = document.getElementById('aitools-popover');
+
+      // Slash command trigger
       if (ta.value === '/') {
-        openAITools(false); // focus stays in prompt, / stays typed
+        openAITools(false);
         return;
       }
+
+      // While popover is open via slash, route typing to filter
+      if (popover.classList.contains('open') && ta.value.startsWith('/')) {
+        filterAITools(ta.value.slice(1));
+        document.getElementById('send').classList.remove('visible');
+        return;
+      }
+
+      // If user deletes the / while popover is open, close it
+      if (popover.classList.contains('open') && !ta.value.startsWith('/')) {
+        closeAITools();
+      }
+
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
       document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
+    }
+
+    function onPromptKeydown(e) {
+      const popover = document.getElementById('aitools-popover');
+      if (!popover.classList.contains('open')) return;
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const highlighted = document.querySelector('.aitools-item.highlighted');
+        if (highlighted) {
+          const checkbox = highlighted.querySelector('input[type="checkbox"]');
+          if (checkbox) checkbox.checked = !checkbox.checked;
+        }
+        closeAITools();
+      }
     }
 
     function openAITools(focusSearch = true) {
@@ -711,11 +742,17 @@
       const btn = document.getElementById('aitools-btn');
       popover.classList.remove('open');
       btn.classList.remove('active');
-      // Reset search
+      // Reset search input
       const search = document.getElementById('aitools-search');
       if (search.value) {
         search.value = '';
         filterAITools('');
+      }
+      // Clear slash command text from textarea
+      const prompt = document.getElementById('prompt');
+      if (prompt.value.startsWith('/')) {
+        prompt.value = '';
+        document.getElementById('send').classList.remove('visible');
       }
     }
 
