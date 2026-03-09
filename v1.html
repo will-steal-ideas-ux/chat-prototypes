@@ -327,6 +327,26 @@
     }
     .aitools-col + .aitools-col::-webkit-scrollbar { width: 4px; }
     .aitools-col + .aitools-col::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+
+    /* Search mode: flatten to single column */
+    .aitools-columns.is-searching {
+      flex-direction: column;
+    }
+    .aitools-columns.is-searching .aitools-col {
+      padding: 8px 0;
+    }
+    .aitools-columns.is-searching .aitools-col + .aitools-col {
+      border-left: none;
+      max-height: none;
+      overflow: visible;
+      padding-top: 0;
+    }
+    .aitools-columns.is-searching .aitools-col-label {
+      display: none;
+    }
+    .aitools-item.highlighted {
+      background: var(--bg-primary);
+    }
     .aitools-col-label {
       padding: 2px 14px 8px;
       font-size: 11px;
@@ -575,7 +595,7 @@
                 <input type="text" id="aitools-search" placeholder="Search" oninput="filterAITools(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off" />
                 <span class="aitools-kbd">/</span>
               </div>
-              <div class="aitools-columns">
+              <div class="aitools-columns" id="aitools-columns">
                 <div class="aitools-col" id="col-capabilities">
                   <div class="aitools-col-label">AI Capabilities</div>
                   <div class="aitools-item" data-name="deep research">
@@ -684,6 +704,7 @@
 
     function filterAITools(query) {
       const q = query.trim().toLowerCase();
+      const columns = document.getElementById('aitools-columns');
 
       const capItems = document.querySelectorAll('#col-capabilities .aitools-item');
       const intItems = document.querySelectorAll('#col-integrations .aitools-item');
@@ -702,19 +723,31 @@
         if (match) intVisible++;
       });
 
-      document.getElementById('empty-capabilities').style.display = capVisible === 0 ? 'block' : 'none';
-      document.getElementById('empty-integrations').style.display = intVisible === 0 ? 'block' : 'none';
+      // Flatten to single column when searching
+      columns.classList.toggle('is-searching', q.length > 0);
+      document.getElementById('col-capabilities').style.display = (q && capVisible === 0) ? 'none' : '';
+      document.getElementById('col-integrations').style.display = (q && intVisible === 0) ? 'none' : '';
+
+      // Empty states only shown in browse mode
+      document.getElementById('empty-capabilities').style.display = (!q && capVisible === 0) ? 'block' : 'none';
+      document.getElementById('empty-integrations').style.display = (!q && intVisible === 0) ? 'block' : 'none';
+
+      updateHighlight();
+    }
+
+    function updateHighlight() {
+      document.querySelectorAll('.aitools-item').forEach(item => item.classList.remove('highlighted'));
+      const columns = document.getElementById('aitools-columns');
+      if (!columns.classList.contains('is-searching')) return;
+      const first = document.querySelector('.aitools-item:not(.hidden)');
+      if (first) first.classList.add('highlighted');
     }
 
     function handleSearchKey(e) {
       if (e.key !== 'Enter') return;
-      // Collect all visible items across both columns
-      const allItems = [
-        ...document.querySelectorAll('#col-capabilities .aitools-item:not(.hidden)'),
-        ...document.querySelectorAll('#col-integrations .aitools-item:not(.hidden)')
-      ];
-      if (allItems.length === 1) {
-        const checkbox = allItems[0].querySelector('input[type="checkbox"]');
+      const highlighted = document.querySelector('.aitools-item.highlighted');
+      if (highlighted) {
+        const checkbox = highlighted.querySelector('input[type="checkbox"]');
         if (checkbox) checkbox.checked = !checkbox.checked;
       }
     }
