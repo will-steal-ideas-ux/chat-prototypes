@@ -152,11 +152,13 @@
       display: flex; flex-direction: column;
     }
 
-    /* ─── V4.2: chat + card centered together ─────────────── */
+    /* ─── V4.2: chat + card centered together, shifted right ─ */
     .main-area { justify-content: center; }
     .chat-thread { flex: 0 0 auto; overflow-y: visible; }
+    .chat-messages { margin-left: auto; margin-right: 80px; }
     .fq-wrap {
-      width: 100%; max-width: 760px; margin: 0 auto;
+      width: 100%; max-width: 760px;
+      margin-left: auto; margin-right: 80px;
       padding: 0 24px 24px;
     }
     .chat-thread::-webkit-scrollbar { width: 4px; }
