@@ -782,8 +782,8 @@
     document.addEventListener('keydown', (e) => {
       const tag = document.activeElement.tagName;
 
-      // "/" when not in an input — open AI Tools
-      if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+      // "/" when not in an input and prompt is empty — open AI Tools
+      if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA' && !document.getElementById('prompt').value.trim()) {
         e.preventDefault();
         openAITools();
       }
