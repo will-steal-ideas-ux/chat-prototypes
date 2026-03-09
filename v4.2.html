@@ -151,6 +151,16 @@
       flex: 1; overflow-y: auto; padding: 40px 0 0;
       display: flex; flex-direction: column;
     }
+
+    /* ─── V4.2: card centered in remaining space ──────────── */
+    .chat-thread { flex: 0 0 auto; overflow-y: visible; }
+    .fq-wrap {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .fq-wrap .fq-card { width: 100%; max-width: 712px; }
     .chat-thread::-webkit-scrollbar { width: 4px; }
     .chat-thread::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
 
