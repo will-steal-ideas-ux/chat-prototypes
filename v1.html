@@ -689,7 +689,7 @@
       // Slash command trigger — same style as Claude
       if (ta.value === '/') {
         ta.value = '';
-        openAITools();
+        openAITools(false); // focus stays in prompt
         return;
       }
       ta.style.height = 'auto';
@@ -697,12 +697,14 @@
       document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
     }
 
-    function openAITools() {
+    function openAITools(focusSearch = true) {
       const popover = document.getElementById('aitools-popover');
       const btn = document.getElementById('aitools-btn');
       popover.classList.add('open');
       btn.classList.add('active');
-      setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+      if (focusSearch) {
+        setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+      }
     }
 
     function closeAITools() {
