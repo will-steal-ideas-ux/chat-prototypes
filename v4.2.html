@@ -152,13 +152,13 @@
       display: flex; flex-direction: column;
     }
 
-    /* ─── V4.2: card absolute-centered in main area ──────── */
+    /* ─── V4.2: card pinned to bottom-center of main area ── */
     .main-area { position: relative; }
     .chat-thread { flex: 0 0 auto; overflow-y: visible; }
     .fq-wrap {
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
       width: calc(100% - 48px);
       max-width: 712px;
       padding: 0;
