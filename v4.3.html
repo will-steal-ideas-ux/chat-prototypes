@@ -516,11 +516,11 @@
     </div>
 
     <!-- Prompt box -->
-    <div class="prompt-wrap" id="prompt-wrap" style="display:none; opacity:0; transition:opacity .2s ease">
+    <div class="prompt-wrap" id="prompt-wrap">
       <div class="prompt-box">
         <div class="prompt-textarea-row">
           <textarea class="prompt-textarea" id="prompt-input" rows="1"
-            placeholder="Ask for a follow up"
+            placeholder="Ask anything to start the chat"
             oninput="onInput(this)"
             onkeydown="onPromptKey(event)"></textarea>
         </div>
@@ -641,42 +641,6 @@
     }, 900);
   }
 
-  function autoStart() {
-    const msgs = document.getElementById('chat-messages');
-    promptSent = true;
-
-    // Pre-populate user message
-    const userRow = document.createElement('div');
-    userRow.className = 'msg-row-user';
-    userRow.innerHTML = '<div class="msg-bubble-user">I want to create a campaign</div>';
-    msgs.appendChild(userRow);
-
-    // Typing indicator
-    const typingRow = document.createElement('div');
-    typingRow.className = 'msg-row-ai';
-    typingRow.id = 'typing-row';
-    typingRow.innerHTML = `
-      <div class="ai-badge">
-        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
-        GPT-4o mini
-      </div>
-      <div class="typing-indicator">
-        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-      </div>`;
-    msgs.appendChild(typingRow);
-
-    setTimeout(() => {
-      const tr = document.getElementById('typing-row');
-      if (tr) tr.remove();
-
-      const pw = document.getElementById('prompt-wrap');
-      pw.style.display = 'none';
-
-      const fw = document.getElementById('fq-wrap');
-      fw.style.display = '';
-      requestAnimationFrame(() => { fw.style.opacity = '1'; });
-    }, 900);
-  }
 
   // ── Card render ──────────────────────────────────────────────
   function render() {
@@ -862,7 +826,6 @@
   });
 
   render();
-  autoStart();
 </script>
 </body>
 </html>
