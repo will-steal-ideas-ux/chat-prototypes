@@ -205,7 +205,7 @@
     }
 
     .fq-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: flex-end; justify-content: space-between;
       padding: 16px 24px 0; gap: 12px;
     }
     .fq-title {
@@ -213,9 +213,9 @@
       font-size: 16px; font-weight: 600; color: var(--text-primary);
       flex: 1; line-height: 24px;
     }
-    .fq-changer { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .fq-changer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .fq-nav-btn {
-      width: 22px; height: 22px; border: none; background: transparent;
+      width: 24px; height: 24px; border: none; background: transparent;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       color: var(--text-primary); border-radius: 4px; transition: background var(--t);
     }
@@ -223,7 +223,15 @@
     .fq-nav-btn:disabled { opacity: .3; cursor: default; }
     .fq-nav-btn:disabled:hover { background: transparent; }
     .fq-nav-btn svg { width: 18px; height: 18px; }
-    .fq-page { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+    .fq-page { font-size: 14px; color: var(--text-primary); white-space: nowrap; line-height: 21px; }
+    .fq-close {
+      width: 24px; height: 24px; border: none; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary); border-radius: 4px; transition: background var(--t), color var(--t);
+      flex-shrink: 0;
+    }
+    .fq-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .fq-close svg { width: 18px; height: 18px; }
 
     .fq-options { display: flex; flex-direction: column; gap: 12px; padding: 16px 24px; }
 
@@ -263,7 +271,7 @@
     .fq-check-icon { opacity: 0; transition: opacity .12s; }
     .fq-option.selected .fq-check-icon { opacity: 1; }
 
-    .fq-label { font-size: 14px; color: var(--text-primary); line-height: 20px; }
+    .fq-label { font-size: 14px; color: var(--text-primary); line-height: 21px; }
 
     .fq-recommended {
       background: var(--accent); color: #fff;
@@ -483,16 +491,21 @@
     <div class="fq-wrap" id="fq-wrap" style="display:none; opacity:0; transition:opacity .2s ease">
       <div class="fq-card">
         <div class="fq-header">
-          <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
-          <div class="fq-changer">
-            <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <span class="fq-page" id="fq-page">Step 1 of 2</span>
-            <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
+          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+            <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+            <div class="fq-changer">
+              <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <span class="fq-page" id="fq-page">Step 1 of 2</span>
+              <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
           </div>
+          <button class="fq-close" onclick="fqClose()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
         </div>
         <div class="fq-options" id="fq-options"></div>
         <div class="fq-footer" id="fq-footer" style="display:none">
@@ -744,6 +757,21 @@
     const n = step + dir;
     if (n < 1 || n > 2 || (n === 2 && s1sel === null)) return;
     step = n; render();
+  }
+
+  function fqClose() {
+    const fw = document.getElementById('fq-wrap');
+    fw.style.transition = 'opacity .18s ease';
+    fw.style.opacity = '0';
+    setTimeout(() => {
+      fw.style.display = 'none';
+      const pw = document.getElementById('prompt-wrap');
+      pw.style.display = '';
+      pw.style.opacity = '0';
+      pw.style.transition = 'opacity .18s ease';
+      requestAnimationFrame(() => { pw.style.opacity = '1'; });
+      document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
+    }, 180);
   }
 
   function fqSkip() { s2sel = new Set(); fqSubmit(); }
