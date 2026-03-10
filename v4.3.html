@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — V4.3</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-primary:    #f7f7f8;
+      --bg-secondary:  #ffffff;
+      --bg-tertiary:   rgba(124,123,132,.10);
+      --border:        rgba(124,123,132,.20);
+      --border-hover:  rgba(124,123,132,.40);
+      --text-primary:  #252429;
+      --text-secondary:#464546;
+      --text-tertiary: #6f6e78;
+      --text-placeholder:#6f6e78;
+      --accent:        #693bff;
+      --gray-200:      #f2f2f3;
+      --gray-400:      #cacace;
+      --radius-sm:     8px;
+      --radius-md:     16px;
+      --radius-full:   9999px;
+      --shadow-sm:     0 1px 4px rgba(18,0,69,.08), 0 1px 2px rgba(18,0,69,.04);
+      --shadow-md:     0 4px 12px rgba(18,0,69,.08), 0 2px 6px rgba(18,0,69,.04);
+      --shadow-lg:     0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      --t:             .15s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .body-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 264px;
+      background: var(--bg-primary);
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px; text-decoration: none;
+    }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-emblem svg { width: 14px; height: 14px; color: white; }
+    .logo-name {
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+    }
+    .logo-name sup { color: var(--accent); font-size: 11px; font-weight: 500; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: transparent; border: none;
+      color: var(--text-tertiary); transition: background var(--t), color var(--t);
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 14px; color: var(--text-secondary);
+      transition: background var(--t); white-space: nowrap;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); }
+    .sidebar-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
+
+    .sidebar-divider { height: 1px; background: var(--border); margin: 4px 8px; flex-shrink: 0; }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 4px 8px 8px; }
+    .sidebar-content::-webkit-scrollbar { width: 4px; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .sidebar-section-header {
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px 8px 4px;
+    }
+    .sidebar-section-label {
+      flex: 1; font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .sidebar-section-add {
+      width: 20px; height: 20px; border: none; background: transparent;
+      color: var(--text-tertiary); cursor: pointer; font-size: 16px; font-weight: 400;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: background var(--t), color var(--t); line-height: 1;
+    }
+    .sidebar-section-add:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+    .sidebar-item {
+      display: flex; align-items: center; gap: 8px;
+      height: 34px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; transition: background var(--t);
+    }
+    .sidebar-item:hover { background: var(--bg-tertiary); }
+    .sidebar-item.active { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .sidebar-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+    }
+    .sidebar-email {
+      font-size: 13px; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Main area ───────────────────────────────────────────── */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .main-topbar {
+      display: flex; justify-content: flex-end; align-items: center;
+      padding: 10px 16px; gap: 4px; flex-shrink: 0;
+    }
+
+    /* ── Chat thread ─────────────────────────────────────────── */
+    .chat-thread { flex: 1; overflow-y: auto; }
+    .chat-thread::-webkit-scrollbar { width: 4px; }
+    .chat-thread::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .chat-messages {
+      max-width: 760px; margin: 0 auto;
+      padding: 40px 0 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .msg-row-user { display: flex; justify-content: flex-end; }
+    .msg-bubble-user {
+      max-width: 72%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 4px 16px;
+      padding: 11px 16px;
+      font-size: 15px; line-height: 24px;
+    }
+
+    .msg-row-ai { display: flex; flex-direction: column; gap: 6px; }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+    }
+    .ai-badge-icon {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ai-badge-icon svg { width: 10px; height: 10px; color: var(--text-tertiary); }
+    .msg-bubble-ai { font-size: 15px; line-height: 24px; }
+
+    .typing-indicator { display: flex; align-items: center; gap: 4px; height: 24px; }
+    .typing-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--text-tertiary);
+      animation: td .9s ease infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .15s; }
+    .typing-dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes td {
+      0%,60%,100%{transform:translateY(0);opacity:.35}
+      30%{transform:translateY(-4px);opacity:1}
+    }
+
+    /* ── Follow-up card ──────────────────────────────────────── */
+    .fq-wrap {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 0 28px;
+    }
+
+    .fq-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .fq-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; gap: 12px;
+    }
+    .fq-title {
+      font-size: 15px; font-weight: 500; color: var(--text-primary);
+      flex: 1; line-height: 22px;
+    }
+    .fq-changer { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .fq-nav-btn {
+      width: 22px; height: 22px; border: none; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); border-radius: 4px; transition: background var(--t);
+    }
+    .fq-nav-btn:hover { background: var(--bg-tertiary); }
+    .fq-nav-btn:disabled { opacity: .3; cursor: default; }
+    .fq-nav-btn:disabled:hover { background: transparent; }
+    .fq-nav-btn svg { width: 18px; height: 18px; }
+    .fq-page { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+
+    .fq-options { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; }
+
+    .fq-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); cursor: pointer;
+      transition: border-color var(--t); user-select: none;
+    }
+    .fq-option:hover { border-color: rgba(105,59,255,.4); }
+    .fq-option.selected { border-color: var(--accent); }
+
+    .fq-option-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+
+    .fq-radio {
+      width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
+      border: 1px solid var(--gray-400); background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color var(--t), background var(--t);
+    }
+    .fq-option:hover .fq-radio { border-color: var(--accent); }
+    .fq-option.selected .fq-radio { border-color: var(--accent); background: var(--accent); }
+    .fq-radio-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #fff;
+      opacity: 0; transition: opacity .12s;
+    }
+    .fq-option.selected .fq-radio-dot { opacity: 1; }
+
+    .fq-checkbox {
+      width: 16px; height: 16px; flex-shrink: 0; border-radius: 4px;
+      border: 1px solid var(--gray-400); background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color var(--t), background var(--t);
+    }
+    .fq-option:hover .fq-checkbox { border-color: var(--accent); }
+    .fq-option.selected .fq-checkbox { border-color: var(--accent); background: var(--accent); }
+    .fq-check-icon { opacity: 0; transition: opacity .12s; }
+    .fq-option.selected .fq-check-icon { opacity: 1; }
+
+    .fq-label { font-size: 14px; color: var(--text-primary); line-height: 20px; }
+
+    .fq-recommended {
+      background: var(--accent); color: #fff;
+      font-size: 11px; font-weight: 500; padding: 2px 6px;
+      border-radius: 100px; flex-shrink: 0;
+    }
+
+    .fq-kbd {
+      flex-shrink: 0; min-width: 26px; height: 26px; padding: 0 7px;
+      background: var(--gray-200); border: 1px solid var(--gray-400);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .fq-option-custom { gap: 10px; }
+    .fq-custom-pencil { width: 14px; height: 14px; flex-shrink: 0; color: var(--text-tertiary); }
+    .fq-custom-input {
+      flex: 1; border: none; outline: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary);
+      line-height: 20px; min-width: 0;
+    }
+    .fq-custom-input::placeholder { color: var(--text-placeholder); }
+
+    .fq-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 4px 16px 14px;
+    }
+    .fq-skip {
+      height: 34px; padding: 0 12px; border: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-sm);
+      transition: background var(--t), color var(--t);
+    }
+    .fq-skip:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .fq-submit {
+      height: 34px; padding: 0 14px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: opacity var(--t);
+    }
+    .fq-submit:hover { opacity: .88; }
+
+    /* ── Prompt box ──────────────────────────────────────────── */
+    .prompt-wrap {
+      max-width: 760px; margin: 0 auto; padding: 0 0 28px;
+    }
+    .prompt-box {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    .prompt-box:focus-within {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-lg);
+    }
+    .prompt-textarea-row { padding: 14px 16px 0; }
+    .prompt-textarea {
+      width: 100%; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 15px; line-height: 24px;
+      color: var(--text-primary); background: transparent;
+      max-height: 200px; overflow-y: auto;
+    }
+    .prompt-textarea::placeholder { color: var(--text-placeholder); }
+    .prompt-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px 10px;
+    }
+    .prompt-left { display: flex; align-items: center; gap: 2px; }
+    .prompt-right { display: flex; align-items: center; gap: 4px; }
+    .prompt-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--t), color var(--t);
+    }
+    .prompt-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-btn svg { width: 15px; height: 15px; }
+    .prompt-divider { width: 1px; height: 16px; background: var(--border); margin: 0 2px; }
+    .prompt-auto {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--t);
+    }
+    .prompt-auto:hover { background: var(--bg-tertiary); }
+    .prompt-auto svg { width: 13px; height: 13px; }
+    .prompt-send {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: var(--text-primary); cursor: pointer;
+      color: #fff; transition: background var(--t), opacity var(--t), transform var(--t);
+      opacity: 0; pointer-events: none; transform: scale(.88);
+    }
+    .prompt-send.visible { opacity: 1; pointer-events: auto; transform: scale(1); }
+    .prompt-send:hover { background: #1a1a2e; }
+    .prompt-send svg { width: 16px; height: 16px; }
+
+    /* ── Version switcher ────────────────────────────────────── */
+    .version-switcher {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 9999; font-family: 'Inter', sans-serif;
+    }
+    .version-trigger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-secondary);
+      border: 1px solid var(--border); border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(18,0,69,.08); cursor: pointer; user-select: none;
+    }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .version-trigger-desc { font-size: 12px; color: var(--text-tertiary); }
+    .version-trigger svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform var(--t); }
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px; min-width: 168px; display: none;
+    }
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: background var(--t);
+    }
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 28px; }
+    .version-option-desc { font-size: 13px; color: var(--text-secondary); }
+    .version-option-check { margin-left: auto; width: 14px; height: 14px; color: var(--accent); opacity: 0; }
+    .version-option.current .version-option-check { opacity: 1; }
+  </style>
+</head>
+<body>
+<div class="body-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+        </div>
+        <span class="logo-name">nexos<sup>ai</sup></span>
+      </a>
+      <button class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+        New chat
+      </div>
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Search chats
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Agents</span>
+        <button class="sidebar-section-add">+</button>
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:#693bff"></div>
+        Sprint Architect
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:#f59e0b"></div>
+        Sentiment Strategist
+      </div>
+
+      <div class="sidebar-section-header" style="margin-top:8px">
+        <span class="sidebar-section-label">Recent Chats</span>
+      </div>
+      <div class="sidebar-item active">Cybersecurity market trends for 2026</div>
+      <div class="sidebar-item">EV Market Trends Analysis</div>
+      <div class="sidebar-item">Generate an image bursting out of the pa…</div>
+      <div class="sidebar-item">Target Audience Brainstorming</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar">A</div>
+      <span class="sidebar-email">andrzej@nexos.ai</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+
+    <div class="main-topbar">
+      <button class="icon-btn" title="Expand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      </button>
+      <button class="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="chat-thread" id="chat-thread">
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+
+    <!-- Follow-up card -->
+    <div class="fq-wrap" id="fq-wrap" style="display:none; opacity:0; transition:opacity .2s ease">
+      <div class="fq-card">
+        <div class="fq-header">
+          <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+          <div class="fq-changer">
+            <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="fq-page" id="fq-page">Step 1 of 2</span>
+            <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="fq-options" id="fq-options"></div>
+        <div class="fq-footer" id="fq-footer" style="display:none">
+          <button class="fq-skip" onclick="fqSkip()">Skip</button>
+          <button class="fq-submit" onclick="fqSubmit()">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt box -->
+    <div class="prompt-wrap" id="prompt-wrap" style="display:none; opacity:0; transition:opacity .2s ease">
+      <div class="prompt-box">
+        <div class="prompt-textarea-row">
+          <textarea class="prompt-textarea" id="prompt-input" rows="1"
+            placeholder="Ask for a follow up"
+            oninput="onInput(this)"
+            onkeydown="onPromptKey(event)"></textarea>
+        </div>
+        <div class="prompt-actions">
+          <div class="prompt-left">
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Attach
+            </button>
+            <div class="prompt-divider"></div>
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 20.3 12 17l7.5 3.3ZM12 3v14"/></svg>
+              Tools
+            </button>
+          </div>
+          <div class="prompt-right">
+            <button class="prompt-auto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Auto
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <button class="prompt-send" id="send-btn" onclick="sendPrompt()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Version switcher -->
+<div class="version-switcher" id="version-switcher">
+  <div class="version-trigger" onclick="toggleVersion(event)">
+    <span class="version-trigger-label">V4.3</span>
+    <span class="version-trigger-desc">Prompt → Card</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+  </div>
+  <div class="version-dropdown">
+    <a class="version-option" href="v1.html"><span class="version-option-label">V1</span><span class="version-option-desc">AI Tools</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="v2.html"><span class="version-option-label">V2</span><span class="version-option-desc">Audio Input</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="v3.html"><span class="version-option-label">V3</span><span class="version-option-desc">Search</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="v4.html"><span class="version-option-label">V4</span><span class="version-option-desc">Follow-up</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="v4.1.html"><span class="version-option-label">V4.1</span><span class="version-option-desc">Hover Shortcuts</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="v4.2.html"><span class="version-option-label">V4.2</span><span class="version-option-desc">Card in Prompt</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option current" href="v4.3.html"><span class="version-option-label">V4.3</span><span class="version-option-desc">Prompt → Card</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+    <a class="version-option" href="canvas.html"><span class="version-option-label">V5</span><span class="version-option-desc">Canvas</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+  </div>
+</div>
+
+<script>
+  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
+  const STEP2 = ['100–1000', '1001–5000', '5000+', 'Custom'];
+  const RESPONSES = {
+    0: 'Great choice. Here\'s a tailored PPC Facebook Ads plan — covering audience targeting, creative strategy, budget allocation, and KPIs to maximise ROI.',
+    1: 'Perfect. For PPC Google Ads I\'ll build around keyword strategy, match types, ad copy best practices, bidding, and conversion tracking to drive qualified traffic.',
+    2: 'Excellent. An SEO campaign is a strong long-term investment. Your plan covers technical SEO, on-page optimisation, content strategy, link building, and milestones.',
+    3: 'No problem — I\'ll build a fully custom plan around your specific needs. Tell me more about your target audience, product, and goals.',
+  };
+
+  let step = 1, s1sel = null, s2sel = new Set(), cardDone = false, promptSent = false;
+
+  // ── Prompt ──────────────────────────────────────────────────
+  function onInput(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    document.getElementById('send-btn').classList.toggle('visible', ta.value.trim().length > 0);
+  }
+
+  function onPromptKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPrompt(); }
+  }
+
+  function sendPrompt() {
+    const inp = document.getElementById('prompt-input');
+    const text = inp.value.trim();
+    if (!text || promptSent) return;
+    promptSent = true;
+
+    const msgs = document.getElementById('chat-messages');
+
+    // User bubble
+    const userRow = document.createElement('div');
+    userRow.className = 'msg-row-user';
+    userRow.innerHTML = `<div class="msg-bubble-user">${text}</div>`;
+    msgs.appendChild(userRow);
+
+    // Typing indicator
+    const typingRow = document.createElement('div');
+    typingRow.className = 'msg-row-ai';
+    typingRow.id = 'typing-row';
+    typingRow.innerHTML = `
+      <div class="ai-badge">
+        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+        GPT-4o mini
+      </div>
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>`;
+    msgs.appendChild(typingRow);
+
+    setTimeout(() => {
+      const tr = document.getElementById('typing-row');
+      if (tr) tr.remove();
+
+      // Fade out prompt
+      const pw = document.getElementById('prompt-wrap');
+      pw.style.transition = 'opacity .18s ease';
+      pw.style.opacity = '0';
+
+      setTimeout(() => {
+        pw.style.display = 'none';
+        const fw = document.getElementById('fq-wrap');
+        fw.style.display = '';
+        requestAnimationFrame(() => { fw.style.opacity = '1'; });
+      }, 180);
+    }, 900);
+  }
+
+  function autoStart() {
+    const msgs = document.getElementById('chat-messages');
+    promptSent = true;
+
+    // Pre-populate user message
+    const userRow = document.createElement('div');
+    userRow.className = 'msg-row-user';
+    userRow.innerHTML = '<div class="msg-bubble-user">I want to create a campaign</div>';
+    msgs.appendChild(userRow);
+
+    // Typing indicator
+    const typingRow = document.createElement('div');
+    typingRow.className = 'msg-row-ai';
+    typingRow.id = 'typing-row';
+    typingRow.innerHTML = `
+      <div class="ai-badge">
+        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+        GPT-4o mini
+      </div>
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>`;
+    msgs.appendChild(typingRow);
+
+    setTimeout(() => {
+      const tr = document.getElementById('typing-row');
+      if (tr) tr.remove();
+
+      const pw = document.getElementById('prompt-wrap');
+      pw.style.display = 'none';
+
+      const fw = document.getElementById('fq-wrap');
+      fw.style.display = '';
+      requestAnimationFrame(() => { fw.style.opacity = '1'; });
+    }, 900);
+  }
+
+  // ── Card render ──────────────────────────────────────────────
+  function render() {
+    const opts = document.getElementById('fq-options');
+    document.getElementById('fq-title').textContent = step === 1
+      ? 'What kind of campaign do you need?' : 'What is your budget?';
+    document.getElementById('fq-page').textContent = 'Step ' + step + ' of 2';
+    document.getElementById('fq-prev').disabled = step === 1;
+    document.getElementById('fq-next').disabled = step === 2 || s1sel === null;
+
+    if (step === 1) {
+      opts.innerHTML = STEP1.map((label, i) => {
+        const isCustom = i === STEP1.length - 1;
+        const sel = s1sel === i;
+        if (isCustom) return `
+          <div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s1pick(${i})">
+            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <input class="fq-custom-input" id="s1-custom" type="text" placeholder="Custom"
+              onclick="event.stopPropagation();s1pick(${i})"
+              onkeydown="if(event.key==='Enter')fqNav(1)" />
+            <div class="fq-kbd">4</div>
+          </div>`;
+        return `
+          <div class="fq-option${sel ? ' selected' : ''}" onclick="s1pick(${i})">
+            <div class="fq-option-left">
+              <div class="fq-radio"><div class="fq-radio-dot"></div></div>
+              <div class="fq-label">${label}</div>
+            </div>
+            <div class="fq-kbd">${i + 1}</div>
+          </div>`;
+      }).join('');
+      document.getElementById('fq-footer').style.display = 'none';
+
+    } else {
+      opts.innerHTML = STEP2.map((label, i) => {
+        const isCustom = i === STEP2.length - 1;
+        const sel = s2sel.has(i);
+        if (isCustom) return `
+          <div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s2toggle(${i})">
+            <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <input class="fq-custom-input" id="s2-custom" type="text" placeholder="Custom"
+              onclick="event.stopPropagation();s2toggle(${i})" />
+            <div class="fq-kbd">4</div>
+          </div>`;
+        return `
+          <div class="fq-option${sel ? ' selected' : ''}" onclick="s2toggle(${i})">
+            <div class="fq-option-left">
+              <div class="fq-checkbox">
+                <svg class="fq-check-icon" width="9" height="7" viewBox="0 0 9 7" fill="none">
+                  <path d="M1 3.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="fq-label">${label}</div>
+              ${i === 0 ? '<span class="fq-recommended">Recommended</span>' : ''}
+            </div>
+            <div class="fq-kbd">${i + 1}</div>
+          </div>`;
+      }).join('');
+      document.getElementById('fq-footer').style.display = 'flex';
+    }
+  }
+
+  function s1pick(idx) {
+    if (cardDone) return;
+    s1sel = idx; render();
+    if (idx < STEP1.length - 1) setTimeout(() => fqNav(1), 360);
+    else { const el = document.getElementById('s1-custom'); if (el) el.focus(); }
+  }
+
+  function s2toggle(idx) {
+    if (cardDone) return;
+    if (s2sel.has(idx)) s2sel.delete(idx); else s2sel.add(idx);
+    render();
+    if (idx === STEP2.length - 1) { const el = document.getElementById('s2-custom'); if (el) el.focus(); }
+  }
+
+  function fqNav(dir) {
+    const n = step + dir;
+    if (n < 1 || n > 2 || (n === 2 && s1sel === null)) return;
+    step = n; render();
+  }
+
+  function fqSkip() { s2sel = new Set(); fqSubmit(); }
+
+  function fqSubmit() {
+    if (cardDone) return;
+    cardDone = true;
+
+    let label = STEP1[s1sel] || '';
+    if (s1sel === STEP1.length - 1) {
+      const el = document.getElementById('s1-custom');
+      if (el && el.value.trim()) label = el.value.trim();
+    }
+    if (s2sel.size > 0) {
+      const budgets = [...s2sel].map(i => {
+        if (i === STEP2.length - 1) { const el = document.getElementById('s2-custom'); return (el && el.value.trim()) ? el.value.trim() : 'Custom'; }
+        return STEP2[i];
+      }).join(', ');
+      label += ' · Budget: ' + budgets;
+    }
+
+    const responseText = RESPONSES[s1sel] || RESPONSES[3];
+    const fw = document.getElementById('fq-wrap');
+    fw.style.transition = 'opacity .18s ease';
+    fw.style.opacity = '0';
+
+    setTimeout(() => {
+      fw.style.display = 'none';
+      const msgs = document.getElementById('chat-messages');
+
+      const userRow = document.createElement('div');
+      userRow.className = 'msg-row-user';
+      userRow.innerHTML = `<div class="msg-bubble-user">${label}</div>`;
+      msgs.appendChild(userRow);
+
+      const aiRow = document.createElement('div');
+      aiRow.className = 'msg-row-ai';
+      aiRow.innerHTML = `
+        <div class="ai-badge">
+          <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+          GPT-4o mini
+        </div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>`;
+      msgs.appendChild(aiRow);
+
+      // Show prompt
+      const pw = document.getElementById('prompt-wrap');
+      pw.style.display = '';
+      pw.style.opacity = '0';
+      pw.style.transition = 'opacity .18s ease';
+      requestAnimationFrame(() => { pw.style.opacity = '1'; });
+      document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
+      document.getElementById('send-btn').classList.remove('visible');
+
+      setTimeout(() => {
+        aiRow.innerHTML = `
+          <div class="ai-badge">
+            <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+            GPT-4o mini
+          </div>
+          <div class="msg-bubble-ai">${responseText}</div>`;
+        document.getElementById('chat-thread').scrollTop = 99999;
+      }, 1200);
+    }, 180);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (cardDone) return;
+    const fw = document.getElementById('fq-wrap');
+    if (!fw || fw.style.display === 'none') return;
+    const inInput = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+    const num = parseInt(e.key);
+    if (!isNaN(num) && num >= 1 && !inInput) {
+      if (step === 1 && num <= STEP1.length) { e.preventDefault(); s1pick(num - 1); }
+      else if (step === 2 && num <= STEP2.length) { e.preventDefault(); s2toggle(num - 1); }
+    }
+    if (e.key === 'Enter' && step === 2 && !inInput) { e.preventDefault(); fqSubmit(); }
+  });
+
+  function toggleVersion(e) {
+    e.stopPropagation();
+    document.getElementById('version-switcher').classList.toggle('open');
+  }
+  document.addEventListener('click', () => {
+    document.getElementById('version-switcher').classList.remove('open');
+  });
+
+  render();
+  autoStart();
+</script>
+</body>
+</html>
