@@ -151,6 +151,20 @@
       flex: 1; overflow-y: auto; padding: 40px 0 0;
       display: flex; flex-direction: column;
     }
+
+    /* Empty state */
+    .chat-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; padding-bottom: 80px;
+    }
+    .chat-empty-title {
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 20px;
+      color: var(--text-primary);
+    }
+    .chat-empty-sub {
+      font-size: 14px; color: var(--text-tertiary);
+    }
     .chat-thread::-webkit-scrollbar { width: 4px; }
     .chat-thread::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
 
@@ -226,8 +240,7 @@
 
     /* ─── Interactive card ────────────────────────────────── */
     .fq-wrap {
-      width: 100%; max-width: 760px; margin: 0 auto;
-      padding: 0 24px 32px;
+      width: 100%;
       animation: fq-in .2s ease;
     }
     @keyframes fq-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -459,12 +472,13 @@
     .version-option-check { margin-left: auto; width: 14px; height: 14px; color: var(--accent); opacity: 0; }
     .version-option.current .version-option-check { opacity: 1; }
 
-    /* Working state — disable everything except Stop */
+    /* Working state — disable everything except Send/Stop btn */
     .prompt-box.working .prompt-textarea { opacity: .4; pointer-events: none; }
     .prompt-box.working .prompt-btn,
     .prompt-box.working .prompt-btn-divider,
     .prompt-box.working .prompt-auto-btn { opacity: .4; pointer-events: none; }
-    .prompt-icon-btn[title="Stop"] { color: var(--text-primary); }
+    .prompt-box.fq-open .prompt-textarea { opacity: .4; pointer-events: none; }
+    #send-btn #icon-stop { color: var(--text-primary); }
   </style>
 </head>
 <body>
@@ -531,47 +545,11 @@
   <!-- Main -->
   <main class="main-area">
     <div class="chat-thread" id="chat-thread">
-      <div class="chat-messages" id="chat-messages">
-
-        <!-- User message -->
-        <div class="msg-row user">
-          <div class="msg-bubble user">I want to create a campaign</div>
-        </div>
-
-        <!-- AI message -->
-        <div class="msg-row ai">
-          <div class="ai-badge">
-            <div class="ai-badge-icon">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
-            </div>
-            GPT-4o mini · Search Preview
-          </div>
-          <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>
-        </div>
-
+      <div class="chat-empty" id="chat-empty">
+        <div class="chat-empty-title">What can I help with?</div>
+        <div class="chat-empty-sub">Start a conversation to get your marketing plan.</div>
       </div>
-
-      <!-- Interactive card (inline, below messages) -->
-      <div class="fq-wrap" id="fq-wrap">
-        <div class="fq-card" id="fq-card">
-          <div class="fq-header">
-            <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
-            <div class="fq-changer">
-              <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
-              </button>
-              <span class="fq-page" id="fq-page">Step 1 of 2</span>
-              <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
-                <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="fq-options" id="fq-options"></div>
-          <div class="fq-footer" id="fq-footer" style="display:none">
-            <button class="fq-skip" onclick="fqSkip()">Skip</button>
-            <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
-          </div>
-        </div>
+      <div class="chat-messages" id="chat-messages">
       </div>
     </div>
 
@@ -580,8 +558,9 @@
       <div class="prompt-box">
         <div class="prompt-textarea-row">
           <textarea class="prompt-textarea" id="prompt-input" rows="1"
-            placeholder="Ask for a follow up"
-            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            placeholder="Message Nexos..."
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+            onkeydown="handlePromptKey(event)"></textarea>
         </div>
         <div class="prompt-actions">
           <div class="prompt-actions-left">
@@ -601,8 +580,11 @@
               Auto
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
             </button>
-            <button class="prompt-icon-btn" title="Stop" id="stop-btn" onclick="fqStop()">
-              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+            <button class="prompt-icon-btn" id="send-btn" onclick="handleSendBtn()" title="Send">
+              <!-- Send icon (default) -->
+              <svg id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9l20-7z"/></svg>
+              <!-- Stop icon (shown when working) -->
+              <svg id="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
             </button>
           </div>
         </div>
@@ -613,8 +595,8 @@
 
 <script>
   // ─── Data ─────────────────────────────────────────────────
-  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Custom'];
-  const STEP2 = ['100–1000', '1001–5000', '5000+', 'Custom'];
+  const STEP1 = ['PPC Facebook Ads', 'PPC Google Ads', 'SEO Campaign', 'Something else'];
+  const STEP2 = ['100–1000', '1001–5000', '5000+', 'Something else'];
 
   const RESPONSES = {
     0: 'Great choice. Here\'s a tailored PPC Facebook Ads marketing plan for your business — covering audience targeting, creative strategy, budget allocation, and key performance metrics to maximise ROI.',
@@ -625,16 +607,178 @@
 
   // State
   let step = 1;
-  let s1sel = null;   // index or null
+  let s1sel = null;
   let s2sel = new Set();
-  let done = false;
+  let fqDone = false;
+  let fqOpen = false;
   let aiTimer = null;
   let wrapTimer = null;
   let aiRow = null;
+  let isWorking = false;
+  let flowStarted = false;
+
+  // ─── Prompt send ───────────────────────────────────────────
+  function handlePromptKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (isWorking) return;
+      sendPrompt();
+    }
+  }
+
+  function handleSendBtn() {
+    if (isWorking || fqOpen) {
+      stopAll();
+    } else {
+      sendPrompt();
+    }
+  }
+
+  function setFqOpen(val) {
+    fqOpen = val;
+    const promptBox = document.querySelector('.prompt-box');
+    const iconSend = document.getElementById('icon-send');
+    const iconStop = document.getElementById('icon-stop');
+    if (val) {
+      promptBox.classList.add('fq-open');
+      iconSend.style.display = 'none';
+      iconStop.style.display = '';
+    } else {
+      promptBox.classList.remove('fq-open');
+      if (!isWorking) {
+        iconSend.style.display = '';
+        iconStop.style.display = 'none';
+      }
+    }
+  }
+
+  function setWorking(val) {
+    isWorking = val;
+    const promptBox = document.querySelector('.prompt-box');
+    const iconSend = document.getElementById('icon-send');
+    const iconStop = document.getElementById('icon-stop');
+    if (val) {
+      promptBox.classList.add('working');
+      iconSend.style.display = 'none';
+      iconStop.style.display = '';
+    } else {
+      promptBox.classList.remove('working');
+      iconSend.style.display = '';
+      iconStop.style.display = 'none';
+    }
+  }
+
+  function sendPrompt() {
+    const input = document.getElementById('prompt-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Hide empty state
+    const emptyEl = document.getElementById('chat-empty');
+    if (emptyEl) emptyEl.remove();
+
+    const msgs = document.getElementById('chat-messages');
+
+    // User bubble
+    const userRow = document.createElement('div');
+    userRow.className = 'msg-row user';
+    userRow.innerHTML = `<div class="msg-bubble user">${escHtml(text)}</div>`;
+    msgs.appendChild(userRow);
+
+    setWorking(true);
+
+    // AI typing indicator
+    aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai';
+    aiRow.innerHTML = `
+      <div class="ai-badge">
+        <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+        GPT-4o mini · Search Preview
+      </div>
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>`;
+    msgs.appendChild(aiRow);
+    scrollBottom();
+
+    if (!flowStarted) {
+      // First prompt — show the follow-up flow
+      aiTimer = setTimeout(() => {
+        aiRow.innerHTML = `
+          <div class="ai-badge">
+            <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+            GPT-4o mini · Search Preview
+          </div>
+          <div class="msg-bubble ai">I'd love to make you a good plan but I need to follow up before, to get the best results possible</div>`;
+        setWorking(false);
+        flowStarted = true;
+        document.getElementById('prompt-input').placeholder = 'Ask a follow up';
+        showFqCard();
+        requestAnimationFrame(() => scrollBottom());
+      }, 900);
+    } else {
+      // Subsequent prompts — generic echo
+      aiTimer = setTimeout(() => {
+        aiRow.innerHTML = `
+          <div class="ai-badge">
+            <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+            GPT-4o mini · Search Preview
+          </div>
+          <div class="msg-bubble ai">Got it! Let me work on that for you.</div>`;
+        setWorking(false);
+        requestAnimationFrame(() => scrollBottom());
+      }, 900);
+    }
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ─── Show FQ card ──────────────────────────────────────────
+  function showFqCard() {
+    // Reset state
+    step = 1; s1sel = null; s2sel = new Set(); fqDone = false;
+
+    const thread = document.getElementById('chat-thread');
+    const wrap = document.createElement('div');
+    wrap.className = 'fq-wrap';
+    wrap.id = 'fq-wrap';
+    wrap.innerHTML = `
+      <div class="fq-card" id="fq-card">
+        <div class="fq-header">
+          <p class="fq-title" id="fq-title">What kind of campaign do you need?</p>
+          <div class="fq-changer">
+            <button class="fq-nav-btn" id="fq-prev" onclick="fqNav(-1)" aria-label="Previous" disabled>
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 12 16 20 24"/></svg>
+            </button>
+            <span class="fq-page" id="fq-page">Step 1 of 2</span>
+            <button class="fq-nav-btn" id="fq-next" onclick="fqNav(1)" aria-label="Next" disabled>
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 20 16 12 24"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="fq-options" id="fq-options"></div>
+        <div class="fq-footer" id="fq-footer" style="display:none">
+          <button class="fq-skip" onclick="fqSkip()">Skip</button>
+          <button class="fq-submit" id="fq-submit" onclick="fqSubmit()">Submit</button>
+        </div>
+      </div>`;
+
+    // Append inside chat-messages so it's in the same scroll flow
+    const msgs = document.getElementById('chat-messages');
+    msgs.appendChild(wrap);
+
+    render();
+    setFqOpen(true);
+  }
 
   // ─── Render ────────────────────────────────────────────────
   function render() {
     const opts = document.getElementById('fq-options');
+    if (!opts) return;
     const footer = document.getElementById('fq-footer');
     const title = document.getElementById('fq-title');
     const page = document.getElementById('fq-page');
@@ -653,9 +797,10 @@
         if (isCustom) {
           return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s1pick(${i})" id="fq-opt-${i}">
             <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <input class="fq-custom-input" id="s1-input" type="text" placeholder="Custom"
+            <input class="fq-custom-input" id="s1-input" type="text" placeholder="Something else"
               onclick="event.stopPropagation(); s1pick(${i})"
-              onkeydown="if(event.key==='Enter'){fqNav(1)}" />
+              onkeydown="if(event.key==='Enter'){fqNav(1)}"
+              oninput="document.getElementById('fq-submit').style.display=this.value.trim()?'':'none'" />
             <div class="fq-kbd">4</div>
           </div>`;
         }
@@ -667,7 +812,8 @@
           <div class="fq-kbd">${i + 1}</div>
         </div>`;
       }).join('');
-      footer.style.display = 'none';
+      footer.style.display = 'flex';
+      document.getElementById('fq-submit').style.display = 'none';
 
     } else {
       title.textContent = 'What is your budget?';
@@ -677,7 +823,7 @@
         if (isCustom) {
           return `<div class="fq-option fq-option-custom${sel ? ' selected' : ''}" onclick="s2toggle(${i})" id="fq-opt-${i}">
             <svg class="fq-custom-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <input class="fq-custom-input" id="s2-input" type="text" placeholder="Custom"
+            <input class="fq-custom-input" id="s2-input" type="text" placeholder="Something else"
               onclick="event.stopPropagation(); s2toggle(${i})" />
             <div class="fq-kbd">4</div>
           </div>`;
@@ -697,12 +843,13 @@
         </div>`;
       }).join('');
       footer.style.display = 'flex';
+      document.getElementById('fq-submit').style.display = '';
     }
   }
 
   // ─── Interactions ──────────────────────────────────────────
   function s1pick(idx) {
-    if (done) return;
+    if (fqDone) return;
     s1sel = idx;
     render();
     const isCustom = idx === STEP1.length - 1;
@@ -715,7 +862,7 @@
   }
 
   function s2toggle(idx) {
-    if (done) return;
+    if (fqDone) return;
     if (s2sel.has(idx)) s2sel.delete(idx);
     else s2sel.add(idx);
     render();
@@ -733,14 +880,16 @@
     render();
   }
 
-  function fqSkip() { s2sel = new Set(); fqSubmit(); }
+  function fqSkip() {
+    if (step === 1) { s1sel = null; step = 2; render(); return; }
+    s2sel = new Set(); fqSubmit();
+  }
 
-  // ─── Submit ────────────────────────────────────────────────
+  // ─── FQ Submit ─────────────────────────────────────────────
   function fqSubmit() {
-    if (done) return;
-    done = true;
+    if (fqDone) return;
+    fqDone = true;
 
-    // Build label
     let label = STEP1[s1sel] || '';
     if (s1sel === STEP1.length - 1) {
       const inp = document.getElementById('s1-input');
@@ -750,7 +899,7 @@
       const budgets = [...s2sel].map(i => {
         if (i === STEP2.length - 1) {
           const inp = document.getElementById('s2-input');
-          return (inp && inp.value.trim()) ? inp.value.trim() : 'Custom';
+          return (inp && inp.value.trim()) ? inp.value.trim() : 'Something else';
         }
         return STEP2[i];
       }).join(', ');
@@ -759,25 +908,24 @@
 
     const responseText = RESPONSES[s1sel] || RESPONSES[3];
 
-    // Disable prompt while working
-    const promptBox = document.querySelector('.prompt-box');
-    promptBox.classList.add('working');
+    setFqOpen(false);
+    setWorking(true);
 
-    // Remove card entirely
+    // Remove card
     const wrap = document.getElementById('fq-wrap');
-    wrap.style.transition = 'opacity .15s';
-    wrap.style.opacity = '0';
-    wrapTimer = setTimeout(() => { wrap.remove(); wrapTimer = null; }, 150);
+    if (wrap) {
+      wrap.style.transition = 'opacity .15s';
+      wrap.style.opacity = '0';
+      wrapTimer = setTimeout(() => { wrap.remove(); wrapTimer = null; }, 150);
+    }
 
-    // Append user message
     const msgs = document.getElementById('chat-messages');
 
     const userRow = document.createElement('div');
     userRow.className = 'msg-row user';
-    userRow.innerHTML = `<div class="msg-bubble user">${label}</div>`;
+    userRow.innerHTML = `<div class="msg-bubble user">${escHtml(label)}</div>`;
     msgs.appendChild(userRow);
 
-    // Typing indicator
     aiRow = document.createElement('div');
     aiRow.className = 'msg-row ai';
     aiRow.innerHTML = `
@@ -789,11 +937,8 @@
         <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
       </div>`;
     msgs.appendChild(aiRow);
+    scrollBottom();
 
-    const thread = document.getElementById('chat-thread');
-    thread.scrollTop = thread.scrollHeight;
-
-    // Show response after delay
     aiTimer = setTimeout(() => {
       aiRow.innerHTML = `
         <div class="ai-badge">
@@ -816,26 +961,22 @@
           <div class="skeleton-line" style="width:80%"></div>
         </div>`;
 
-      thread.scrollTop = thread.scrollHeight;
-
-      // Re-enable prompt
-      promptBox.classList.remove('working');
-      document.getElementById('prompt-input').placeholder = 'As a follow up';
+      setWorking(false);
+      document.getElementById('prompt-input').placeholder = 'Ask a follow up';
+      scrollBottom();
     }, 1400);
   }
 
-  function fqStop() {
+  function stopAll() {
     if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
     if (wrapTimer) { clearTimeout(wrapTimer); wrapTimer = null; }
     if (aiRow) { aiRow.remove(); aiRow = null; }
-    done = true;
     const wrap = document.getElementById('fq-wrap');
     if (wrap) { wrap.style.transition = 'none'; wrap.remove(); }
-    const promptBox = document.querySelector('.prompt-box');
-    promptBox.classList.remove('working');
-    document.getElementById('prompt-input').placeholder = 'Ask for a follow up';
+    setFqOpen(false);
+    setWorking(false);
+    fqDone = true;
 
-    // Add "stopped" AI message
     const msgs = document.getElementById('chat-messages');
     const row = document.createElement('div');
     row.className = 'msg-row ai';
@@ -844,9 +985,14 @@
         <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
         GPT-4o mini · Search Preview
       </div>
-      <div class="msg-bubble ai">The interactive questionnaire was stopped. What kind of campaign are you looking to create? Feel free to describe it in your own words.</div>`;
+      <div class="msg-bubble ai">Stopped. Feel free to describe what kind of campaign you need.</div>`;
     msgs.appendChild(row);
-    document.getElementById('chat-thread').scrollTop = 99999;
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    const thread = document.getElementById('chat-thread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
   }
 
   function toggleReasoning(btn) {
@@ -856,11 +1002,12 @@
     btn.setAttribute('aria-expanded', body.classList.contains('open'));
   }
 
-  // ─── Keyboard shortcuts ────────────────────────────────────
+  // ─── Keyboard shortcuts (fq card only) ────────────────────
   document.addEventListener('keydown', e => {
-    if (done) return;
+    if (fqDone || !flowStarted) return;
     const active = document.activeElement;
     const inInput = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA';
+    if (inInput && active.id === 'prompt-input') return;
 
     const num = parseInt(e.key);
     if (!isNaN(num) && num >= 1 && !inInput) {
@@ -882,9 +1029,6 @@
   document.addEventListener('click', () => {
     document.getElementById('version-switcher').classList.remove('open');
   });
-
-  // ─── Init ──────────────────────────────────────────────────
-  render();
 </script>
   <div class="version-switcher" id="version-switcher">
     <div class="version-trigger" onclick="toggleVersionDropdown(event)">
