@@ -116,24 +116,21 @@
       { id: "gc", label: "Google Calendar", initial: "G", color: "#4285F4", unlinked: true },
     ];
 
-    function Toggle({ on, onChange }) {
+    function Toggle({ on }) {
       return (
-        <button
-          onClick={onChange}
-          style={{
-            width: 36, height: 20, borderRadius: 10,
-            background: on ? "#6c47ff" : "hsl(240, 6%, 90%)",
-            border: "none", cursor: "pointer", flexShrink: 0,
-            position: "relative", transition: "background 0.2s", padding: 0,
-          }}
-        >
+        <div style={{
+          width: 36, height: 20, borderRadius: 10,
+          background: on ? "#6c47ff" : "hsl(240, 6%, 90%)",
+          flexShrink: 0, position: "relative",
+          transition: "background 0.2s", pointerEvents: "none",
+        }}>
           <div style={{
             width: 16, height: 16, borderRadius: "50%", background: "#fff",
             position: "absolute", top: 2, left: on ? 18 : 2,
             transition: "left 0.18s cubic-bezier(.4,0,.2,1)",
             boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
           }} />
-        </button>
+        </div>
       );
     }
 
@@ -262,7 +259,7 @@
                             <div style={{ fontSize: 12.5, fontWeight: 500, color: "#252429", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.label}</div>
                             <div style={{ fontSize: 11, color: "#6f6e78" }}>{c.desc}</div>
                           </div>
-                          <Toggle on={!!caps[c.id]} onChange={e => { e.stopPropagation(); setCaps(p => ({ ...p, [c.id]: !p[c.id] })); }} />
+                          <Toggle on={!!caps[c.id]} />
                         </div>
                       ))}
                     </div>
@@ -291,7 +288,7 @@
                           </div>
                           {i.unlinked
                             ? <span style={{ fontSize: 11.5, color: "#6c47ff", fontWeight: 600, whiteSpace: "nowrap" }}>Connect</span>
-                            : <Toggle on={!!ints[i.id]} onChange={e => { e.stopPropagation(); setInts(p => ({ ...p, [i.id]: !p[i.id] })); }} />
+                            : <Toggle on={!!ints[i.id]} />
                           }
                         </div>
                       ))}
