@@ -186,6 +186,7 @@
       const [isTyping, setIsTyping] = useState(false);
       const bottomRef = useRef(null);
       const textareaRef = useRef(null);
+      const composerRef = useRef(null);
 
       const activeCount = Object.values(caps).filter(Boolean).length + Object.values(ints).filter(Boolean).length;
       const chatStarted = messages.length > 0;
@@ -200,6 +201,23 @@
       useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       }, [messages, isTyping]);
+
+      useEffect(() => {
+        function handleClick(e) {
+          if (composerRef.current && !composerRef.current.contains(e.target)) {
+            setShowTools(false);
+          }
+        }
+        function handleKeyDown(e) {
+          if (e.key === "Escape") setShowTools(false);
+        }
+        document.addEventListener("mousedown", handleClick);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+          document.removeEventListener("mousedown", handleClick);
+          document.removeEventListener("keydown", handleKeyDown);
+        };
+      }, []);
 
       function submit() {
         const val = text.trim();
@@ -327,7 +345,7 @@
 
           {/* Composer */}
           <div style={{ padding: "0 24px 24px", flexShrink: 0 }}>
-            <div style={{ maxWidth: 660, margin: "0 auto" }}>
+            <div ref={composerRef} style={{ maxWidth: 660, margin: "0 auto" }}>
               <div style={{
                 background: "#fff",
                 borderRadius: 18,
