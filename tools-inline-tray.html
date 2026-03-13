@@ -223,6 +223,7 @@
         const val = text.trim();
         if (!val) return;
         setText("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
         setShowTools(false);
         setMessages(m => [...m, { role: "user", text: val }]);
         setIsTyping(true);
@@ -437,11 +438,11 @@
                 <textarea
                   ref={textareaRef}
                   value={text}
-                  onChange={e => setText(e.target.value)}
+                  onChange={e => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything..."
                   style={{
-                    maxHeight: 220, overflowY: "auto", resize: "none",
+                    overflowY: "hidden", resize: "none",
                     border: "none", outline: "none",
                     padding: "14px 16px 10px",
                     fontSize: 14, color: "#252429", background: "transparent",
