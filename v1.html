@@ -880,6 +880,13 @@
       document.getElementById('version-switcher').classList.remove('open');
     });
 
+    document.getElementById('aitools-columns').addEventListener('click', function(e) {
+      const row = e.target.closest('.aitools-item');
+      if (!row) return;
+      const cb = row.querySelector('input[type=checkbox]');
+      if (cb && !e.target.closest('input')) cb.checked = !cb.checked;
+    });
+
     function toggleVersionDropdown(e) {
       e.stopPropagation();
       document.getElementById('version-switcher').classList.toggle('open');
