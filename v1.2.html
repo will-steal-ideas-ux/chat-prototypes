@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus.ai — V1.2 Chat View</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-primary:    #f7f7f8;
+      --bg-secondary:  #ffffff;
+      --bg-tertiary:   rgba(124,123,132,.10);
+      --border-secondary: rgba(124,123,132,.25);
+      --text-primary:   #252429;
+      --text-secondary: #464546;
+      --text-tertiary:  #6f6e78;
+      --text-placeholder: #6f6e78;
+      --brand-purple:  #6c47ff;
+      --brand-purple-light: #ede9ff;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-full: 9999px;
+      --shadow-lg: 0 8px 15px rgba(18,0,69,.06), 0 4px 7px rgba(18,0,69,.03);
+      --transition: .18s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Body layout ─────────────────────────────────────── */
+    .body-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ─── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      width: 264px; background: var(--bg-primary);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; overflow: hidden;
+      transition: width var(--transition);
+      border-right: 1px solid var(--border-secondary);
+    }
+    .sidebar.collapsed { width: 52px; }
+    .sidebar-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
+    }
+    .sidebar.collapsed .sidebar-header { padding: 14px 0 10px; justify-content: center; }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; flex: 1; min-width: 0; overflow: hidden;
+    }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-emblem svg { color: white; }
+    .sidebar-logo-name {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+      white-space: nowrap;
+      transition: opacity var(--transition), max-width var(--transition);
+      max-width: 160px; overflow: hidden;
+    }
+    .sidebar-logo-name .ai-suffix { color: var(--brand-purple); font-size: 11px; vertical-align: super; font-weight: 500; }
+    .sidebar.collapsed .sidebar-logo-name { max-width: 0; opacity: 0; }
+    .sidebar.collapsed .collapse-btn { display: none; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: transparent; border: none;
+      color: var(--text-tertiary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .sidebar-quick { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-quick-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-quick-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-quick-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-quick-item:hover svg { color: var(--text-secondary); }
+    .sidebar-quick-item span { overflow: hidden; transition: opacity var(--transition), max-width var(--transition); max-width: 200px; }
+    .sidebar.collapsed .sidebar-quick { display: none; }
+    .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-nav-item:hover svg { color: var(--text-secondary); }
+    .sidebar-nav-item .nav-label { transition: opacity var(--transition), max-width var(--transition); max-width: 200px; overflow: hidden; }
+    .sidebar.collapsed .sidebar-nav { display: none; }
+    .sidebar-divider { height: 1px; background: var(--border-secondary); margin: 4px 8px; flex-shrink: 0; }
+    .sidebar.collapsed .sidebar-divider { display: none; }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+    .sidebar-content::-webkit-scrollbar { width: 4px; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+    .sidebar.collapsed .sidebar-content { display: none; }
+    .sidebar-section { margin-bottom: 4px; }
+    .sidebar-section-header {
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px 8px 4px; cursor: pointer;
+    }
+    .sidebar-section-chevron { color: var(--text-tertiary); display: flex; align-items: center; }
+    .sidebar-section-chevron svg { width: 14px; height: 14px; }
+    .sidebar-section-label {
+      flex: 1; font-size: 11px; font-weight: 600;
+      color: var(--text-tertiary); letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .sidebar-section-add {
+      width: 20px; height: 20px; border: none; background: transparent;
+      color: var(--text-tertiary); cursor: pointer; font-size: 18px; font-weight: 300;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: background var(--transition), color var(--transition);
+      line-height: 1;
+    }
+    .sidebar-section-add:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px;
+      font-size: 14px; font-weight: 400; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: background var(--transition);
+    }
+    .sidebar-link:hover { background: var(--bg-tertiary); }
+    .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
+    .sidebar-link-icon { font-size: 16px; flex-shrink: 0; }
+    .sidebar-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0;
+      border-top: 1px solid var(--border-secondary);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--brand-purple); cursor: pointer;
+    }
+    .sidebar-user-email {
+      font-size: 13px; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: opacity var(--transition), max-width var(--transition); max-width: 200px;
+    }
+    .sidebar.collapsed .sidebar-footer { padding: 12px 0; justify-content: center; }
+    .sidebar.collapsed .sidebar-user-email { max-width: 0; opacity: 0; }
+
+    /* ─── Main area ───────────────────────────────────────── */
+    .main-area {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; background: var(--bg-secondary);
+    }
+
+    /* ─── Welcome area ────────────────────────────────────── */
+    .welcome-area {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 32px;
+      transition: opacity .15s ease;
+    }
+    .welcome-area.hidden { display: none; }
+    .welcome-heading {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 32px;
+      color: var(--text-placeholder); letter-spacing: -0.25px; text-align: center;
+    }
+
+    /* ─── Prompt input ────────────────────────────────────── */
+    .prompt-wrap { width: 100%; max-width: 760px; padding: 0 0 32px; }
+    .prompt-box {
+      position: relative;
+      background: rgba(255,255,255,.85);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+      backdrop-filter: blur(8px);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .prompt-box:focus-within {
+      border-color: rgba(124,123,132,.45);
+      box-shadow: 0 8px 24px rgba(18,0,69,.09), 0 4px 10px rgba(18,0,69,.05);
+    }
+    .prompt-textarea {
+      width: 100%; min-height: 28px; max-height: 200px;
+      background: transparent; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400;
+      color: var(--text-primary); line-height: 1.5; padding: 4px 4px 0;
+      overflow-y: auto;
+    }
+    .prompt-textarea::placeholder { color: var(--text-placeholder); }
+    .prompt-actions {
+      display: flex; align-items: center;
+      height: 40px;
+    }
+    .prompt-left { display: flex; align-items: center; gap: 4px; }
+    .prompt-right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 10px;
+      border-radius: var(--radius-sm); border: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+      color: var(--text-primary); cursor: pointer;
+      transition: background var(--transition);
+    }
+    .action-btn:hover { background: var(--bg-primary); }
+    .action-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .model-selector {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 8px;
+      border-radius: var(--radius-sm); background: transparent; border: none;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer;
+      transition: background var(--transition);
+    }
+    .model-selector:hover { background: var(--bg-primary); }
+    .model-selector .model-logo {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .model-selector svg { width: 14px; height: 14px; color: var(--text-tertiary); }
+    .mic-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text-tertiary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .mic-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
+    .mic-btn svg { width: 20px; height: 20px; }
+    .send-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--text-primary); border: none; cursor: pointer; color: white;
+      transition: background var(--transition), opacity var(--transition), transform var(--transition);
+      opacity: 0; pointer-events: none; transform: scale(0.85);
+    }
+    .send-btn.visible { opacity: 1; pointer-events: auto; transform: scale(1); }
+    .send-btn:hover { background: #1a1a2e; }
+    .send-btn svg { width: 18px; height: 18px; }
+
+    /* ─── Tools popover ────────────────────────────────── */
+    .action-btn.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    /* ─── Tools indicator pill ──────────────────────────── */
+    .tools-indicator {
+      display: none;
+      align-items: center;
+      border: 1px solid #8c75ff;
+      border-radius: 16px;
+      padding: 3px 8px 3px 3px;
+      margin-left: 2px;
+      pointer-events: none;
+    }
+    .tools-indicator.visible { display: inline-flex; }
+    .tools-ind-badges { display: flex; align-items: center; }
+    .tools-ind-badge {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: white;
+      border: 0.5px solid rgba(124,123,132,0.25);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .tools-ind-badge + .tools-ind-badge,
+    .tools-ind-count { margin-left: -7px; }
+    .tools-ind-badge svg { width: 13px; height: 13px; }
+    .tools-ind-count {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: white;
+      border: 0.5px solid rgba(124,123,132,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .aitools-popover {
+      position: fixed;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(18,0,69,.12), 0 4px 12px rgba(18,0,69,.07);
+      overflow: hidden;
+      z-index: 200;
+      display: none;
+    }
+    .aitools-popover.open { display: block; }
+
+    .aitools-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .aitools-search svg { width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0; }
+    .aitools-search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: transparent;
+    }
+    .aitools-search input::placeholder { color: var(--text-placeholder); }
+    .aitools-kbd {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-primary);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0;
+    }
+
+    .aitools-columns { display: flex; }
+    .aitools-col { flex: 1; padding: 12px 0; }
+    .aitools-col + .aitools-col {
+      border-left: 1px solid var(--border-secondary);
+      overflow-y: auto;
+      max-height: 220px;
+    }
+    .aitools-col + .aitools-col::-webkit-scrollbar { width: 4px; }
+    .aitools-col + .aitools-col::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+
+    .aitools-columns.is-searching { flex-direction: column; }
+    .aitools-columns.is-searching .aitools-col { padding: 8px 0; }
+    .aitools-columns.is-searching .aitools-col + .aitools-col {
+      border-left: none; max-height: none; overflow: visible; padding-top: 0;
+    }
+    .aitools-columns.is-searching .aitools-col-label { display: none; }
+    .aitools-item.highlighted { background: var(--bg-primary); }
+    .aitools-col-label {
+      padding: 2px 14px 8px;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .aitools-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .aitools-item:hover { background: var(--bg-primary); }
+    .aitools-item.hidden { display: none; }
+    .aitools-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; background: var(--bg-primary);
+    }
+    .aitools-icon svg { width: 16px; height: 16px; }
+    .aitools-icon img { width: 18px; height: 18px; }
+    .aitools-info { flex: 1; min-width: 0; }
+    .aitools-name {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .aitools-desc { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+
+    /* Toggle switch */
+    .toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--border-secondary); border-radius: 9px;
+      cursor: pointer; transition: background .2s;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute;
+      width: 12px; height: 12px; border-radius: 50%; background: white;
+      top: 3px; left: 3px; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-track { background: var(--brand-purple); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(14px); }
+
+    .aitools-empty {
+      padding: 20px 14px; font-size: 13px;
+      color: var(--text-tertiary); text-align: center; display: none;
+    }
+
+    /* ─── Chat area ───────────────────────────────────────── */
+    .chat-area {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-area.active { display: flex; }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 24px 16px;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+
+    .chat-messages-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* User message */
+    .msg-user {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .msg-user .msg-content {
+      max-width: 72%;
+      background: var(--text-primary);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 18px 18px 4px 18px;
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* AI message */
+    .msg-ai {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .msg-ai-icon {
+      width: 26px; height: 26px;
+      background: var(--text-primary);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: white;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .msg-ai .msg-content {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding-top: 3px;
+    }
+
+    /* Typing indicator */
+    .typing-dots {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      height: 22px;
+    }
+    .typing-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      display: block;
+      animation: typing-pulse 1.2s infinite ease-in-out;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: .2s; }
+    .typing-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing-pulse {
+      0%, 80%, 100% { transform: scale(0.65); opacity: 0.35; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Chat input bar */
+    .chat-input-bar {
+      flex-shrink: 0;
+      padding: 0 24px 24px;
+    }
+    .chat-input-bar .prompt-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* ─── Version switcher ────────────────────────────────── */
+    .version-switcher {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+      font-family: 'Inter', sans-serif;
+    }
+    .version-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(18,0,69,.08);
+      cursor: pointer;
+      user-select: none;
+    }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .version-trigger-desc { font-size: 12px; color: var(--text-tertiary); }
+    .version-trigger svg {
+      width: 14px; height: 14px;
+      color: var(--text-tertiary);
+      transition: transform var(--transition);
+    }
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px;
+      min-width: 160px;
+      display: none;
+    }
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 6px;
+      cursor: pointer; text-decoration: none;
+      transition: background var(--transition);
+    }
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 22px; }
+    .version-option-desc { font-size: 13px; color: var(--text-secondary); }
+    .version-option-check {
+      margin-left: auto; width: 14px; height: 14px;
+      color: var(--brand-purple); opacity: 0;
+    }
+    .version-option.current .version-option-check { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="body-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a class="sidebar-logo" href="#" onclick="if(document.getElementById('sidebar').classList.contains('collapsed')){event.preventDefault();document.getElementById('sidebar').classList.remove('collapsed');}">
+          <div class="logo-emblem">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="sidebar-logo-name">nexos<span class="ai-suffix">.ai</span></span>
+        </a>
+        <button class="icon-btn collapse-btn" onclick="document.getElementById('sidebar').classList.add('collapsed')" title="Collapse sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+        </button>
+      </div>
+      <div class="sidebar-quick">
+        <div class="sidebar-quick-item" onclick="newChat()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+          <span>New chat</span>
+        </div>
+        <div class="sidebar-quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>Search chats</span>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-nav">
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          <span class="nav-label">Agents</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-label">Projects</span>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-content">
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">
+            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            <span class="sidebar-section-label">Agents</span>
+            <button class="sidebar-section-add">+</button>
+          </div>
+          <div class="sidebar-link"><span class="sidebar-link-icon">🏃</span>Sprint Architect</div>
+          <div class="sidebar-link"><span class="sidebar-link-icon">✨</span>Sentiment Strategist</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">
+            <span class="sidebar-section-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            <span class="sidebar-section-label">Recent Chats</span>
+          </div>
+          <div class="sidebar-link active" id="current-chat-link">New conversation</div>
+          <div class="sidebar-link">Cybersecurity market trends for 2026</div>
+          <div class="sidebar-link">EV Market Trends Analysis</div>
+          <div class="sidebar-link">Generate an image bursting out of the pa...</div>
+          <div class="sidebar-link">Target Audience Brainstorming</div>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-avatar">A</div>
+        <span class="sidebar-user-email">andrzej@nexos.ai</span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-area">
+
+      <!-- Welcome state -->
+      <div class="welcome-area" id="welcome-area">
+        <h1 class="welcome-heading">What's on your mind today?</h1>
+        <div class="prompt-wrap" id="prompt-wrap">
+          <div class="prompt-box">
+            <textarea class="prompt-textarea" id="prompt"
+              placeholder="Ask anything to start the chat"
+              rows="1"
+              oninput="onInput(this)"
+              onkeydown="onPromptKeydown(event)"></textarea>
+            <!-- Tools Popover -->
+            <div class="aitools-popover" id="aitools-popover">
+              <div class="aitools-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="aitools-search" placeholder="Search" oninput="filterAITools(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off" />
+                <span class="aitools-kbd">/</span>
+              </div>
+              <div class="aitools-columns" id="aitools-columns">
+                <div class="aitools-col" id="col-capabilities">
+                  <div class="aitools-col-label">AI Capabilities</div>
+                  <div class="aitools-item" data-name="deep research">
+                    <div class="aitools-icon" style="background:#ede9ff"><svg viewBox="0 0 24 24" fill="none" stroke="#6c47ff" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Deep research</div><div class="aitools-desc">Perform advanced research</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="web search">
+                    <div class="aitools-icon" style="background:#e0f2fe"><svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Web search</div><div class="aitools-desc">Find online information</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="extended thinking">
+                    <div class="aitools-icon" style="background:#fef9c3"><svg viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6L15 17H9l-.7-2C6.3 13.7 5 11.5 5 9a7 7 0 0 1 7-7Z"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Extended thinking</div><div class="aitools-desc">Find online information</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-empty" id="empty-capabilities">No results</div>
+                </div>
+                <div class="aitools-col" id="col-integrations">
+                  <div class="aitools-col-label">Integrations</div>
+                  <div class="aitools-item" data-name="microsoft sharepoint sharepoint">
+                    <div class="aitools-icon" style="background:#f0f4ff"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><circle cx="7" cy="7" r="5.5" fill="#036C70"/><circle cx="11" cy="10" r="5" fill="#1A9BA1"/><circle cx="7.5" cy="13" r="3.5" fill="#37C6D0"/><rect x="5" y="5" width="8" height="10" rx="1" fill="white" opacity=".15"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Microsoft Sharepoint</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="slack">
+                    <div class="aitools-icon" style="background:#f9f0ff"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M5.5 11.5a1.5 1.5 0 0 1-3 0V6a1.5 1.5 0 0 1 3 0v5.5Z" fill="#E01E5A"/><path d="M12 5.5a1.5 1.5 0 0 1 0-3h.5A1.5 1.5 0 0 1 14 4v1.5H12Z" fill="#E01E5A"/><path d="M12.5 5.5H7a1.5 1.5 0 0 1 0-3h5.5a1.5 1.5 0 0 1 0 3Z" fill="#36C5F0"/><path d="M14 12a1.5 1.5 0 0 1-3 0V6a1.5 1.5 0 0 1 3 0v6Z" fill="#2EB67D"/><path d="M6 12.5a1.5 1.5 0 0 1 0 3H5.5A1.5 1.5 0 0 1 4 14v-1.5H6Z" fill="#2EB67D"/><path d="M5.5 12.5H11a1.5 1.5 0 0 1 0 3H5.5a1.5 1.5 0 0 1 0-3Z" fill="#ECB22E"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Slack</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="microsoft teams teams">
+                    <div class="aitools-icon" style="background:#f0f4ff"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M10.5 7h4a1 1 0 0 1 1 1v3.5a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V8a1 1 0 0 1 .5-.866V7Z" fill="#5059C9"/><circle cx="13" cy="5" r="1.5" fill="#5059C9"/><circle cx="8" cy="4.5" r="2" fill="#7B83EB"/><path d="M4 8h8a1 1 0 0 1 1 1v4a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9a1 1 0 0 1 1-1Z" fill="#7B83EB"/><path d="M8 8v8" stroke="white" stroke-width="1.2"/><path d="M5 11h6" stroke="white" stroke-width="1.2"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Microsoft Teams</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="google drive drive">
+                    <div class="aitools-icon" style="background:#f0fdf4"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M1.5 13.5 4 9l3 5.5H1.5Z" fill="#0F9D58"/><path d="M6.5 14.5h5L9 9.5 6.5 14.5Z" fill="#00832D"/><path d="M9 9.5l2.5 5 3-5.5L11 3.5 9 9.5Z" fill="#FBBC04"/><path d="M7 3.5l2 6 2-6-2-3.5L7 3.5Z" fill="#4285F4"/><path d="M4 9l3 5.5h5L9 9.5 7 3.5 4 9Z" fill="#34A853"/><path d="M7 3.5l4 0 3.5 6-3-5.5-4 0L4 9l-2.5 4.5 2.5-4.5L7 3.5Z" fill="#EA4335"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Google Drive</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="notion">
+                    <div class="aitools-icon" style="background:#f5f5f5"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><rect width="18" height="18" rx="3" fill="white"/><path d="M4 3.5h6.5l4 4V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z" fill="#1a1a1a"/><path d="M10.5 3.5V7.5H14.5" fill="none" stroke="white" stroke-width=".8"/><path d="M6 7.5h6M6 9.5h6M6 11.5h4" stroke="white" stroke-width=".8" stroke-linecap="round"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">Notion</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-item" data-name="github">
+                    <div class="aitools-icon" style="background:#f6f8fa"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 1.5a7.5 7.5 0 0 0-2.372 14.621c.375.068.513-.163.513-.362 0-.179-.007-.653-.01-1.28-2.086.454-2.527-.996-2.527-.996-.341-.867-.833-1.098-.833-1.098-.68-.465.052-.456.052-.456.752.053 1.148.772 1.148.772.668 1.145 1.753.814 2.18.623.068-.484.261-.814.475-1.001-1.665-.19-3.416-.833-3.416-3.707 0-.818.292-1.488.772-2.012-.077-.19-.334-.952.073-1.985 0 0 .63-.201 2.063.769A7.18 7.18 0 0 1 9 6.299c.638.003 1.28.086 1.88.253 1.43-.97 2.06-.769 2.06-.769.408 1.033.151 1.795.074 1.985.48.524.771 1.194.771 2.012 0 2.882-1.754 3.515-3.424 3.7.269.232.508.69.508 1.39 0 1.003-.009 1.813-.009 2.06 0 .2.135.434.517.36A7.501 7.501 0 0 0 9 1.5Z" fill="#1a1a1a"/></svg></div>
+                    <div class="aitools-info"><div class="aitools-name">GitHub</div></div>
+                    <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+                  </div>
+                  <div class="aitools-empty" id="empty-integrations">No results</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="prompt-actions">
+              <div class="prompt-left">
+                <button class="action-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                  Attach
+                </button>
+                <button class="action-btn" id="aitools-btn" onclick="toggleAITools(event)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 4.5 20.3 12 17l7.5 3.3ZM12 3v14"/></svg>
+                  Tools
+                  <div class="tools-indicator" id="tools-indicator">
+                    <div class="tools-ind-badges" id="tools-ind-badges"></div>
+                  </div>
+                </button>
+              </div>
+              <div class="prompt-right">
+                <button class="model-selector">
+                  <div class="model-logo">✦</div>
+                  Auto
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <button class="mic-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
+                </button>
+                <button class="send-btn" id="send" onclick="sendMessage()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7Z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat state -->
+      <div class="chat-area" id="chat-area">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-messages-inner" id="chat-messages-inner"></div>
+        </div>
+        <div class="chat-input-bar" id="chat-input-bar"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    /* ─── State ─────────────────────────────────────────────── */
+    let inChatMode = false;
+
+    const FAKE_RESPONSES = [
+      `Based on your question, here are the key points to consider:\n\n1. The current landscape shows strong opportunity in your target segment\n2. Audience-first strategies consistently outperform product-first approaches\n3. Data-informed iteration is the differentiator between top and median performers\n\nWould you like me to go deeper on any of these areas?`,
+      `Great question. Here's my take:\n\nThe most effective approaches share a few traits — they're specific, measurable, and tied directly to business outcomes. Vague goals lead to vague results.\n\nI'd suggest starting with a clear definition of success, then working backward from there to identify the right tactics.`,
+      `Here's a quick breakdown:\n\nShort-term: Focus on the highest-leverage actions that can show signal within 30 days.\nMid-term: Use that signal to double down on what's working and cut what isn't.\nLong-term: Build systems so the wins compound over time rather than requiring constant reinvestment.\n\nWhat's your current timeline looking like?`,
+      `Happy to help with that. A few thoughts:\n\nThe problem you're describing is common, and the root cause is usually one of two things — either the strategy is unclear, or the execution isn't consistent with the strategy. Both are fixable.\n\nWhat does your current approach look like? That'll help me give more targeted advice.`,
+    ];
+
+    /* ─── Chat logic ────────────────────────────────────────── */
+    function sendMessage() {
+      const ta = document.getElementById('prompt');
+      const text = ta.value.trim();
+      if (!text) return;
+
+      // First message: transition to chat mode
+      if (!inChatMode) {
+        enterChatMode();
+      }
+
+      addMessage('user', text);
+
+      ta.value = '';
+      ta.style.height = 'auto';
+      document.getElementById('send').classList.remove('visible');
+      ta.focus();
+
+      simulateAIResponse();
+    }
+
+    function enterChatMode() {
+      inChatMode = true;
+
+      const welcome = document.getElementById('welcome-area');
+      const chatArea = document.getElementById('chat-area');
+      const chatInputBar = document.getElementById('chat-input-bar');
+      const promptWrap = document.getElementById('prompt-wrap');
+
+      // Move prompt-wrap into chat input bar
+      chatInputBar.appendChild(promptWrap);
+
+      // Update placeholder
+      document.getElementById('prompt').placeholder = 'Ask a follow up...';
+
+      // Swap views
+      welcome.classList.add('hidden');
+      chatArea.classList.add('active');
+    }
+
+    function addMessage(role, text) {
+      const inner = document.getElementById('chat-messages-inner');
+      const div = document.createElement('div');
+
+      if (role === 'user') {
+        div.className = 'msg-user';
+        div.innerHTML = `<div class="msg-content">${escapeHtml(text)}</div>`;
+      } else {
+        div.className = 'msg-ai';
+        div.innerHTML = `
+          <div class="msg-ai-icon">✦</div>
+          <div class="msg-content">${escapeHtml(text)}</div>`;
+      }
+
+      inner.appendChild(div);
+      scrollToBottom();
+    }
+
+    function simulateAIResponse() {
+      const inner = document.getElementById('chat-messages-inner');
+
+      // Typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'msg-ai';
+      typingDiv.id = 'typing-indicator';
+      typingDiv.innerHTML = `
+        <div class="msg-ai-icon">✦</div>
+        <div class="msg-content">
+          <span class="typing-dots"><span></span><span></span><span></span></span>
+        </div>`;
+      inner.appendChild(typingDiv);
+      scrollToBottom();
+
+      const response = FAKE_RESPONSES[Math.floor(Math.random() * FAKE_RESPONSES.length)];
+
+      setTimeout(() => {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+        addMessage('ai', response);
+      }, 1100);
+    }
+
+    function scrollToBottom() {
+      const messages = document.getElementById('chat-messages');
+      if (messages) messages.scrollTop = messages.scrollHeight;
+    }
+
+    function newChat() {
+      inChatMode = false;
+
+      const welcome = document.getElementById('welcome-area');
+      const chatArea = document.getElementById('chat-area');
+      const welcomeArea = document.getElementById('welcome-area');
+      const promptWrap = document.getElementById('prompt-wrap');
+
+      // Move prompt-wrap back to welcome area
+      // Insert before the closing tag of welcome-area
+      welcomeArea.appendChild(promptWrap);
+
+      // Clear messages
+      document.getElementById('chat-messages-inner').innerHTML = '';
+
+      // Reset textarea
+      const ta = document.getElementById('prompt');
+      ta.value = '';
+      ta.style.height = 'auto';
+      ta.placeholder = 'Ask anything to start the chat';
+      document.getElementById('send').classList.remove('visible');
+
+      // Swap views
+      chatArea.classList.remove('active');
+      welcome.classList.remove('hidden');
+
+      ta.focus();
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+    }
+
+    /* ─── Input handling ────────────────────────────────────── */
+    function onInput(ta) {
+      const popover = document.getElementById('aitools-popover');
+
+      if (ta.value === '/') {
+        openAITools(false);
+        return;
+      }
+
+      if (popover.classList.contains('open') && ta.value.startsWith('/')) {
+        filterAITools(ta.value.slice(1));
+        document.getElementById('send').classList.remove('visible');
+        return;
+      }
+
+      if (popover.classList.contains('open') && !ta.value.startsWith('/')) {
+        closeAITools();
+      }
+
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+      document.getElementById('send').classList.toggle('visible', ta.value.trim().length > 0);
+
+      // Re-position popover if open (prompt-box height changed)
+      if (popover.classList.contains('open')) positionAITools();
+    }
+
+    function onPromptKeydown(e) {
+      const popover = document.getElementById('aitools-popover');
+
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (popover.classList.contains('open')) {
+          const highlighted = document.querySelector('.aitools-item.highlighted');
+          if (highlighted) {
+            const checkbox = highlighted.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = !checkbox.checked;
+          }
+          closeAITools();
+        } else {
+          sendMessage();
+        }
+        return;
+      }
+
+      if (!popover.classList.contains('open')) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        // Basic arrow nav could go here
+      }
+    }
+
+    /* ─── AI Tools popover ──────────────────────────────────── */
+    function positionAITools() {
+      const popover = document.getElementById('aitools-popover');
+      const box = document.querySelector('.prompt-box');
+      if (!box) return;
+      const rect = box.getBoundingClientRect();
+      popover.style.left = rect.left + 'px';
+      popover.style.width = rect.width + 'px';
+      popover.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+      popover.style.maxHeight = (rect.top - 24) + 'px';
+    }
+
+    function openAITools(focusSearch = true) {
+      const popover = document.getElementById('aitools-popover');
+      const btn = document.getElementById('aitools-btn');
+      positionAITools();
+      popover.classList.add('open');
+      btn.classList.add('active');
+      if (focusSearch) {
+        setTimeout(() => document.getElementById('aitools-search').focus(), 50);
+      }
+    }
+
+    function closeAITools() {
+      const popover = document.getElementById('aitools-popover');
+      const btn = document.getElementById('aitools-btn');
+      popover.classList.remove('open');
+      btn.classList.remove('active');
+      const search = document.getElementById('aitools-search');
+      if (search.value) {
+        search.value = '';
+        filterAITools('');
+      }
+      const prompt = document.getElementById('prompt');
+      if (prompt.value.startsWith('/')) {
+        prompt.value = '';
+        document.getElementById('send').classList.remove('visible');
+      }
+    }
+
+    function toggleAITools(e) {
+      e.stopPropagation();
+      const popover = document.getElementById('aitools-popover');
+      if (popover.classList.contains('open')) {
+        closeAITools();
+      } else {
+        openAITools();
+      }
+    }
+
+    function filterAITools(query) {
+      const q = query.trim().toLowerCase();
+      const columns = document.getElementById('aitools-columns');
+      const capItems = document.querySelectorAll('#col-capabilities .aitools-item');
+      const intItems = document.querySelectorAll('#col-integrations .aitools-item');
+      let capVisible = 0, intVisible = 0;
+
+      capItems.forEach(item => {
+        const match = !q || item.dataset.name.includes(q);
+        item.classList.toggle('hidden', !match);
+        if (match) capVisible++;
+      });
+      intItems.forEach(item => {
+        const match = !q || item.dataset.name.includes(q);
+        item.classList.toggle('hidden', !match);
+        if (match) intVisible++;
+      });
+
+      columns.classList.toggle('is-searching', q.length > 0);
+      document.getElementById('col-capabilities').style.display = (q && capVisible === 0) ? 'none' : '';
+      document.getElementById('col-integrations').style.display = (q && intVisible === 0) ? 'none' : '';
+      document.getElementById('empty-capabilities').style.display = (!q && capVisible === 0) ? 'block' : 'none';
+      document.getElementById('empty-integrations').style.display = (!q && intVisible === 0) ? 'block' : 'none';
+
+      updateHighlight();
+    }
+
+    function updateHighlight() {
+      document.querySelectorAll('.aitools-item').forEach(item => item.classList.remove('highlighted'));
+      const columns = document.getElementById('aitools-columns');
+      if (!columns.classList.contains('is-searching')) return;
+      const first = document.querySelector('.aitools-item:not(.hidden)');
+      if (first) first.classList.add('highlighted');
+    }
+
+    function handleSearchKey(e) {
+      if (e.key !== 'Enter') return;
+      const highlighted = document.querySelector('.aitools-item.highlighted');
+      if (highlighted) {
+        const checkbox = highlighted.querySelector('input[type="checkbox"]');
+        if (checkbox) { checkbox.checked = !checkbox.checked; updateToolsIndicator(); }
+      }
+    }
+
+    function updateToolsIndicator() {
+      const checkboxes = document.querySelectorAll('.aitools-item input[type="checkbox"]');
+      const selected = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          const item = cb.closest('.aitools-item');
+          const iconEl = item.querySelector('.aitools-icon');
+          selected.push({ bg: iconEl.style.background, html: iconEl.innerHTML });
+        }
+      });
+
+      const indicator = document.getElementById('tools-indicator');
+      const badges = document.getElementById('tools-ind-badges');
+      badges.innerHTML = '';
+
+      if (!selected.length) { indicator.classList.remove('visible'); return; }
+      indicator.classList.add('visible');
+
+      const show = selected.slice(0, 2);
+      const extra = selected.length - 2;
+      const total = show.length + (extra > 0 ? 1 : 0);
+
+      show.forEach((item, i) => {
+        const b = document.createElement('div');
+        b.className = 'tools-ind-badge';
+        b.style.cssText = `background:${item.bg}; z-index:${total - i}`;
+        b.innerHTML = item.html;
+        badges.appendChild(b);
+      });
+
+      if (extra > 0) {
+        const c = document.createElement('div');
+        c.className = 'tools-ind-count';
+        c.style.zIndex = 1;
+        c.textContent = extra;
+        badges.appendChild(c);
+      }
+    }
+
+    /* ─── Toggle change → update indicator ─────────────────── */
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('.aitools-item input[type="checkbox"]')) {
+        updateToolsIndicator();
+      }
+    });
+
+    /* ─── Global listeners ──────────────────────────────────── */
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement.tagName;
+      if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA' && !document.getElementById('prompt').value.trim()) {
+        e.preventDefault();
+        openAITools();
+      }
+      if (e.key === 'Escape') {
+        const popover = document.getElementById('aitools-popover');
+        if (popover.classList.contains('open')) {
+          closeAITools();
+          document.getElementById('prompt').focus();
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const popover = document.getElementById('aitools-popover');
+      if (popover.classList.contains('open')) positionAITools();
+    });
+
+    document.addEventListener('click', (e) => {
+      const popover = document.getElementById('aitools-popover');
+      const btn = document.getElementById('aitools-btn');
+      if (!popover.contains(e.target) && !btn.contains(e.target)) {
+        closeAITools();
+      }
+      document.getElementById('version-switcher').classList.remove('open');
+    });
+
+    function toggleVersionDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('version-switcher').classList.toggle('open');
+    }
+  </script>
+
+  <!-- Version Switcher -->
+  <div class="version-switcher" id="version-switcher">
+    <div class="version-trigger" onclick="toggleVersionDropdown(event)">
+      <span class="version-trigger-label">V1.2</span>
+      <span class="version-trigger-desc">Chat View</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="version-dropdown">
+      <a class="version-option" href="v1.html">
+        <span class="version-option-label">V1</span>
+        <span class="version-option-desc">Tools</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option current" href="v1.2.html">
+        <span class="version-option-label">V1.2</span>
+        <span class="version-option-desc">Chat View</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v2.html">
+        <span class="version-option-label">V2</span>
+        <span class="version-option-desc">Audio Input</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v3.html">
+        <span class="version-option-label">V3</span>
+        <span class="version-option-desc">Search</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="v4.html">
+        <span class="version-option-label">V4</span>
+        <span class="version-option-desc">Follow-up</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+      <a class="version-option" href="canvas.html">
+        <span class="version-option-label">V5</span>
+        <span class="version-option-desc">Canvas</span>
+        <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
