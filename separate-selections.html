@@ -596,19 +596,18 @@
     <div class="welcome-area">
       <h1 class="welcome-heading">What do you want Nexus to do?</h1>
       <div class="prompt-wrap">
-        <!-- Floating tray — rendered above the prompt box -->
-        <div class="tray-shell" id="tray-shell">
-          <div class="tray-header" id="tray-header">
-            <span id="tray-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              Attach
-            </span>
-            <span id="tray-subtitle"></span>
-          </div>
-          <div class="tray-body" id="tray-body"></div>
-        </div>
-
         <div class="prompt-box">
+          <!-- Floating tray — anchored above the prompt box -->
+          <div class="tray-shell" id="tray-shell">
+            <div class="tray-header" id="tray-header">
+              <span id="tray-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                Attach
+              </span>
+              <span id="tray-subtitle"></span>
+            </div>
+            <div class="tray-body" id="tray-body"></div>
+          </div>
           <!-- Textarea — top -->
           <textarea
             class="prompt-textarea"
@@ -933,7 +932,7 @@
 
   /* Close tray when clicking outside the prompt-wrap */
   document.addEventListener('click', (e) => {
-    const wrap = document.querySelector('.prompt-wrap');
+    const wrap = document.querySelector('.prompt-box');
     if (currentTray && !wrap.contains(e.target)) {
       currentTray = null;
       document.getElementById('tray-shell').classList.remove('visible');
