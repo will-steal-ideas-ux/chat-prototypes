@@ -8,22 +8,56 @@
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
     :root {
-      --bg-primary:    #f7f7f8;
-      --bg-secondary:  #ffffff;
-      --bg-tertiary:   rgba(124,123,132,.10);
-      --border-secondary: rgba(124,123,132,.25);
-      --text-primary:   #252429;
-      --text-secondary: #464546;
-      --text-tertiary:  #6f6e78;
-      --text-placeholder: #6f6e78;
-      --brand-purple:  #6c47ff;
-      --brand-purple-light: #ede9ff;
-      --radius-xs: 4px;
-      --radius-sm: 8px;
-      --radius-md: 16px;
+      /* shadcn design tokens */
+      --background: 0 0% 100%;
+      --foreground: 258 6% 15%;
+
+      --card: 0 0% 100%;
+      --card-foreground: 258 6% 15%;
+
+      --popover: 0 0% 100%;
+      --popover-foreground: 258 6% 15%;
+
+      --muted: 240 5% 97%;
+      --muted-foreground: 258 4% 45%;
+
+      --border: 240 6% 90%;
+      --input: 240 6% 90%;
+
+      --primary: 252 100% 64%;
+      --primary-foreground: 0 0% 100%;
+
+      --secondary: 240 5% 97%;
+      --secondary-foreground: 258 6% 15%;
+
+      --accent: 252 100% 96%;
+      --accent-foreground: 252 100% 64%;
+
+      --ring: 252 100% 64%;
+
+      --radius: 0.5rem;
+
+      /* Semantic aliases used throughout the components */
+      --bg-primary:         hsl(var(--muted));
+      --bg-secondary:       hsl(var(--background));
+      --bg-tertiary:        hsl(240 4% 50% / 0.10);
+      --border-secondary:   hsl(var(--border));
+      --text-primary:       hsl(var(--foreground));
+      --text-secondary:     hsl(300 1% 27%);
+      --text-tertiary:      hsl(var(--muted-foreground));
+      --text-placeholder:   hsl(var(--muted-foreground));
+      --brand-purple:       hsl(var(--primary));
+      --brand-purple-light: hsl(var(--accent));
+      --accent-color:       hsl(var(--primary));
+
+      --radius-xs:   calc(var(--radius) * 0.5);
+      --radius-sm:   var(--radius);
+      --radius-md:   calc(var(--radius) * 2);
       --radius-full: 9999px;
-      --shadow-lg: 0 8px 15px rgba(18,0,69,.06), 0 4px 7px rgba(18,0,69,.03);
-      --transition: .18s ease;
+
+      --shadow-sm: 0 1px 3px hsl(252 100% 14% / 0.10), 0 1px 2px hsl(252 100% 14% / 0.05);
+      --shadow-lg: 0 8px 15px hsl(252 100% 14% / 0.06), 0 4px 7px hsl(252 100% 14% / 0.03);
+      --transition: .15s ease;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -882,6 +916,7 @@
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </a>
       <a class="version-option" href="canvas.html">
+      <a class="version-option" href="tools-inline-tray.html"><span class="version-option-label">—</span><span class="version-option-desc">Tools Inline Tray</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
         <span class="version-option-label">V5</span>
         <span class="version-option-desc">Canvas</span>
         <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
