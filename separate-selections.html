@@ -293,11 +293,9 @@
     .send-btn:hover { background: #1a1a2e; }
     .send-btn svg { width: 16px; height: 16px; }
 
-    /* Floating tray — appears above the prompt box */
+    /* Floating tray — anchored to clicked button via JS */
     .tray-shell {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
+      position: fixed;
       width: 340px;
       border-radius: 12px;
       border: 1px solid var(--border-secondary);
@@ -619,15 +617,15 @@
           <!-- Action bar — bottom -->
           <div class="prompt-actions">
             <div class="prompt-actions-left">
-              <button class="sel-pill" id="pill-attach" onclick="setTray('attach')">
+              <button class="sel-pill" id="pill-attach" onclick="setTray('attach', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 Attach
               </button>
-              <button class="sel-pill" id="pill-tools" onclick="setTray('tools')">
+              <button class="sel-pill" id="pill-tools" onclick="setTray('tools', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
                 Tools
               </button>
-              <button class="sel-pill" id="pill-integrations" onclick="setTray('integrations')">
+              <button class="sel-pill" id="pill-integrations" onclick="setTray('integrations', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
                 Integrations
               </button>
@@ -697,7 +695,7 @@
     document.getElementById('send-btn').classList.toggle('visible', ta.value.trim().length > 0);
   }
 
-  function setTray(name) {
+  function setTray(name, btn) {
     const shell = document.getElementById('tray-shell');
     const body  = document.getElementById('tray-body');
     const title = document.getElementById('tray-title');
@@ -714,6 +712,14 @@
     currentTray = name;
     updatePills();
     shell.classList.add('visible');
+
+    // Position tray above the clicked button
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      shell.style.left = r.left + 'px';
+      shell.style.top  = (r.top - 8) + 'px';
+      shell.style.transform = 'translateY(-100%)';
+    }
     body.innerHTML = '';
 
     if (name === 'attach') {
