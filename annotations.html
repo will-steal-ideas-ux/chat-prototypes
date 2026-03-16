@@ -273,14 +273,20 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 12px 8px;
       border-bottom: 1px solid var(--border-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--transition);
     }
+    .tooltip-source-bar:hover { background: var(--bg-primary); }
     .tooltip-chip {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 2px 8px 2px 2px;
       border: 1px solid var(--border-secondary);
       border-radius: var(--radius-full);
-      background: var(--bg-primary);
+      background: #fff;
+      transition: border-color var(--transition);
     }
+    .tooltip-source-bar:hover .tooltip-chip { border-color: hsl(252 100% 64% / 0.4); }
     .tooltip-chip-icon {
       width: 20px; height: 20px; border-radius: 50%;
       background: #fff; border: 1px solid var(--border-secondary);
@@ -288,11 +294,16 @@
     }
     .tooltip-chip-label {
       font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      transition: color var(--transition);
     }
+    .tooltip-source-bar:hover .tooltip-chip-label { color: var(--brand-purple); text-decoration: underline; text-underline-offset: 2px; }
     .tooltip-ext-link {
-      width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0;
+      width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary);
+      transition: background var(--transition), color var(--transition);
     }
+    .tooltip-source-bar:hover .tooltip-ext-link { color: var(--brand-purple); }
     .tooltip-ext-link svg { width: 14px; height: 14px; }
 
     .tooltip-title {
@@ -955,7 +966,7 @@
         </div>
       </div>` : '';
     return `
-      <div class="tooltip-source-bar">
+      <a class="tooltip-source-bar" href="#" target="_blank">
         <div class="tooltip-chip">
           <div class="tooltip-chip-icon">
             <span class="${src.favClass}" style="width:14px;height:14px;font-size:8px;">${src.favLetter}</span>
@@ -967,7 +978,7 @@
             <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/>
           </svg>
         </div>
-      </div>
+      </a>
       <div class="tooltip-title">${src.title}</div>
       <div class="tooltip-excerpt">${src.excerpt}</div>
       ${nav}
