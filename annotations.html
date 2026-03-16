@@ -306,6 +306,25 @@
       color: var(--text-secondary);
     }
 
+    /* Multi-source nav */
+    .tooltip-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 8px 8px;
+      border-top: 1px solid var(--border-secondary);
+    }
+    .tooltip-nav-arrows { display: flex; align-items: center; gap: 2px; }
+    .tooltip-nav-btn {
+      width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border-secondary); background: #fff;
+      cursor: pointer; color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    }
+    .tooltip-nav-btn:hover:not(:disabled) { background: var(--bg-primary); color: var(--text-primary); border-color: hsl(252 100% 64% / 0.3); }
+    .tooltip-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .tooltip-nav-btn svg { width: 14px; height: 14px; }
+    .tooltip-nav-count { font-size: 12px; font-weight: 500; color: var(--text-tertiary); padding: 0 4px; }
+
     /* Tooltip: local document variant */
     .tooltip-doc-bar {
       display: flex; align-items: center; justify-content: space-between;
@@ -613,11 +632,12 @@
                 <!-- web annotation with multiple sources -->
                 <span class="ann-chip"
                   data-type="web"
-                  data-source-label="Forbes.com"
-                  data-fav-class="fav-f"
-                  data-fav-letter="F"
-                  data-title="Five Trends That Will Shape Cybersecurity In 2025"
-                  data-excerpt="1. Rise Of Agentic AI. Artificial intelligence is already playing a crucial role in cybersecurity, but its influence has grown exponentially. AI and machine learning will …">
+                  data-sources='[
+                    {"label":"Forbes.com","favClass":"fav-f","favLetter":"F","title":"Five Trends That Will Shape Cybersecurity In 2025","excerpt":"1. Rise Of Agentic AI. Artificial intelligence is already playing a crucial role in cybersecurity, but its influence has grown exponentially. AI and machine learning will …"},
+                    {"label":"Statista.com","favClass":"fav-s","favLetter":"S","title":"IoT Cybersecurity Market Size 2024–2030","excerpt":"The global IoT security market is projected to reach $59.16 billion by 2030, growing at a CAGR of 23.1%. Device authentication and network security account for the largest share …"},
+                    {"label":"Nasdaq.com","favClass":"fav-n","favLetter":"N","title":"IoT Device Proliferation Creates New Security Challenges","excerpt":"By 2025, an estimated 75 billion connected devices will be active globally. Each device represents a potential entry point for attackers, demanding robust endpoint protection strategies …"},
+                    {"label":"Cybernews.de","favClass":"fav-c","favLetter":"C","title":"The Top IoT Vulnerabilities Enterprises Must Address","excerpt":"Default credentials and unpatched firmware remain the two most exploited IoT vulnerabilities. 43% of breaches involving IoT devices begin with weak or unchanged default passwords …"}
+                  ]'>
                   <span class="ann-icons">
                     <span class="ann-icon"><span class="fav-f">F</span></span>
                     <span class="ann-icon"><span class="fav-s">S</span></span>
@@ -905,55 +925,89 @@
   // ─── Annotation tooltip logic ───────────────────────────
   const tooltip = document.getElementById('ann-tooltip');
   let hideTimer = null;
+  let activeChip = null;
+  let currentSources = [];
+  let currentIndex = 0;
 
-  function showTooltip(chip, e) {
+  function renderWebSource(src, index, total) {
+    const nav = total > 1 ? `
+      <div class="tooltip-nav">
+        <div class="tooltip-nav-arrows">
+          <button class="tooltip-nav-btn" id="tt-prev" onclick="navigate(-1)" ${index === 0 ? 'disabled' : ''}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
+          </button>
+          <span class="tooltip-nav-count">${index + 1} of ${total}</span>
+          <button class="tooltip-nav-btn" id="tt-next" onclick="navigate(1)" ${index === total - 1 ? 'disabled' : ''}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+          </button>
+        </div>
+      </div>` : '';
+    return `
+      <div class="tooltip-source-bar">
+        <div class="tooltip-chip">
+          <div class="tooltip-chip-icon">
+            <span class="${src.favClass}" style="width:14px;height:14px;font-size:8px;">${src.favLetter}</span>
+          </div>
+          <span class="tooltip-chip-label">${src.label}</span>
+        </div>
+        <div class="tooltip-ext-link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tooltip-title">${src.title}</div>
+      <div class="tooltip-excerpt">${src.excerpt}</div>
+      ${nav}
+    `;
+  }
+
+  function renderDocSource(chip) {
+    return `
+      <div class="tooltip-doc-bar">
+        <div class="tooltip-doc-chip">
+          <div class="tooltip-doc-icon-wrap">
+            ${chip.querySelector('.ann-icon').innerHTML}
+          </div>
+          <span class="tooltip-doc-chip-label">${chip.dataset.sourceLabel}</span>
+        </div>
+      </div>
+      <div class="tooltip-doc-meta">
+        ${chip.dataset.docPage}
+        <span class="tooltip-doc-meta-dot"></span>
+        ${chip.dataset.docSection}
+      </div>
+      <blockquote class="tooltip-quote">"${chip.dataset.quote}"</blockquote>
+    `;
+  }
+
+  function navigate(dir) {
+    currentIndex = Math.max(0, Math.min(currentSources.length - 1, currentIndex + dir));
+    tooltip.innerHTML = renderWebSource(currentSources[currentIndex], currentIndex, currentSources.length);
+  }
+
+  function showTooltip(chip) {
     clearTimeout(hideTimer);
+    activeChip = chip;
     const type = chip.dataset.type;
 
     if (type === 'web') {
-      const favLetter = chip.dataset.favLetter || '?';
-      const favClass  = chip.dataset.favClass  || 'fav-f';
-      tooltip.innerHTML = `
-        <div class="tooltip-source-bar">
-          <div class="tooltip-chip">
-            <div class="tooltip-chip-icon">
-              <span class="${favClass}" style="width:14px;height:14px;font-size:8px;">${favLetter}</span>
-            </div>
-            <span class="tooltip-chip-label">${chip.dataset.sourceLabel}</span>
-          </div>
-          <div class="tooltip-ext-link">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/>
-            </svg>
-          </div>
-        </div>
-        <div class="tooltip-title">${chip.dataset.title}</div>
-        <div class="tooltip-excerpt">${chip.dataset.excerpt}</div>
-      `;
+      // Support both single (legacy data-*) and multi (data-sources JSON)
+      if (chip.dataset.sources) {
+        currentSources = JSON.parse(chip.dataset.sources);
+      } else {
+        currentSources = [{
+          label:     chip.dataset.sourceLabel,
+          favClass:  chip.dataset.favClass  || 'fav-f',
+          favLetter: chip.dataset.favLetter || '?',
+          title:     chip.dataset.title,
+          excerpt:   chip.dataset.excerpt
+        }];
+      }
+      currentIndex = 0;
+      tooltip.innerHTML = renderWebSource(currentSources[0], 0, currentSources.length);
     } else {
-      // local document
-      const docIcon = chip.querySelector('.ann-icon').innerHTML;
-      tooltip.innerHTML = `
-        <div class="tooltip-doc-bar">
-          <div class="tooltip-doc-chip">
-            <div class="tooltip-doc-icon-wrap">
-              ${chip.querySelector('svg') ? chip.querySelector('.ann-icon').innerHTML : `
-              <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="12" height="12">
-                <rect x="2" y="1" width="9" height="13" rx="1.5"/>
-                <path d="M5 5h4M5 8h4M5 11h2"/>
-                <path d="M9 1v3.5H12" stroke-linejoin="round"/>
-              </svg>`}
-            </div>
-            <span class="tooltip-doc-chip-label">${chip.dataset.sourceLabel}</span>
-          </div>
-        </div>
-        <div class="tooltip-doc-meta">
-          ${chip.dataset.docPage}
-          <span class="tooltip-doc-meta-dot"></span>
-          ${chip.dataset.docSection}
-        </div>
-        <blockquote class="tooltip-quote">"${chip.dataset.quote}"</blockquote>
-      `;
+      tooltip.innerHTML = renderDocSource(chip);
     }
 
     positionTooltip(chip);
@@ -967,39 +1021,28 @@
     let left = rect.left;
     let top  = rect.bottom + margin;
 
-    // Clamp to viewport
-    if (left + tw > window.innerWidth - margin) {
-      left = window.innerWidth - tw - margin;
-    }
+    if (left + tw > window.innerWidth - margin) left = window.innerWidth - tw - margin;
     if (left < margin) left = margin;
 
-    // Flip above if no room below
-    const th = 160; // approximate tooltip height
-    if (top + th > window.innerHeight - margin) {
-      top = rect.top - th - margin;
-    }
+    const th = 200;
+    if (top + th > window.innerHeight - margin) top = rect.top - th - margin;
 
     tooltip.style.left = left + 'px';
     tooltip.style.top  = top  + 'px';
   }
 
   function scheduleHide() {
-    hideTimer = setTimeout(() => {
-      tooltip.classList.remove('visible');
-    }, 150);
+    hideTimer = setTimeout(() => tooltip.classList.remove('visible'), 150);
   }
 
-  // Attach events to all annotation chips
   document.querySelectorAll('.ann-chip').forEach(chip => {
-    chip.addEventListener('mouseenter', e => showTooltip(chip, e));
+    chip.addEventListener('mouseenter', () => showTooltip(chip));
     chip.addEventListener('mouseleave', scheduleHide);
   });
 
-  // Keep tooltip alive when hovering it
   tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
   tooltip.addEventListener('mouseleave', scheduleHide);
 
-  // Close version switcher on outside click
   document.addEventListener('click', e => {
     const ver = document.getElementById('ver');
     if (!ver.contains(e.target)) ver.classList.remove('open');
