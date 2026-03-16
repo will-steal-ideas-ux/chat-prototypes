@@ -299,11 +299,23 @@
       padding: 10px 12px 4px;
       font-size: 14px; font-weight: 600; line-height: 20px;
       color: var(--text-primary);
+      /* fixed 2-line height */
+      height: 50px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
     }
     .tooltip-excerpt {
       padding: 0 12px 12px;
       font-size: 13px; line-height: 20px;
       color: var(--text-secondary);
+      /* fixed 3-line height */
+      height: 72px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
 
     /* Multi-source nav */
