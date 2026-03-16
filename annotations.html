@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — Annotations</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 258 6% 15%;
+      --card: 0 0% 100%;
+      --muted: 240 5% 97%;
+      --muted-foreground: 258 4% 45%;
+      --border: 240 6% 90%;
+      --primary: 252 100% 64%;
+      --accent: 252 100% 64%;
+      --radius: 0.5rem;
+
+      --bg-primary:         hsl(var(--muted));
+      --bg-secondary:       hsl(var(--background));
+      --bg-tertiary:        hsl(240 4% 50% / 0.10);
+      --border-secondary:   hsl(var(--border));
+      --text-primary:       hsl(var(--foreground));
+      --text-secondary:     hsl(300 1% 27%);
+      --text-tertiary:      hsl(var(--muted-foreground));
+      --text-placeholder:   hsl(var(--muted-foreground));
+      --brand-purple:       hsl(var(--primary));
+      --accent-color:       hsl(var(--accent));
+
+      --radius-xs:   calc(var(--radius) * 0.5);
+      --radius-sm:   var(--radius);
+      --radius-md:   calc(var(--radius) * 2);
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 3px hsl(252 100% 14% / 0.10), 0 1px 2px hsl(252 100% 14% / 0.05);
+      --shadow-md: 0 4px 12px hsl(252 100% 14% / 0.10), 0 2px 6px hsl(252 100% 14% / 0.06);
+      --shadow-lg: 0 8px 24px hsl(252 100% 14% / 0.12), 0 4px 8px hsl(252 100% 14% / 0.06);
+      --transition: .15s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Layout ──────────────────────────────────────────── */
+    .body-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ─── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      width: 264px; background: var(--bg-primary);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; overflow: hidden;
+      border-right: 1px solid var(--border-secondary);
+    }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; flex: 1;
+    }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-emblem svg { width: 14px; height: 14px; color: white; }
+    .logo-name {
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+    }
+    .logo-name sup { color: var(--accent-color); font-size: 11px; font-weight: 500; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: transparent; border: none;
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); }
+    .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+
+    .sidebar-divider { height: 1px; background: var(--border-secondary); margin: 4px 8px; flex-shrink: 0; }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+    .sidebar-content::-webkit-scrollbar { width: 4px; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+    .sidebar-section-header {
+      display: flex; align-items: center; gap: 4px; padding: 8px 8px 4px;
+    }
+    .sidebar-section-label {
+      flex: 1; font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; transition: background var(--transition);
+    }
+    .sidebar-link:hover { background: var(--bg-tertiary); }
+    .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
+    .sidebar-link-icon { font-size: 16px; flex-shrink: 0; }
+    .sidebar-agent {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition);
+    }
+    .sidebar-agent:hover { background: var(--bg-tertiary); }
+    .agent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0; border-top: 1px solid var(--border-secondary);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--accent-color); cursor: pointer;
+    }
+    .sidebar-email { font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ─── Main area ───────────────────────────────────────── */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ─── Chat thread ─────────────────────────────────────── */
+    .chat-thread {
+      flex: 1; overflow-y: auto; padding: 40px 0 0;
+      display: flex; flex-direction: column;
+    }
+    .chat-thread::-webkit-scrollbar { width: 4px; }
+    .chat-thread::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+
+    .chat-messages {
+      width: 100%; max-width: 760px; margin: 0 auto;
+      padding: 0 24px 32px; display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* User bubble */
+    .msg-row.user { display: flex; justify-content: flex-end; }
+    .msg-bubble.user {
+      max-width: 68%; background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 16px 16px 4px 16px;
+      padding: 12px 16px; font-size: 15px; line-height: 24px;
+    }
+
+    /* AI row */
+    .msg-row.ai { display: flex; flex-direction: column; gap: 8px; }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+    }
+    .ai-badge-icon {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ai-badge-icon svg { width: 11px; height: 11px; color: var(--text-tertiary); }
+    .msg-bubble.ai {
+      font-size: 15px; line-height: 26px; color: var(--text-primary);
+    }
+    .msg-bubble.ai h2 {
+      font-size: 15px; font-weight: 600; margin: 16px 0 6px; color: var(--text-primary);
+    }
+    .msg-bubble.ai h2:first-child { margin-top: 0; }
+    .msg-bubble.ai ul { padding-left: 20px; display: flex; flex-direction: column; gap: 2px; }
+    .msg-bubble.ai p { margin-bottom: 4px; }
+
+    /* ─── Annotation chip (inline) ─────────────────────────── */
+    .ann-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px 2px 2px;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      background: transparent;
+      vertical-align: middle;
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: border-color var(--transition), background var(--transition);
+      margin: 0 1px;
+      text-decoration: none;
+    }
+    .ann-chip:hover { border-color: hsl(252 100% 64% / 0.35); background: hsl(252 100% 64% / 0.04); }
+
+    /* Stacked favicon icons */
+    .ann-icons {
+      display: flex; align-items: center;
+      /* negative margin trick for overlap */
+    }
+    .ann-icon {
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--bg-secondary);
+      border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+      font-size: 10px;
+    }
+    .ann-icon + .ann-icon { margin-left: -6px; }
+
+    /* Favicon as letter avatar (for web) */
+    .ann-favicon {
+      width: 14px; height: 14px; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Doc icon (for local) */
+    .ann-doc-icon {
+      width: 14px; height: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: #6b6879;
+      flex-shrink: 0;
+    }
+    .ann-doc-icon svg { width: 12px; height: 12px; }
+
+    .ann-label {
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+      line-height: 1; letter-spacing: 0;
+    }
+    .ann-count {
+      font-size: 11px; font-weight: 500; color: #6f6e78;
+    }
+
+    /* Local doc chip — subtle doc tint */
+    .ann-chip.doc .ann-icon {
+      background: #f0eeff;
+    }
+
+    /* ─── Annotation tooltip ───────────────────────────────── */
+    .ann-tooltip {
+      position: fixed;
+      z-index: 1000;
+      width: 340px;
+      background: #fff;
+      border: 1px solid var(--border-secondary);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .ann-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Tooltip: web link variant */
+    .tooltip-source-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .tooltip-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px 2px 2px;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      background: var(--bg-primary);
+    }
+    .tooltip-chip-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; border: 1px solid var(--border-secondary);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .tooltip-chip-label {
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    }
+    .tooltip-ext-link {
+      width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tooltip-ext-link svg { width: 14px; height: 14px; }
+
+    .tooltip-title {
+      padding: 10px 12px 4px;
+      font-size: 14px; font-weight: 600; line-height: 20px;
+      color: var(--text-primary);
+    }
+    .tooltip-excerpt {
+      padding: 0 12px 12px;
+      font-size: 13px; line-height: 20px;
+      color: var(--text-secondary);
+    }
+
+    /* Tooltip: local document variant */
+    .tooltip-doc-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .tooltip-doc-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 2px 8px 2px 2px;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      background: var(--bg-primary);
+    }
+    .tooltip-doc-icon-wrap {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #ede9ff; border: 1px solid hsl(252 100% 64% / 0.15);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tooltip-doc-icon-wrap svg { width: 12px; height: 12px; color: #693bff; }
+    .tooltip-doc-chip-label {
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    }
+
+    .tooltip-doc-meta {
+      padding: 8px 12px 0;
+      font-size: 11px; font-weight: 500; color: var(--text-tertiary);
+      letter-spacing: 0.2px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .tooltip-doc-meta-dot {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: var(--text-tertiary); flex-shrink: 0;
+    }
+
+    .tooltip-quote {
+      margin: 6px 12px 12px;
+      background: #f8f7ff;
+      border-left: 2px solid #693bff;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 10px;
+      font-size: 13px; line-height: 20px;
+      color: var(--text-secondary);
+      font-style: normal;
+    }
+
+    /* ─── Sources bar ─────────────────────────────────────── */
+    .sources-bar {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 12px;
+      cursor: pointer;
+      position: relative;
+    }
+    .sources-icons { display: flex; align-items: center; }
+    .sources-icon {
+      width: 20px; height: 20px;
+      border: 2px solid var(--bg-secondary);
+      border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .sources-icon + .sources-icon { margin-left: -6px; }
+    .sources-label {
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    }
+
+    /* ─── Sources panel (expanded) ─────────────────────────── */
+    .sources-panel {
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid var(--border-secondary);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: none;
+    }
+    .sources-panel.open { display: block; }
+    .sources-panel-header {
+      padding: 12px 16px 10px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .sources-list { display: flex; flex-direction: column; }
+    .source-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-secondary);
+      cursor: pointer; transition: background var(--transition);
+      text-decoration: none;
+    }
+    .source-row:last-child { border-bottom: none; }
+    .source-row:hover { background: var(--bg-primary); }
+    .source-row-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden;
+    }
+    /* web source icon: favicon letter */
+    .source-row-icon.web {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+    }
+    /* doc source icon */
+    .source-row-icon.doc {
+      background: #ede9ff;
+    }
+    .source-row-icon.doc svg { width: 14px; height: 14px; color: #693bff; }
+    .source-row-body { flex: 1; min-width: 0; }
+    .source-row-title {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .source-row-meta {
+      font-size: 12px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .source-row-ext {
+      width: 14px; height: 14px; color: var(--text-tertiary); flex-shrink: 0;
+    }
+    .source-row-ext svg { width: 14px; height: 14px; }
+
+    /* ─── Prompt box ──────────────────────────────────────── */
+    .prompt-wrap {
+      width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto;
+    }
+    .prompt-box {
+      position: relative; background: #fff;
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+    }
+    .prompt-textarea-row { padding: 14px 16px 0; }
+    .prompt-textarea {
+      width: 100%; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 15px; line-height: 24px;
+      color: var(--text-primary); background: transparent;
+      max-height: 200px; overflow-y: auto;
+    }
+    .prompt-textarea::placeholder { color: var(--text-placeholder); }
+    .prompt-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 12px;
+    }
+    .prompt-actions-left { display: flex; align-items: center; gap: 2px; }
+    .prompt-actions-right { display: flex; align-items: center; gap: 4px; }
+    .prompt-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .prompt-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-btn svg { width: 16px; height: 16px; }
+    .prompt-btn-divider { width: 1px; height: 18px; background: var(--border-secondary); margin: 0 2px; }
+    .prompt-icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
+    }
+    .prompt-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-icon-btn svg { width: 18px; height: 18px; }
+
+    /* ─── Version switcher ────────────────────────────────── */
+    .version-switcher {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 9999; font-family: 'Inter', sans-serif;
+    }
+    .version-trigger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(18,0,69,.08); cursor: pointer; user-select: none;
+    }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .version-trigger-desc { font-size: 12px; color: var(--text-tertiary); }
+    .version-trigger svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform var(--transition); }
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px; min-width: 200px; display: none;
+    }
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: background var(--transition);
+    }
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 90px; }
+    .version-option-desc { font-size: 13px; color: var(--text-secondary); }
+    .version-option-check { margin-left: auto; width: 14px; height: 14px; color: var(--accent-color); opacity: 0; }
+    .version-option.current .version-option-check { opacity: 1; }
+
+    /* favicon letter helpers */
+    .fav-f  { background: #e02020; font-size: 8px; font-weight: 700; color: #fff; width: 14px; height: 14px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+    .fav-s  { background: #1e3c8c; font-size: 8px; font-weight: 700; color: #fff; width: 14px; height: 14px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+    .fav-c  { background: #0066cc; font-size: 8px; font-weight: 700; color: #fff; width: 14px; height: 14px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+    .fav-n  { background: #1a1a2e; font-size: 8px; font-weight: 700; color: #fff; width: 14px; height: 14px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+    .fav-b  { background: #d35400; font-size: 8px; font-weight: 700; color: #fff; width: 14px; height: 14px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<!-- Tooltip (single, repositioned via JS) -->
+<div class="ann-tooltip" id="ann-tooltip"></div>
+
+<div class="body-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
+        </div>
+        <span class="logo-name">nexos<sup>ai</sup></span>
+      </a>
+      <button class="icon-btn" title="Collapse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search chats
+      </div>
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Agents
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-content">
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Agents</span>
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#693bff"></div>Sprint Architect
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#f59e0b"></div>Sentiment Strategist
+      </div>
+      <div class="sidebar-section-header" style="margin-top:8px">
+        <span class="sidebar-section-label">Recent Chats</span>
+      </div>
+      <div class="sidebar-link active"><span class="sidebar-link-icon">💬</span>Cybersecurity market trends for 2026</div>
+      <div class="sidebar-link"><span class="sidebar-link-icon">💬</span>EV Market Trends Analysis</div>
+      <div class="sidebar-link"><span class="sidebar-link-icon">💬</span>Q3 Report deep-dive</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar">A</div>
+      <span class="sidebar-email">andrzej@nexos.ai</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <div class="chat-thread">
+      <div class="chat-messages">
+
+        <!-- User message -->
+        <div class="msg-row user">
+          <div class="msg-bubble user">Analyze the current state of cybersecurity market and its trends, using our Q3 research report and online sources.</div>
+        </div>
+
+        <!-- AI response -->
+        <div class="msg-row ai">
+          <div class="ai-badge">
+            <div class="ai-badge-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
+            </div>
+            GPT-4o mini · Search Preview
+          </div>
+
+          <div class="msg-bubble ai">
+            <p>As of January 2025, the cybersecurity market is experiencing significant growth and transformation, driven by technological advancements, evolving threats, and regulatory changes.</p>
+
+            <h2>Key Trends:</h2>
+            <ul>
+              <li><strong>Cloud Security:</strong> With the rise of cloud adoption, securing cloud environments has become paramount. This includes Infrastructure-as-a-Service (IaaS), Platform-as-a-Service (PaaS), and Software-as-a-Service (SaaS) offerings.
+                <!-- web annotation -->
+                <span class="ann-chip"
+                  data-type="web"
+                  data-source-label="Forbes.com"
+                  data-fav-class="fav-f"
+                  data-fav-letter="F"
+                  data-title="Five Trends That Will Shape Cybersecurity In 2025"
+                  data-excerpt="1. Rise Of Agentic AI. Artificial intelligence is already playing a crucial role in cybersecurity, but its influence has grown exponentially. AI and machine learning will …">
+                  <span class="ann-icons">
+                    <span class="ann-icon"><span class="fav-f">F</span></span>
+                  </span>
+                  <span class="ann-label">Forbes.com</span>
+                </span>
+              </li>
+
+              <li><strong>Internet of Things (IoT) Security:</strong> The proliferation of IoT devices has significantly expanded the attack surface. Securing these devices and the data they generate is a challenge.
+                <!-- web annotation with multiple sources -->
+                <span class="ann-chip"
+                  data-type="web"
+                  data-source-label="Forbes.com"
+                  data-fav-class="fav-f"
+                  data-fav-letter="F"
+                  data-title="Five Trends That Will Shape Cybersecurity In 2025"
+                  data-excerpt="1. Rise Of Agentic AI. Artificial intelligence is already playing a crucial role in cybersecurity, but its influence has grown exponentially. AI and machine learning will …">
+                  <span class="ann-icons">
+                    <span class="ann-icon"><span class="fav-f">F</span></span>
+                    <span class="ann-icon"><span class="fav-s">S</span></span>
+                    <span class="ann-icon"><span class="fav-n">N</span></span>
+                  </span>
+                  <span class="ann-label">Forbes.com</span>
+                  <span class="ann-count">+3</span>
+                </span>
+              </li>
+
+              <li><strong>Zero Trust Security:</strong> This security model assumes no one or device should be trusted implicitly and continuously verifies access rights before granting any access.
+                <!-- web annotation -->
+                <span class="ann-chip"
+                  data-type="web"
+                  data-source-label="Cybernews.de"
+                  data-fav-class="fav-c"
+                  data-fav-letter="C"
+                  data-title="Zero Trust Architecture: The New Security Standard"
+                  data-excerpt="Zero Trust has moved from concept to mainstream implementation, with 72% of enterprises adopting some form of zero-trust policy as of Q4 2024 …">
+                  <span class="ann-icons">
+                    <span class="ann-icon"><span class="fav-c">C</span></span>
+                  </span>
+                  <span class="ann-label">Cybernews.de</span>
+                </span>
+              </li>
+
+              <li><strong>AI-driven threat detection:</strong> Our internal analysis confirms that machine learning models reduce mean time to detect (MTTD) by up to 63% compared to rule-based systems.
+                <!-- LOCAL DOC annotation -->
+                <span class="ann-chip doc"
+                  data-type="doc"
+                  data-source-label="Q3_Security_Report.pdf"
+                  data-doc-page="Page 14"
+                  data-doc-section="Section 3.2 — AI Threat Detection"
+                  data-quote="Machine learning-based anomaly detection reduced MTTD from an average of 18.4 hours to 6.8 hours across all monitored client environments in Q3 2024, representing a 63% improvement over rule-based baseline.">
+                  <span class="ann-icons">
+                    <span class="ann-icon" style="background:#ede9ff; border-color: hsl(252 100% 64% / 0.15);">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="11" height="11">
+                        <rect x="2" y="1" width="9" height="13" rx="1.5"/>
+                        <path d="M5 5h4M5 8h4M5 11h2"/>
+                        <path d="M9 1v3.5H12" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="ann-label">Q3 Report</span>
+                  <span class="ann-count">p.14</span>
+                </span>
+              </li>
+
+              <li><strong>Ransomware Evolution:</strong> Ransomware attacks remain a significant threat, with attackers demanding increasingly high ransoms and targeting critical infrastructure.
+                <!-- web annotation -->
+                <span class="ann-chip"
+                  data-type="web"
+                  data-source-label="Cityspace.co.uk"
+                  data-fav-class="fav-b"
+                  data-fav-letter="B"
+                  data-title="Ransomware attacks hit record high in 2024"
+                  data-excerpt="The average ransom demand increased by 82% year-over-year, reaching $1.2M in Q3 2024. Critical infrastructure sectors including healthcare and energy were the primary targets …">
+                  <span class="ann-icons">
+                    <span class="ann-icon"><span class="fav-b">B</span></span>
+                  </span>
+                  <span class="ann-label">Cityspace.co.uk</span>
+                </span>
+              </li>
+            </ul>
+
+            <h2>Challenges:</h2>
+            <ul>
+              <li><strong>Cybersecurity Skills Shortage:</strong> Our Q3 report highlights a critical internal gap — only 34% of our surveyed clients have a dedicated security operations team.
+                <!-- LOCAL DOC annotation -->
+                <span class="ann-chip doc"
+                  data-type="doc"
+                  data-source-label="Q3_Security_Report.pdf"
+                  data-doc-page="Page 7"
+                  data-doc-section="Section 1.4 — Talent Gap Analysis"
+                  data-quote="Across the 142 mid-market clients surveyed in Q3, only 34% reported having a dedicated Security Operations Center (SOC) or in-house security team. The remaining 66% rely on generalist IT staff or external vendors for incident response.">
+                  <span class="ann-icons">
+                    <span class="ann-icon" style="background:#ede9ff; border-color: hsl(252 100% 64% / 0.15);">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="11" height="11">
+                        <rect x="2" y="1" width="9" height="13" rx="1.5"/>
+                        <path d="M5 5h4M5 8h4M5 11h2"/>
+                        <path d="M9 1v3.5H12" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="ann-label">Q3 Report</span>
+                  <span class="ann-count">p.7</span>
+                </span>
+              </li>
+
+              <li><strong>Evolving Threat Landscape:</strong> Cyber threats are constantly evolving, making it difficult for organizations to keep up with the latest threats and vulnerabilities.
+                <!-- web annotation -->
+                <span class="ann-chip"
+                  data-type="web"
+                  data-source-label="Indigocomps.net"
+                  data-fav-class="fav-n"
+                  data-fav-letter="I"
+                  data-title="2025 Threat Intelligence Report"
+                  data-excerpt="The threat landscape has evolved dramatically, with 340+ new malware families identified in Q3 alone. Threat actors are increasingly leveraging AI to automate and personalize attacks …">
+                  <span class="ann-icons">
+                    <span class="ann-icon"><span class="fav-n">I</span></span>
+                  </span>
+                  <span class="ann-label">Indigocomps.net</span>
+                </span>
+              </li>
+
+              <li><strong>Budget Constraints:</strong> As noted in the Q3 report, 58% of clients plan to increase their security budget by less than 10% despite growing threats.
+                <!-- LOCAL DOC annotation with different doc -->
+                <span class="ann-chip doc"
+                  data-type="doc"
+                  data-source-label="Budget_Forecast_2025.xlsx"
+                  data-doc-page="Sheet 3"
+                  data-doc-section="Security Spend Projections"
+                  data-quote="58% of respondents indicated planned security budget increases below 10% for FY2025. 22% plan no increase, citing economic uncertainty. Only 8% plan increases above 25%.">
+                  <span class="ann-icons">
+                    <span class="ann-icon" style="background:#e8f5e9; border-color: hsl(142 60% 45% / 0.2);">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="#2e7d32" stroke-width="1.5" width="11" height="11">
+                        <rect x="1" y="1" width="14" height="14" rx="2"/>
+                        <path d="M1 5h14"/>
+                        <path d="M5 5v10M10 5v10"/>
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="ann-label">Budget Forecast</span>
+                  <span class="ann-count">S3</span>
+                </span>
+              </li>
+            </ul>
+
+            <!-- Sources bar -->
+            <div class="sources-bar" id="sources-toggle" onclick="toggleSources()">
+              <div class="sources-icons">
+                <div class="sources-icon"><span class="fav-f" style="width:12px;height:12px;font-size:7px;">F</span></div>
+                <div class="sources-icon" style="background:#ede9ff;">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="10" height="10">
+                    <rect x="2" y="1" width="9" height="13" rx="1.5"/>
+                    <path d="M5 5h4M5 8h4M5 11h2"/>
+                    <path d="M9 1v3.5H12" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="sources-icon"><span class="fav-c" style="width:12px;height:12px;font-size:7px;">C</span></div>
+                <div class="sources-icon" style="background:#e8f5e9;">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#2e7d32" stroke-width="1.5" width="10" height="10">
+                    <rect x="1" y="1" width="14" height="14" rx="2"/>
+                    <path d="M1 5h14M5 5v10M10 5v10"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="sources-label">Sources</span>
+            </div>
+
+            <!-- Sources panel -->
+            <div class="sources-panel" id="sources-panel">
+              <div class="sources-panel-header">5 sources</div>
+              <div class="sources-list">
+
+                <!-- Web source -->
+                <a class="source-row" href="#">
+                  <div class="source-row-icon web"><span class="fav-f">F</span></div>
+                  <div class="source-row-body">
+                    <div class="source-row-title">Five Trends That Will Shape Cybersecurity In 2025</div>
+                    <div class="source-row-meta">Forbes.com</div>
+                  </div>
+                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
+                </a>
+
+                <!-- Local doc source — PDF -->
+                <div class="source-row">
+                  <div class="source-row-icon doc">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="14" height="14">
+                      <rect x="2" y="1" width="9" height="13" rx="1.5"/>
+                      <path d="M5 5h4M5 8h4M5 11h2"/>
+                      <path d="M9 1v3.5H12" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="source-row-body">
+                    <div class="source-row-title">Q3_Security_Report.pdf</div>
+                    <div class="source-row-meta">Local document · Pages 7, 14</div>
+                  </div>
+                </div>
+
+                <!-- Web source -->
+                <a class="source-row" href="#">
+                  <div class="source-row-icon web"><span class="fav-c">C</span></div>
+                  <div class="source-row-body">
+                    <div class="source-row-title">Zero Trust Architecture: The New Security Standard</div>
+                    <div class="source-row-meta">Cybernews.de</div>
+                  </div>
+                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
+                </a>
+
+                <!-- Local doc source — XLSX -->
+                <div class="source-row">
+                  <div class="source-row-icon doc" style="background:#e8f5e9;">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="#2e7d32" stroke-width="1.5" width="14" height="14">
+                      <rect x="1" y="1" width="14" height="14" rx="2"/>
+                      <path d="M1 5h14M5 5v10M10 5v10"/>
+                    </svg>
+                  </div>
+                  <div class="source-row-body">
+                    <div class="source-row-title">Budget_Forecast_2025.xlsx</div>
+                    <div class="source-row-meta">Local document · Sheet 3</div>
+                  </div>
+                </div>
+
+                <!-- Web source -->
+                <a class="source-row" href="#">
+                  <div class="source-row-icon web"><span class="fav-b">B</span></div>
+                  <div class="source-row-body">
+                    <div class="source-row-title">Ransomware attacks hit record high in 2024</div>
+                    <div class="source-row-meta">Cityspace.co.uk</div>
+                  </div>
+                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
+                </a>
+
+              </div>
+            </div>
+
+          </div><!-- /.msg-bubble.ai -->
+        </div><!-- /.msg-row.ai -->
+
+      </div>
+    </div><!-- /.chat-thread -->
+
+    <!-- Prompt box -->
+    <div class="prompt-wrap">
+      <div class="prompt-box">
+        <div class="prompt-textarea-row">
+          <textarea class="prompt-textarea" rows="1" placeholder="Ask follow up"></textarea>
+        </div>
+        <div class="prompt-actions">
+          <div class="prompt-actions-left">
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Attach
+            </button>
+            <div class="prompt-btn-divider"></div>
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Tools
+            </button>
+          </div>
+          <div class="prompt-actions-right">
+            <button class="prompt-icon-btn" title="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Version switcher -->
+<div class="version-switcher" id="ver">
+  <div class="version-trigger" onclick="document.getElementById('ver').classList.toggle('open')">
+    <span class="version-trigger-label">Annotations</span>
+    <span class="version-trigger-desc">Local doc variant</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+  </div>
+  <div class="version-dropdown">
+    <a class="version-option" href="index.html">
+      <span class="version-option-label">Index</span>
+      <span class="version-option-desc">Overview</span>
+      <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </a>
+    <a class="version-option" href="v4.html">
+      <span class="version-option-label">V4</span>
+      <span class="version-option-desc">Latest</span>
+      <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </a>
+    <a class="version-option current" href="annotations.html">
+      <span class="version-option-label">Annotations</span>
+      <span class="version-option-desc">This file</span>
+      <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </a>
+  </div>
+</div>
+
+<script>
+  // ─── Sources panel toggle ────────────────────────────────
+  function toggleSources() {
+    document.getElementById('sources-panel').classList.toggle('open');
+  }
+
+  // ─── Annotation tooltip logic ───────────────────────────
+  const tooltip = document.getElementById('ann-tooltip');
+  let hideTimer = null;
+
+  function showTooltip(chip, e) {
+    clearTimeout(hideTimer);
+    const type = chip.dataset.type;
+
+    if (type === 'web') {
+      const favLetter = chip.dataset.favLetter || '?';
+      const favClass  = chip.dataset.favClass  || 'fav-f';
+      tooltip.innerHTML = `
+        <div class="tooltip-source-bar">
+          <div class="tooltip-chip">
+            <div class="tooltip-chip-icon">
+              <span class="${favClass}" style="width:14px;height:14px;font-size:8px;">${favLetter}</span>
+            </div>
+            <span class="tooltip-chip-label">${chip.dataset.sourceLabel}</span>
+          </div>
+          <div class="tooltip-ext-link">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/>
+            </svg>
+          </div>
+        </div>
+        <div class="tooltip-title">${chip.dataset.title}</div>
+        <div class="tooltip-excerpt">${chip.dataset.excerpt}</div>
+      `;
+    } else {
+      // local document
+      const docIcon = chip.querySelector('.ann-icon').innerHTML;
+      tooltip.innerHTML = `
+        <div class="tooltip-doc-bar">
+          <div class="tooltip-doc-chip">
+            <div class="tooltip-doc-icon-wrap">
+              ${chip.querySelector('svg') ? chip.querySelector('.ann-icon').innerHTML : `
+              <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="12" height="12">
+                <rect x="2" y="1" width="9" height="13" rx="1.5"/>
+                <path d="M5 5h4M5 8h4M5 11h2"/>
+                <path d="M9 1v3.5H12" stroke-linejoin="round"/>
+              </svg>`}
+            </div>
+            <span class="tooltip-doc-chip-label">${chip.dataset.sourceLabel}</span>
+          </div>
+        </div>
+        <div class="tooltip-doc-meta">
+          ${chip.dataset.docPage}
+          <span class="tooltip-doc-meta-dot"></span>
+          ${chip.dataset.docSection}
+        </div>
+        <blockquote class="tooltip-quote">"${chip.dataset.quote}"</blockquote>
+      `;
+    }
+
+    positionTooltip(chip);
+    tooltip.classList.add('visible');
+  }
+
+  function positionTooltip(chip) {
+    const rect = chip.getBoundingClientRect();
+    const tw = 340;
+    const margin = 8;
+    let left = rect.left;
+    let top  = rect.bottom + margin;
+
+    // Clamp to viewport
+    if (left + tw > window.innerWidth - margin) {
+      left = window.innerWidth - tw - margin;
+    }
+    if (left < margin) left = margin;
+
+    // Flip above if no room below
+    const th = 160; // approximate tooltip height
+    if (top + th > window.innerHeight - margin) {
+      top = rect.top - th - margin;
+    }
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = top  + 'px';
+  }
+
+  function scheduleHide() {
+    hideTimer = setTimeout(() => {
+      tooltip.classList.remove('visible');
+    }, 150);
+  }
+
+  // Attach events to all annotation chips
+  document.querySelectorAll('.ann-chip').forEach(chip => {
+    chip.addEventListener('mouseenter', e => showTooltip(chip, e));
+    chip.addEventListener('mouseleave', scheduleHide);
+  });
+
+  // Keep tooltip alive when hovering it
+  tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+  tooltip.addEventListener('mouseleave', scheduleHide);
+
+  // Close version switcher on outside click
+  document.addEventListener('click', e => {
+    const ver = document.getElementById('ver');
+    if (!ver.contains(e.target)) ver.classList.remove('open');
+  });
+</script>
+</body>
+</html>
