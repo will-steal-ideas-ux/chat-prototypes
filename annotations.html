@@ -515,10 +515,12 @@
     /* ─── Sources bar ─────────────────────────────────────── */
     .sources-bar {
       display: inline-flex; align-items: center; gap: 6px;
-      margin-top: 12px;
-      cursor: pointer;
-      position: relative;
+      margin-top: 12px; cursor: pointer; position: relative;
+      padding: 3px 8px 3px 3px;
+      border-radius: var(--radius-full);
+      transition: background var(--transition);
     }
+    .sources-bar:hover { background: var(--bg-primary); }
     .sources-icons { display: flex; align-items: center; }
     .sources-icon {
       width: 20px; height: 20px;
@@ -529,63 +531,98 @@
       overflow: hidden; flex-shrink: 0;
     }
     .sources-icon + .sources-icon { margin-left: -6px; }
-    .sources-label {
-      font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    }
+    .sources-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
 
-    /* ─── Sources panel (expanded) ─────────────────────────── */
-    .sources-panel {
-      margin-top: 8px;
+    /* ─── Sources drawer ───────────────────────────────────── */
+    .sources-overlay {
+      position: fixed; inset: 0; z-index: 1500;
+      pointer-events: none;
+    }
+    .sources-overlay.open { pointer-events: auto; }
+
+    .sources-scrim {
+      position: absolute; inset: 0;
+      background: hsl(252 20% 10% / 0.25);
+      opacity: 0; transition: opacity .25s ease;
+    }
+    .sources-overlay.open .sources-scrim { opacity: 1; }
+
+    .sources-drawer {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: 600px; max-width: 100vw;
       background: #fff;
+      box-shadow: 0 0 0 1px rgba(51,51,51,.07), 0 3px 6px rgba(51,51,51,.15);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    .sources-overlay.open .sources-drawer { transform: translateX(0); }
+
+    .sources-drawer-header {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 24px 24px 12px;
+      flex-shrink: 0;
+    }
+    .sources-drawer-title {
+      flex: 1; font-family: 'DM Sans', sans-serif; font-weight: 600;
+      font-size: 22px; line-height: 30px; color: var(--text-primary);
+    }
+    .sources-drawer-close {
+      width: 30px; height: 30px; border: none; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary); border-radius: 6px; flex-shrink: 0; margin-top: 2px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .sources-drawer-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sources-drawer-close svg { width: 18px; height: 18px; }
+
+    .sources-drawer-body {
+      flex: 1; overflow-y: auto; padding: 12px 24px 24px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .sources-drawer-body::-webkit-scrollbar { width: 4px; }
+    .sources-drawer-body::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+
+    /* Source card */
+    .sp-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
       border: 1px solid var(--border-secondary);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      display: none;
+      cursor: pointer; text-decoration: none; display: block;
+      transition: background var(--transition), border-color var(--transition);
     }
-    .sources-panel.open { display: block; }
-    .sources-panel-header {
-      padding: 12px 16px 10px;
-      font-size: 13px; font-weight: 600; color: var(--text-primary);
-      border-bottom: 1px solid var(--border-secondary);
-    }
-    .sources-list { display: flex; flex-direction: column; }
-    .source-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border-secondary);
-      cursor: pointer; transition: background var(--transition);
-      text-decoration: none;
-    }
-    .source-row:last-child { border-bottom: none; }
-    .source-row:hover { background: var(--bg-primary); }
-    .source-row-icon {
-      width: 24px; height: 24px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; overflow: hidden;
-    }
-    /* web source icon: favicon letter */
-    .source-row-icon.web {
+    .sp-card:hover { background: var(--bg-primary); border-color: hsl(252 100% 64% / 0.25); }
+    .sp-chip-row { margin-bottom: 12px; }
+    .sp-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px 2px 2px;
+      border-radius: var(--radius-full);
       background: var(--bg-primary);
-      border: 1px solid var(--border-secondary);
     }
-    /* doc source icon */
-    .source-row-icon.doc {
-      background: #ede9ff;
+    .sp-chip-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; border: 1px solid var(--border-secondary);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .source-row-icon.doc svg { width: 14px; height: 14px; color: #693bff; }
-    .source-row-body { flex: 1; min-width: 0; }
-    .source-row-title {
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .sp-chip-icon.doc-pdf { background: #ede9ff; border-color: hsl(252 100% 64% / 0.2); }
+    .sp-chip-icon.doc-xlsx { background: #e8f5e9; border-color: hsl(142 60% 45% / 0.2); }
+    .sp-chip-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .sp-title {
+      padding-left: 8px;
+      font-size: 14px; font-weight: 600; line-height: 21px;
+      color: var(--text-primary); margin-bottom: 2px;
     }
-    .source-row-meta {
-      font-size: 12px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .sp-excerpt {
+      padding-left: 8px;
+      font-size: 14px; line-height: 21px; color: var(--text-secondary);
+      max-height: 42px; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
-    .source-row-ext {
-      width: 14px; height: 14px; color: var(--text-tertiary); flex-shrink: 0;
+    .sp-meta {
+      padding-left: 8px; margin-top: 4px;
+      font-size: 12px; color: var(--text-tertiary);
     }
-    .source-row-ext svg { width: 14px; height: 14px; }
 
     /* ─── Prompt box ──────────────────────────────────────── */
     .prompt-wrap {
@@ -947,72 +984,6 @@
               <span class="sources-label">Sources</span>
             </div>
 
-            <!-- Sources panel -->
-            <div class="sources-panel" id="sources-panel">
-              <div class="sources-panel-header">5 sources</div>
-              <div class="sources-list">
-
-                <!-- Web source -->
-                <a class="source-row" href="#">
-                  <div class="source-row-icon web"><span class="fav-f">F</span></div>
-                  <div class="source-row-body">
-                    <div class="source-row-title">Five Trends That Will Shape Cybersecurity In 2025</div>
-                    <div class="source-row-meta">Forbes.com</div>
-                  </div>
-                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
-                </a>
-
-                <!-- Local doc source — PDF -->
-                <div class="source-row">
-                  <div class="source-row-icon doc">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="14" height="14">
-                      <rect x="2" y="1" width="9" height="13" rx="1.5"/>
-                      <path d="M5 5h4M5 8h4M5 11h2"/>
-                      <path d="M9 1v3.5H12" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                  <div class="source-row-body">
-                    <div class="source-row-title">Q3_Security_Report.pdf</div>
-                    <div class="source-row-meta">Local document · Pages 7, 14</div>
-                  </div>
-                </div>
-
-                <!-- Web source -->
-                <a class="source-row" href="#">
-                  <div class="source-row-icon web"><span class="fav-c">C</span></div>
-                  <div class="source-row-body">
-                    <div class="source-row-title">Zero Trust Architecture: The New Security Standard</div>
-                    <div class="source-row-meta">Cybernews.de</div>
-                  </div>
-                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
-                </a>
-
-                <!-- Local doc source — XLSX -->
-                <div class="source-row">
-                  <div class="source-row-icon doc" style="background:#e8f5e9;">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="#2e7d32" stroke-width="1.5" width="14" height="14">
-                      <rect x="1" y="1" width="14" height="14" rx="2"/>
-                      <path d="M1 5h14M5 5v10M10 5v10"/>
-                    </svg>
-                  </div>
-                  <div class="source-row-body">
-                    <div class="source-row-title">Budget_Forecast_2025.xlsx</div>
-                    <div class="source-row-meta">Local document · Sheet 3</div>
-                  </div>
-                </div>
-
-                <!-- Web source -->
-                <a class="source-row" href="#">
-                  <div class="source-row-icon web"><span class="fav-b">B</span></div>
-                  <div class="source-row-body">
-                    <div class="source-row-title">Ransomware attacks hit record high in 2024</div>
-                    <div class="source-row-meta">Cityspace.co.uk</div>
-                  </div>
-                  <svg class="source-row-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M10 2h4m0 0v4m0-4L7 9"/></svg>
-                </a>
-
-              </div>
-            </div>
 
           </div><!-- /.msg-bubble.ai -->
         </div><!-- /.msg-row.ai -->
@@ -1049,6 +1020,103 @@
   </main>
 </div>
 
+<!-- Sources drawer -->
+<div class="sources-overlay" id="sources-overlay">
+  <div class="sources-scrim" onclick="toggleSources()"></div>
+  <div class="sources-drawer">
+    <div class="sources-drawer-header">
+      <span class="sources-drawer-title">Sources</span>
+      <button class="sources-drawer-close" onclick="toggleSources()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sources-drawer-body">
+
+      <!-- Forbes web source -->
+      <a class="sp-card" href="#">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon"><span class="fav-f">F</span></div>
+            <span class="sp-chip-label">Forbes.com</span>
+          </div>
+        </div>
+        <div class="sp-title">Five Trends That Will Shape Cybersecurity In 2025</div>
+        <div class="sp-excerpt">1. Rise Of Agentic AI. Artificial intelligence is already playing a crucial role in cybersecurity, but its influence has grown exponentially. AI and machine learning will evolve from tools that aid in threat detection to fully integrated systems capable of autonomous defense.</div>
+      </a>
+
+      <!-- Q3 Report local PDF -->
+      <div class="sp-card">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon doc-pdf">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="12" height="12"><rect x="2" y="1" width="9" height="13" rx="1.5"/><path d="M5 5h4M5 8h4M5 11h2"/><path d="M9 1v3.5H12" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="sp-chip-label">Q3_Security_Report.pdf</span>
+          </div>
+        </div>
+        <div class="sp-title">AI-Assisted Threat Detection — Section 3.2</div>
+        <div class="sp-excerpt">Machine learning-based anomaly detection reduced MTTD from an average of 18.4 hours to 6.8 hours across all monitored client environments in Q3 2024, representing a 63% improvement over rule-based baseline.</div>
+        <div class="sp-meta">Local document · Page 14</div>
+      </div>
+
+      <!-- Cybernews web source -->
+      <a class="sp-card" href="#">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon"><span class="fav-c">C</span></div>
+            <span class="sp-chip-label">Cybernews.de</span>
+          </div>
+        </div>
+        <div class="sp-title">Zero Trust Architecture: The New Security Standard</div>
+        <div class="sp-excerpt">Zero Trust has moved from concept to mainstream implementation, with 72% of enterprises adopting some form of zero-trust policy as of Q4 2024. The shift is driven by increasing remote workforces and cloud-first strategies.</div>
+      </a>
+
+      <!-- Q3 Report — talent gap -->
+      <div class="sp-card">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon doc-pdf">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#693bff" stroke-width="1.5" width="12" height="12"><rect x="2" y="1" width="9" height="13" rx="1.5"/><path d="M5 5h4M5 8h4M5 11h2"/><path d="M9 1v3.5H12" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="sp-chip-label">Q3_Security_Report.pdf</span>
+          </div>
+        </div>
+        <div class="sp-title">Talent Gap Analysis — Section 1.4</div>
+        <div class="sp-excerpt">Across the 142 mid-market clients surveyed in Q3, only 34% reported having a dedicated SOC or in-house security team. The remaining 66% rely on generalist IT staff or external vendors for incident response.</div>
+        <div class="sp-meta">Local document · Page 7</div>
+      </div>
+
+      <!-- Budget Forecast XLSX -->
+      <div class="sp-card">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon doc-xlsx">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#2e7d32" stroke-width="1.5" width="12" height="12"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M1 5h14M5 5v10M10 5v10"/></svg>
+            </div>
+            <span class="sp-chip-label">Budget_Forecast_2025.xlsx</span>
+          </div>
+        </div>
+        <div class="sp-title">Security Spend Projections — FY2025</div>
+        <div class="sp-excerpt">58% of respondents indicated planned security budget increases below 10% for FY2025. 22% plan no increase, citing economic uncertainty. Only 8% plan increases above 25%.</div>
+        <div class="sp-meta">Local document · Sheet 3</div>
+      </div>
+
+      <!-- Cityspace web source -->
+      <a class="sp-card" href="#">
+        <div class="sp-chip-row">
+          <div class="sp-chip">
+            <div class="sp-chip-icon"><span class="fav-b">B</span></div>
+            <span class="sp-chip-label">Cityspace.co.uk</span>
+          </div>
+        </div>
+        <div class="sp-title">Ransomware attacks hit record high in 2024</div>
+        <div class="sp-excerpt">The average ransom demand increased by 82% year-over-year, reaching $1.2M in Q3 2024. Critical infrastructure sectors including healthcare and energy were the primary targets of sophisticated ransomware groups.</div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
 <!-- Version switcher -->
 <div class="version-switcher" id="ver">
   <div class="version-trigger" onclick="document.getElementById('ver').classList.toggle('open')">
@@ -1076,9 +1144,9 @@
 </div>
 
 <script>
-  // ─── Sources panel toggle ────────────────────────────────
+  // ─── Sources drawer toggle ───────────────────────────────
   function toggleSources() {
-    document.getElementById('sources-panel').classList.toggle('open');
+    document.getElementById('sources-overlay').classList.toggle('open');
   }
 
   // ─── Annotation tooltip logic ───────────────────────────
@@ -1262,7 +1330,10 @@
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.getElementById('doc-modal-overlay').classList.remove('open');
+    if (e.key === 'Escape') {
+      document.getElementById('doc-modal-overlay').classList.remove('open');
+      document.getElementById('sources-overlay').classList.remove('open');
+    }
   });
 </script>
 </body>
