@@ -483,17 +483,15 @@
                   borderTop: "1px solid hsl(240, 6%, 90%)",
                   gap: 4, flexShrink: 0,
                 }}>
-                  {!showTools && (
-                    <button style={{
-                      display: "flex", alignItems: "center", gap: 5,
-                      background: "transparent", border: "1px solid transparent",
-                      borderRadius: 7, padding: "5px 10px",
-                      cursor: "pointer", fontSize: 13, color: "#6f6e78", transition: "all 0.12s",
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "#f7f7f8"; e.currentTarget.style.borderColor = "hsl(240,6%,90%)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
-                    >+ Attach</button>
-                  )}
+                  <button style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    background: "transparent", border: "1px solid transparent",
+                    borderRadius: 7, padding: "5px 10px",
+                    cursor: "pointer", fontSize: 13, color: "#6f6e78", transition: "all 0.12s",
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#f7f7f8"; e.currentTarget.style.borderColor = "hsl(240,6%,90%)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
+                  >+ Attach</button>
 
                   <button onClick={() => showTools ? closeTools() : openTools()} style={{
                     display: "flex", alignItems: "center", gap: 5,
@@ -521,31 +519,15 @@
 
                   <div style={{ flex: 1 }} />
 
-                  {showTools ? (
-                    /* Done button when tools are open */
-                    <button onClick={closeTools} style={{
-                      padding: "5px 16px",
-                      background: "#5a38e8", border: "none",
-                      borderRadius: 7, cursor: "pointer",
-                      fontSize: 13, fontWeight: 600, color: "#fff",
-                      transition: "background 0.15s",
-                    }}
-                      onMouseEnter={e => e.currentTarget.style.background = "#4c2ed4"}
-                      onMouseLeave={e => e.currentTarget.style.background = "#5a38e8"}
-                    >Done</button>
-                  ) : (
-                    <>
-                      <span style={{ fontSize: 12.5, color: "#6f6e78", userSelect: "none" }}>Auto ⌄</span>
-                      <button onClick={submit} style={{
-                        width: 32, height: 32, borderRadius: "50%",
-                        background: text.trim() ? "#5a38e8" : "hsl(240, 5%, 92%)",
-                        border: "none", cursor: text.trim() ? "pointer" : "default",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 15, color: text.trim() ? "#fff" : "#6f6e78",
-                        transition: "background 0.2s", flexShrink: 0,
-                      }}>↑</button>
-                    </>
-                  )}
+                  <span style={{ fontSize: 12.5, color: "#6f6e78", userSelect: "none" }}>Auto ⌄</span>
+                  <button onClick={submit} style={{
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: text.trim() ? "#5a38e8" : "hsl(240, 5%, 92%)",
+                    border: "none", cursor: text.trim() ? "pointer" : "default",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 15, color: text.trim() ? "#fff" : "#6f6e78",
+                    transition: "background 0.2s", flexShrink: 0,
+                  }}>↑</button>
                 </div>
               </div>
             </div>
