@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tools Inline Tray</title>
+  <title>Tools Replace Input</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     :root {
-      /* shadcn design tokens */
       --background: 0 0% 100%;
       --foreground: 258 6% 15%;
       --card: 0 0% 100%;
@@ -51,7 +50,7 @@
       background: #1e1e1e; border: 1px solid #333;
       border-radius: 10px;
       box-shadow: 0 8px 24px rgba(0,0,0,.4);
-      padding: 4px; min-width: 200px; display: none;
+      padding: 4px; min-width: 220px; display: none;
     }
     .version-switcher.open .version-dropdown { display: block; }
     .version-option {
@@ -74,7 +73,7 @@
   <div class="version-switcher" id="version-switcher">
     <div class="version-trigger" onclick="toggleVersion(event)">
       <span class="version-trigger-label">Tools Tray</span>
-      <span class="version-trigger-desc">Inline Tray</span>
+      <span class="version-trigger-desc">Replace Input</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
     </div>
     <div class="version-dropdown">
@@ -86,8 +85,8 @@
       <a class="version-option" href="v4.2.html"><span class="version-option-label">V4.2</span><span class="version-option-desc">Card in Prompt</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
       <a class="version-option" href="v4.3.html"><span class="version-option-label">V4.3</span><span class="version-option-desc">Prompt → Card</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
       <a class="version-option" href="canvas.html"><span class="version-option-label">V5</span><span class="version-option-desc">Canvas</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
-      <a class="version-option current" href="tools-inline-tray.html"><span class="version-option-label">—</span><span class="version-option-desc">Tools Inline Tray</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
-      <a class="version-option" href="tools-replace-input.html"><span class="version-option-label">—</span><span class="version-option-desc">Tools Replace Input</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+      <a class="version-option" href="tools-inline-tray.html"><span class="version-option-label">—</span><span class="version-option-desc">Tools Inline Tray</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
+      <a class="version-option current" href="tools-replace-input.html"><span class="version-option-label">—</span><span class="version-option-desc">Tools Replace Input</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
       <a class="version-option" href="annotations.html"><span class="version-option-label">Annotations</span><span class="version-option-desc">Local doc variant</span><svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></a>
     </div>
   </div>
@@ -162,7 +161,6 @@
     }
 
     function MessageText({ text }) {
-      // Render **bold** and newlines
       const parts = text.split('\n');
       return (
         <div>
@@ -188,6 +186,7 @@
       const [isTyping, setIsTyping] = useState(false);
       const bottomRef = useRef(null);
       const textareaRef = useRef(null);
+      const searchRef = useRef(null);
       const composerRef = useRef(null);
 
       const activeCount = Object.values(caps).filter(Boolean).length + Object.values(ints).filter(Boolean).length;
@@ -203,6 +202,14 @@
       useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       }, [messages, isTyping]);
+
+      useEffect(() => {
+        if (showTools) {
+          setTimeout(() => searchRef.current?.focus(), 50);
+        } else {
+          setTimeout(() => textareaRef.current?.focus(), 50);
+        }
+      }, [showTools]);
 
       useEffect(() => {
         function handleClick(e) {
@@ -226,7 +233,6 @@
         if (!val) return;
         setText("");
         if (textareaRef.current) textareaRef.current.style.height = "auto";
-        setShowTools(false);
         setMessages(m => [...m, { role: "user", text: val }]);
         setIsTyping(true);
         setTimeout(() => {
@@ -245,6 +251,15 @@
         }
       }
 
+      function openTools() {
+        setShowTools(true);
+        setSearch("");
+      }
+
+      function closeTools() {
+        setShowTools(false);
+      }
+
       return (
         <div style={{
           height: "100vh",
@@ -256,10 +271,6 @@
         }}>
 
           <style>{`
-            @keyframes traysSlideIn {
-              from { opacity: 0; max-height: 0; }
-              to   { opacity: 1; max-height: 420px; }
-            }
             @keyframes bounce {
               0%, 60%, 100% { transform: translateY(0); }
               30% { transform: translateY(-6px); }
@@ -268,10 +279,16 @@
               from { opacity: 0; transform: translateY(8px); }
               to   { opacity: 1; transform: translateY(0); }
             }
-            .tray-open {
-              animation: traysSlideIn 0.2s cubic-bezier(.4,0,.2,1) forwards;
-              overflow: hidden;
+            @keyframes toolsIn {
+              from { opacity: 0; transform: translateY(4px); }
+              to   { opacity: 1; transform: translateY(0); }
             }
+            @keyframes inputIn {
+              from { opacity: 0; transform: translateY(-4px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
+            .tools-panel { animation: toolsIn 0.18s cubic-bezier(.4,0,.2,1) forwards; }
+            .input-panel  { animation: inputIn 0.15s cubic-bezier(.4,0,.2,1) forwards; }
             .chat-msg { animation: fadeUp 0.2s ease forwards; }
             textarea::-webkit-scrollbar { width: 4px; }
             textarea::-webkit-scrollbar-track { background: transparent; }
@@ -352,26 +369,29 @@
               <div style={{
                 background: "#fff",
                 borderRadius: 18,
-                border: "1px solid hsl(240, 6%, 90%)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+                border: showTools ? "1px solid #c4b5fd" : "1px solid hsl(240, 6%, 90%)",
+                boxShadow: showTools ? "0 4px 24px rgba(108,71,255,0.10)" : "0 4px 24px rgba(0,0,0,0.06)",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
+                transition: "border-color 0.15s, box-shadow 0.15s",
               }}>
-                {showTools && (
-                  <div className="tray-open">
+
+                {showTools ? (
+                  /* ── Tools panel replaces the textarea ── */
+                  <div className="tools-panel">
+                    {/* Search bar */}
                     <div style={{
-                      padding: "10px 14px",
-                      borderBottom: "1px solid hsl(240, 6%, 90%)",
+                      padding: "11px 14px",
                       display: "flex", alignItems: "center", gap: 8,
                     }}>
                       <span style={{ color: "#C4C9D4", fontSize: 14, flexShrink: 0 }}>⌕</span>
                       <input
+                        ref={searchRef}
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search tools..."
                         style={{ flex: 1, border: "none", background: "transparent", fontSize: 13, color: "#252429", padding: 0 }}
-                        autoFocus
                       />
                       <kbd style={{
                         background: "#f7f7f8", border: "1px solid hsl(240, 6%, 90%)",
@@ -380,7 +400,10 @@
                       }}>/</kbd>
                     </div>
 
-                    <div style={{ display: "flex", maxHeight: 360, overflow: "hidden" }}>
+                    <div style={{ height: 1, background: "hsl(240, 6%, 90%)" }} />
+
+                    {/* Two-column tool list */}
+                    <div style={{ display: "flex", maxHeight: 280, overflow: "hidden" }}>
                       <div style={{ flex: 1, borderRight: "1px solid hsl(240, 6%, 90%)", paddingBottom: 8 }}>
                         <div style={{ padding: "8px 14px 4px", fontSize: 10, fontWeight: 700, color: "#C4C9D4", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                           Capabilities
@@ -433,43 +456,46 @@
                       </div>
                     </div>
                   </div>
+                ) : (
+                  /* ── Normal textarea ── */
+                  <textarea
+                    className="input-panel"
+                    ref={textareaRef}
+                    value={text}
+                    onChange={e => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask anything..."
+                    style={{
+                      overflowY: "hidden", resize: "none",
+                      border: "none", outline: "none",
+                      padding: "14px 16px 10px",
+                      fontSize: 14, color: "#252429", background: "transparent",
+                      boxSizing: "border-box", lineHeight: 1.6, minHeight: 54, width: "100%",
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  />
                 )}
 
-                {showTools && <div style={{ height: 1, background: "hsl(240, 6%, 90%)" }} />}
-
-                <textarea
-                  ref={textareaRef}
-                  value={text}
-                  onChange={e => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask anything..."
-                  style={{
-                    overflowY: "hidden", resize: "none",
-                    border: "none", outline: "none",
-                    padding: "14px 16px 10px",
-                    fontSize: 14, color: "#252429", background: "transparent",
-                    boxSizing: "border-box", lineHeight: 1.6, minHeight: 54, width: "100%",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                />
-
+                {/* Toolbar — always visible */}
                 <div style={{
                   display: "flex", alignItems: "center",
                   padding: "8px 12px",
                   borderTop: "1px solid hsl(240, 6%, 90%)",
                   gap: 4, flexShrink: 0,
                 }}>
-                  <button style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    background: "transparent", border: "1px solid transparent",
-                    borderRadius: 7, padding: "5px 10px",
-                    cursor: "pointer", fontSize: 13, color: "#6f6e78", transition: "all 0.12s",
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "#f7f7f8"; e.currentTarget.style.borderColor = "hsl(240,6%,90%)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
-                  >+ Attach</button>
+                  {!showTools && (
+                    <button style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      background: "transparent", border: "1px solid transparent",
+                      borderRadius: 7, padding: "5px 10px",
+                      cursor: "pointer", fontSize: 13, color: "#6f6e78", transition: "all 0.12s",
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "#f7f7f8"; e.currentTarget.style.borderColor = "hsl(240,6%,90%)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
+                    >+ Attach</button>
+                  )}
 
-                  <button onClick={() => setShowTools(v => !v)} style={{
+                  <button onClick={() => showTools ? closeTools() : openTools()} style={{
                     display: "flex", alignItems: "center", gap: 5,
                     background: showTools ? "#ede9ff" : "transparent",
                     border: showTools ? "1px solid #c4b5fd" : "1px solid transparent",
@@ -495,16 +521,31 @@
 
                   <div style={{ flex: 1 }} />
 
-                  <span style={{ fontSize: 12.5, color: "#6f6e78", userSelect: "none" }}>Auto ⌄</span>
-
-                  <button onClick={submit} style={{
-                    width: 32, height: 32, borderRadius: "50%",
-                    background: text.trim() ? "#5a38e8" : "hsl(240, 5%, 92%)",
-                    border: "none", cursor: text.trim() ? "pointer" : "default",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 15, color: text.trim() ? "#fff" : "#6f6e78",
-                    transition: "background 0.2s", flexShrink: 0,
-                  }}>↑</button>
+                  {showTools ? (
+                    /* Done button when tools are open */
+                    <button onClick={closeTools} style={{
+                      padding: "5px 16px",
+                      background: "#5a38e8", border: "none",
+                      borderRadius: 7, cursor: "pointer",
+                      fontSize: 13, fontWeight: 600, color: "#fff",
+                      transition: "background 0.15s",
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#4c2ed4"}
+                      onMouseLeave={e => e.currentTarget.style.background = "#5a38e8"}
+                    >Done</button>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: 12.5, color: "#6f6e78", userSelect: "none" }}>Auto ⌄</span>
+                      <button onClick={submit} style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: text.trim() ? "#5a38e8" : "hsl(240, 5%, 92%)",
+                        border: "none", cursor: text.trim() ? "pointer" : "default",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 15, color: text.trim() ? "#fff" : "#6f6e78",
+                        transition: "background 0.2s", flexShrink: 0,
+                      }}>↑</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
