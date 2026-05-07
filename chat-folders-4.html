@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexos.ai — Chat Folders (List view)</title>
+  <title>Nexos.ai — Chat Folders (List styles)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -228,7 +228,7 @@
     }
     .flv-new-chat-btn:hover { background: var(--hover-bg); }
 
-    /* Chat rows in the list view */
+    /* Chat rows in the list view (legacy, kept for reference) */
     .chat-row {
       display: flex; align-items: center; gap: 16px;
       padding: 18px 0; border-bottom: 1px solid var(--border-md);
@@ -635,6 +635,90 @@
     /* Folder reorder highlight */
     .folder-item.folder-drag-over-above { border-top: 2px solid var(--brand); border-radius: 0; }
     .folder-item.folder-drag-over-below { border-bottom: 2px solid var(--brand); border-radius: 0; }
+
+    /* ══ Style toggle pills ══════════════════════════════════ */
+    .cl-style-toggle { display: flex; gap: 4px; margin-bottom: 16px; }
+    .cl-style-btn { height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-secondary); font-family: 'Inter', sans-serif; transition: all 0.1s; }
+    .cl-style-btn:hover { background: var(--hover-bg); }
+    .cl-style-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    /* ══ Style A — Grid ══════════════════════════════════════ */
+    .cl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cl-card {
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; cursor: pointer; transition: background 0.1s, border-color 0.1s;
+    }
+    .cl-card:hover { background: var(--bg-tertiary); border-color: var(--border-md); }
+    .cl-card.active { border-color: var(--brand); background: rgba(105,59,255,0.03); }
+    .cl-card-accent { height: 4px; border-radius: 2px; background: var(--brand); margin-bottom: 12px; }
+    .cl-card-title {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cl-card-preview {
+      font-size: 12px; color: var(--text-tertiary); margin-top: 6px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cl-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 12px;
+    }
+    .cl-card-time { font-size: 11px; color: var(--text-disabled); }
+    .cl-card-badge {
+      background: var(--brand); color: white; font-size: 11px; font-weight: 500;
+      padding: 1px 7px; border-radius: 999px;
+    }
+
+    /* ══ Style B — Inbox ═════════════════════════════════════ */
+    .cl-inbox { display: flex; flex-direction: column; gap: 2px; }
+    .cl-inbox-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: 10px; cursor: pointer; transition: background 0.1s;
+    }
+    .cl-inbox-row:hover { background: var(--hover-bg); }
+    .cl-inbox-row.active { background: var(--brand-bg); }
+    .cl-inbox-icon {
+      width: 36px; height: 36px; border-radius: 8px; background: var(--brand-bg);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--brand); font-size: 13px; font-weight: 600; flex-shrink: 0;
+    }
+    .cl-inbox-mid { flex: 1; min-width: 0; }
+    .cl-inbox-title {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-inbox-preview {
+      font-size: 12px; color: var(--text-tertiary); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+    }
+    .cl-inbox-right { flex-shrink: 0; text-align: right; }
+    .cl-inbox-time { font-size: 11px; color: var(--text-disabled); display: block; }
+    .cl-inbox-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); margin-top: 4px; margin-left: auto; }
+
+    /* ══ Style C — Tiles ═════════════════════════════════════ */
+    .cl-tiles { display: flex; flex-direction: column; }
+    .cl-tile {
+      display: flex; align-items: center; gap: 12px; padding: 14px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .cl-tile:last-child { border-bottom: none; }
+    .cl-tile-accent {
+      width: 3px; height: 20px; border-radius: 2px; background: var(--brand);
+      flex-shrink: 0; opacity: 0; transition: opacity 0.1s;
+    }
+    .cl-tile:hover .cl-tile-accent { opacity: 1; }
+    .cl-tile.active .cl-tile-accent { opacity: 1; }
+    .cl-tile-content { flex: 1; min-width: 0; }
+    .cl-tile-title {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      transition: color 0.1s;
+    }
+    .cl-tile:hover .cl-tile-title { color: var(--brand); }
+    .cl-tile.active .cl-tile-title { color: var(--brand); font-weight: 600; }
+    .cl-tile-meta { font-size: 12px; color: var(--text-disabled); margin-top: 2px; }
+    .cl-tile-time { font-size: 11px; color: var(--text-disabled); flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -643,8 +727,8 @@
 <div style="position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:#fff;border:1px solid rgba(124,123,132,0.25);border-radius:8px;padding:3px;z-index:500;box-shadow:0 2px 8px rgba(18,0,69,0.08);">
   <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders.html">A — Collapsible</a>
   <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-2.html">B — Drill-down</a>
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-4.html">D — List styles</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders-4.html">D — List styles</a>
 </div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════ -->
@@ -887,6 +971,8 @@
 let nextId = 100;
 const uid = () => `id${nextId++}`;
 
+let chatListStyle = 'inbox';
+
 let state = {
   folders: [
     { id:'f1', name:'Work', expanded: true,  chats:['c1','c2','c3'] },
@@ -910,6 +996,14 @@ let state = {
   recentChats: ['c5','c6','c7','c8','c9','c10','c11','c12'],
   activeChat: null,
   openFolderId: null,
+};
+
+const CHAT_PREVIEWS = {
+  c1: { preview: 'AI-powered threats and zero trust adoption are reshaping enterprise security strategies…', time: '2h ago', msgs: 4 },
+  c2: { preview: 'Recommended shifting LinkedIn budget to 40% given your ICP is VP+ enterprise buyers…', time: 'Yesterday', msgs: 7 },
+  c3: { preview: 'Five high-converting headline options focused on speed and ROI for your landing page…', time: '3d ago', msgs: 3 },
+  c4: { preview: 'Draft press release ready for review. Highlights product-market fit and launch date…', time: '1w ago', msgs: 5 },
+  default: { preview: 'Click to continue this conversation with your AI assistant…', time: 'Today', msgs: 2 },
 };
 
 // Modal editing state
@@ -1278,25 +1372,19 @@ function openMoveToFolderMenu(cid, currentFolderId, anchorRect) {
     label: 'New folder…',
     icon: plusIcon(),
     action: () => {
-      const nameHint = state.chats[cid] ? state.chats[cid].slice(0,20) : '';
       openCreateModal();
-      // After create, auto-move — simplified for prototype
       toast('Create folder then move the chat from its menu');
     }
   });
 
-  // Position submenu to the right of the anchor, or flip left if near edge
   let x = anchorRect.right + 8;
   if (x + 200 > window.innerWidth) x = anchorRect.left - 208;
   showDropdown(items, x, anchorRect.top, true);
 }
 
 function moveChatToFolder(cid, folderId) {
-  // Remove from current folder if any
   state.folders.forEach(f => { f.chats = f.chats.filter(c => c !== cid); });
-  // Remove from recent
   state.recentChats = state.recentChats.filter(c => c !== cid);
-  // Add to target folder
   const target = state.folders.find(f => f.id === folderId);
   if (!target) return;
   target.chats.unshift(cid);
@@ -1473,21 +1561,115 @@ function renderFolderListView(fid) {
   head.querySelector('#flvNewChatBtn').addEventListener('click', () => toast(`New chat will be added to "${folder.name}"`));
   section.appendChild(head);
 
-  // Chat rows
-  const items = document.createElement('div');
-  folder.chats.forEach(cid => {
-    const row = document.createElement('div');
-    row.className = 'chat-row' + (state.activeChat === cid ? ' active' : '');
-    row.innerHTML = `
-      <span class="chat-row-title">${esc(state.chats[cid] || 'Unknown chat')}</span>
-      <span class="chat-row-chevron">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>`;
-    row.addEventListener('click', () => setActiveChat(cid));
-    items.appendChild(row);
+  // Style toggle
+  const toggle = document.createElement('div');
+  toggle.className = 'cl-style-toggle';
+  ['Grid', 'Inbox', 'Tiles'].forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'cl-style-btn' + (chatListStyle === label.toLowerCase() ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      chatListStyle = label.toLowerCase();
+      renderFolderListView(fid);
+    });
+    toggle.appendChild(btn);
   });
-  section.appendChild(items);
+  section.appendChild(toggle);
+
+  // Render chosen style
+  if (chatListStyle === 'grid') {
+    renderChatGrid(folder, section);
+  } else if (chatListStyle === 'inbox') {
+    renderChatInbox(folder, section);
+  } else {
+    renderChatTiles(folder, section);
+  }
+
   body.appendChild(section);
+}
+
+// ── Style A: Grid ─────────────────────────────────────────
+function renderChatGrid(folder, container) {
+  const grid = document.createElement('div');
+  grid.className = 'cl-grid';
+
+  folder.chats.forEach(cid => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = esc(state.chats[cid] || 'Unknown chat');
+    const isActive = state.activeChat === cid;
+
+    const card = document.createElement('div');
+    card.className = 'cl-card' + (isActive ? ' active' : '');
+    card.innerHTML = `
+      <div class="cl-card-accent"></div>
+      <div class="cl-card-title">${title}</div>
+      <div class="cl-card-preview">${esc(data.preview)}</div>
+      <div class="cl-card-footer">
+        <span class="cl-card-time">${esc(data.time)}</span>
+        <span class="cl-card-badge">${data.msgs}</span>
+      </div>`;
+    card.addEventListener('click', () => setActiveChat(cid));
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+// ── Style B: Inbox ────────────────────────────────────────
+function renderChatInbox(folder, container) {
+  const inbox = document.createElement('div');
+  inbox.className = 'cl-inbox';
+
+  folder.chats.forEach((cid, idx) => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const initials = title.slice(0, 2).toUpperCase();
+    const isActive = state.activeChat === cid;
+    const showDot = idx === 0 || idx === 2; // a couple items appear "unread"
+
+    const row = document.createElement('div');
+    row.className = 'cl-inbox-row' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <div class="cl-inbox-icon">${esc(initials)}</div>
+      <div class="cl-inbox-mid">
+        <div class="cl-inbox-title">${esc(title)}</div>
+        <div class="cl-inbox-preview">${esc(data.preview)}</div>
+      </div>
+      <div class="cl-inbox-right">
+        <span class="cl-inbox-time">${esc(data.time)}</span>
+        ${showDot ? '<div class="cl-inbox-dot"></div>' : ''}
+      </div>`;
+    row.addEventListener('click', () => setActiveChat(cid));
+    inbox.appendChild(row);
+  });
+
+  container.appendChild(inbox);
+}
+
+// ── Style C: Tiles ────────────────────────────────────────
+function renderChatTiles(folder, container) {
+  const tiles = document.createElement('div');
+  tiles.className = 'cl-tiles';
+
+  folder.chats.forEach(cid => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const isActive = state.activeChat === cid;
+
+    const tile = document.createElement('div');
+    tile.className = 'cl-tile' + (isActive ? ' active' : '');
+    tile.innerHTML = `
+      <div class="cl-tile-accent"></div>
+      <div class="cl-tile-content">
+        <div class="cl-tile-title">${esc(title)}</div>
+        <div class="cl-tile-meta">${esc(data.time)} · ${data.msgs} messages</div>
+      </div>
+      <div class="cl-tile-time">${esc(data.time)}</div>`;
+    tile.addEventListener('click', () => setActiveChat(cid));
+    tiles.appendChild(tile);
+  });
+
+  container.appendChild(tiles);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1512,7 +1694,6 @@ function startChatDrag(cid, folderId, e) {
   const el = e.currentTarget;
   setTimeout(() => el.classList.add('dragging'), 0);
 
-  // Setup recent drop zone
   const recentEl = document.getElementById('recentList');
   recentEl.addEventListener('dragover', onRecentDragOver);
   recentEl.addEventListener('drop', onRecentDrop);
@@ -1557,9 +1738,7 @@ function onRecentDrop(e) {
   if (dragState.type === 'chat') {
     e.preventDefault();
     const cid = dragState.chatId;
-    // Remove from folder if in one
     state.folders.forEach(f => { f.chats = f.chats.filter(c => c !== cid); });
-    // Add to recent if not already there
     if (!state.recentChats.includes(cid)) {
       state.recentChats.unshift(cid);
       toast('Removed from folder — back in Recent chats');
@@ -1636,7 +1815,6 @@ function showDropdown(items, x, y, isSubmenu) {
 
   document.body.appendChild(dd);
 
-  // Position — flip if near edge
   const ddW = 200, ddH = items.length * 36;
   let left = x, top = y;
   if (left + ddW > window.innerWidth - 8) left = x - ddW - (isSubmenu ? 0 : 0);
@@ -1644,7 +1822,6 @@ function showDropdown(items, x, y, isSubmenu) {
   dd.style.left = `${Math.max(8, left)}px`;
   dd.style.top  = `${Math.max(8, top)}px`;
 
-  // Close on outside click
   setTimeout(() => {
     document.addEventListener('click', closeAllDropdowns, { once: true });
   }, 0);
@@ -1683,7 +1860,6 @@ function toast(msg) {
 // ════════════════════════════════════════════════════════════
 function esc(s) { const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
-// Design system folder icon — cms/icons/16x16/folder (sm, regular)
 const FOLDER_PATH = `M 11.2 1.6 H 6.9 L 5.69 0.47 C 5.39 0.17 4.98 0 4.56 0 H 1.6 C 0.72 0 0 0.72 0 1.6 V 9.6 C 0 10.48 0.72 11.2 1.6 11.2 H 11.2 C 12.08 11.2 12.8 10.48 12.8 9.6 V 3.2 C 12.8 2.32 12.1 1.6 11.2 1.6 Z M 11.6 9.6 C 11.6 9.82 11.42 10 11.2 10 H 1.6 C 1.38 10 1.2 9.82 1.2 9.6 V 1.6 C 1.2 1.38 1.38 1.2 1.6 1.2 H 4.54 C 4.64 1.2 4.74 1.24 4.82 1.32 L 6.4 2.8 H 11.2 C 11.42 2.8 11.6 2.98 11.6 3.2 V 9.6 Z`;
 
 function folderSvg(size = 14) {
@@ -1706,7 +1882,6 @@ function chevronRightIcon() { return `<svg width="12" height="12" viewBox="0 0 1
 function demo_createFolder() { openCreateModal(); }
 
 function demo_moveChat() {
-  // Simulate clicking ⋮ on first recent chat
   const cid = state.recentChats[0];
   if (!cid) { toast('No recent chats to move'); return; }
   const fid = state.folders[0]?.id;
@@ -1801,7 +1976,6 @@ document.addEventListener('keydown', (e) => {
 // Init
 document.addEventListener('DOMContentLoaded', () => {
   render();
-  // Auto-open first folder so the view is populated on load
   if (state.folders.length > 0) {
     openFolderInMain(state.folders[0].id);
   }
