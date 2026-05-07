@@ -504,6 +504,96 @@
     .btn-danger { background: #e53e3e; color: white; }
     .btn-danger:hover { background: #c0392b; }
 
+    /* ══ Knowledge base panel ═══════════════════════════════ */
+    .kb-panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 400px; background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      z-index: 300;
+      box-shadow: -8px 0 32px rgba(18,0,69,0.09);
+    }
+    .kb-panel.open { transform: translateX(0); }
+
+    .kb-header {
+      height: 66px; min-height: 66px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 16px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .kb-header-title { display: flex; align-items: center; gap: 8px; }
+    .kb-header-title-text { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .kb-header-actions { display: flex; align-items: center; gap: 4px; }
+
+    .kb-body {
+      flex: 1; overflow-y: auto; padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .kb-body::-webkit-scrollbar { width: 4px; }
+    .kb-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+    .kb-add-row {
+      background: var(--bg-tertiary); border-radius: 8px;
+      padding: 4px 8px 4px 4px;
+      display: flex; align-items: center;
+    }
+    .kb-add-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+      border-radius: 9999px; border: none; background: transparent; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: #4700cf;
+      font-family: 'Inter', sans-serif; transition: background 0.1s;
+    }
+    .kb-add-btn:hover { background: rgba(71,0,207,0.06); }
+
+    .kb-section-label {
+      font-size: 16px; font-weight: 600; color: var(--text-primary);
+      padding: 4px 0 2px;
+    }
+    .kb-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-secondary);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .kb-item:hover { background: var(--bg-tertiary); border-color: var(--border-md); }
+    .kb-item.connected { border-color: rgba(71,0,207,0.25); background: rgba(71,0,207,0.03); }
+    .kb-item-icon {
+      width: 32px; height: 32px; border-radius: 6px; background: var(--bg-tertiary);
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--text-tertiary); font-size: 15px;
+    }
+    .kb-item.connected .kb-item-icon { background: rgba(71,0,207,0.08); border-color: rgba(71,0,207,0.2); color: #4700cf; }
+    .kb-item-body { flex: 1; min-width: 0; }
+    .kb-item-name { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 1px; }
+    .kb-item-meta { font-size: 12px; color: var(--text-disabled); }
+    .kb-item-action {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; color: var(--text-tertiary);
+      transition: background 0.1s, color 0.1s; flex-shrink: 0;
+    }
+    .kb-item-action:hover { background: var(--hover-bg); color: var(--text-primary); }
+    .kb-connect-btn {
+      height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border-md);
+      background: var(--bg-secondary); cursor: pointer; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); font-family: 'Inter', sans-serif; transition: background 0.1s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .kb-connect-btn:hover { background: var(--bg-tertiary); }
+    .kb-connect-btn.connected { background: rgba(71,0,207,0.08); border-color: rgba(71,0,207,0.25); color: #4700cf; }
+
+    /* KB button in flv-header */
+    .kb-toggle-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+      border-radius: 8px; border: 1px solid var(--border-md); background: var(--bg-secondary);
+      cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      font-family: 'Inter', sans-serif; transition: background 0.1s, border-color 0.1s, color 0.1s;
+      flex-shrink: 0;
+    }
+    .kb-toggle-btn:hover { background: var(--bg-tertiary); }
+    .kb-toggle-btn.active { background: rgba(71,0,207,0.07); border-color: rgba(71,0,207,0.3); color: #4700cf; }
+
     /* ══ Toast ═══════════════════════════════════════════════ */
     .toast-wrap {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -652,6 +742,10 @@
         <span class="flv-title" id="flvTitle"></span>
       </div>
       <div class="flv-actions">
+        <button class="kb-toggle-btn" id="kbToggleBtn" onclick="toggleKbPanel()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4.5 4.5 0 0 1 3.5 7.3l.5 2.7H4L4.5 9.3A4.5 4.5 0 0 1 8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 12.5h4M7 14h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Knowledge base
+        </button>
         <button class="tb-btn" title="Share" id="flvShareBtn">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="12" cy="2.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="13.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="8" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7.3 10.5 4.2M5.5 8.7l5 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
         </button>
@@ -661,6 +755,39 @@
       </div>
     </div>
     <div class="flv-body" id="flvBody"></div>
+  </div>
+
+  <!-- Knowledge base panel -->
+  <div class="kb-panel" id="kbPanel">
+    <div class="kb-header">
+      <div class="kb-header-title">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" color="#44434b"><path d="M10 2.5a6 6 0 0 1 4.8 9.6l.7 3.4H4.5l.7-3.4A6 6 0 0 1 10 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M7.5 15.5h5M8.5 17.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span class="kb-header-title-text">Knowledge base</span>
+      </div>
+      <div class="kb-header-actions">
+        <button class="tb-btn" title="Refresh" onclick="toast('Refreshing knowledge bases…')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 0 5.5-5.5 5.3 5.3 0 0 0-3.8 1.6L2.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2.5 3v2.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tb-btn" title="Close" onclick="toggleKbPanel()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="kb-body">
+      <!-- Add button row -->
+      <div class="kb-add-row">
+        <button class="kb-add-btn" onclick="toast('Opening knowledge base connector…')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add knowledge base
+        </button>
+      </div>
+
+      <!-- Connected KBs -->
+      <div>
+        <div class="kb-section-label">Client info docs</div>
+      </div>
+      <div id="kbItemList"></div>
+    </div>
   </div>
 
   <div id="chatView" style="display:none; flex-direction:column; height:100vh; overflow:hidden; flex:1;">
@@ -1604,6 +1731,56 @@ function demo_dragDrop() {
 }
 
 // ════════════════════════════════════════════════════════════
+// Knowledge base panel
+// ════════════════════════════════════════════════════════════
+const KB_ITEMS = [
+  { id:'kb1', name:'Client info docs', meta:'12 files · Updated 2 days ago', connected: true },
+  { id:'kb2', name:'Branding style', meta:'5 files · Updated today', connected: true },
+  { id:'kb3', name:'Notion workspace', meta:'Not connected', connected: false },
+  { id:'kb4', name:'Google Drive', meta:'Not connected', connected: false },
+  { id:'kb5', name:'Confluence', meta:'Not connected', connected: false },
+];
+
+let kbConnected = { kb1: true, kb2: true, kb3: false, kb4: false, kb5: false };
+
+function toggleKbPanel() {
+  const panel = document.getElementById('kbPanel');
+  const btn = document.getElementById('kbToggleBtn');
+  const isOpen = panel.classList.toggle('open');
+  if (btn) btn.classList.toggle('active', isOpen);
+  if (isOpen) renderKbItems();
+}
+
+function renderKbItems() {
+  const list = document.getElementById('kbItemList');
+  list.innerHTML = '';
+  KB_ITEMS.forEach(item => {
+    const connected = kbConnected[item.id];
+    const el = document.createElement('div');
+    el.className = 'kb-item' + (connected ? ' connected' : '');
+    el.innerHTML = `
+      <div class="kb-item-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2a4 4 0 0 1 3.2 6.4l.3 1.6H2.5l.3-1.6A4 4 0 0 1 10 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 10h3M7 11.5h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="kb-item-body">
+        <div class="kb-item-name">${esc(item.name)}</div>
+        <div class="kb-item-meta">${connected ? (item.meta.includes('Not') ? item.meta : item.meta) : item.meta}</div>
+      </div>
+      <button class="kb-connect-btn ${connected ? 'connected' : ''}" onclick="toggleKbItem('${item.id}')">
+        ${connected ? 'Connected' : 'Connect'}
+      </button>`;
+    list.appendChild(el);
+  });
+}
+
+function toggleKbItem(id) {
+  kbConnected[id] = !kbConnected[id];
+  const item = KB_ITEMS.find(k => k.id === id);
+  toast(kbConnected[id] ? `"${item.name}" connected` : `"${item.name}" disconnected`);
+  renderKbItems();
+}
+
+// ════════════════════════════════════════════════════════════
 // Keyboard shortcuts
 // ════════════════════════════════════════════════════════════
 document.addEventListener('keydown', (e) => {
@@ -1611,6 +1788,8 @@ document.addEventListener('keydown', (e) => {
     closeAllDropdowns();
     closeModal('folderModal');
     closeModal('deleteModal');
+    const kbPanel = document.getElementById('kbPanel');
+    if (kbPanel.classList.contains('open')) toggleKbPanel();
   }
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'O') {
     e.preventDefault();
@@ -1619,7 +1798,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Init
-document.addEventListener('DOMContentLoaded', render);
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  // Auto-open first folder so the view is populated on load
+  if (state.folders.length > 0) {
+    openFolderInMain(state.folders[0].id);
+  }
+});
 </script>
 </body>
 </html>
