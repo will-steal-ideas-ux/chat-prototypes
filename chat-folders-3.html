@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexos.ai — Chat Folders</title>
+  <title>Nexos.ai — Chat Folders (List view)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -115,7 +115,7 @@
     }
     .section-add-btn:hover { background: var(--hover-bg); color: var(--text-secondary); }
 
-    /* ── Folder items ── */
+    /* ── Folder items — flat, no expand ── */
     .folder-item { margin-bottom: 1px; }
 
     .folder-header {
@@ -125,28 +125,24 @@
       user-select: none;
     }
     .folder-header:hover { background: var(--hover-bg); }
+    .folder-header.active { background: transparent; }
+    .folder-header.active .folder-name { color: #4700cf; font-weight: 500; }
+    .folder-header.active .folder-icon { color: #4700cf; }
 
     .folder-icon {
       width: 16px; height: 16px; flex-shrink: 0; margin-right: 5px;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text-tertiary); position: relative;
+      color: var(--text-tertiary);
     }
-
-    /* Folder icon swaps to chevron on hover */
-    .fi-folder { display: flex; }
-    .fi-chevron { display: none; align-items: center; justify-content: center; }
-    .fi-chevron svg { transition: transform 0.15s; }
-
-    .folder-header:hover .fi-folder { display: none; }
-    .folder-header:hover .fi-chevron { display: flex; }
-
-    /* Chevron points right when collapsed, down when expanded */
-    .folder-item:not(.expanded) .fi-chevron svg { transform: rotate(-90deg); }
-    .folder-item.expanded .fi-chevron svg { transform: rotate(0deg); }
 
     .folder-name {
       flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .folder-count {
+      font-size: 11px; font-weight: 500; color: var(--text-disabled);
+      margin-right: 4px; flex-shrink: 0;
     }
 
     .folder-name-input {
@@ -172,28 +168,93 @@
     }
     .folder-action-btn:hover { background: rgba(124,123,132,0.12); color: var(--text-primary); }
 
-    /* Folder body */
-    .folder-body {
-      display: none; padding-left: 14px; position: relative;
-    }
-    .folder-item.expanded .folder-body { display: block; }
-
-    .folder-body::before {
-      content: ''; position: absolute; left: 20px;
-      top: 0; bottom: 4px; width: 1px; background: var(--folder-line);
-    }
-
+    /* No folder body — chats show in main panel */
     .folder-chat-item {
       display: flex; align-items: center; height: 32px;
-      padding: 4px 4px 4px 14px; border-radius: 8px;
+      padding: 4px 4px 4px 12px; border-radius: 8px;
       cursor: pointer; font-size: 14px; color: var(--text-secondary);
       transition: background 0.1s;
     }
     .folder-chat-item:hover { background: var(--hover-bg); }
     .folder-chat-item.active { background: #8c75ff1a; color: var(--text-primary); font-weight: 500; }
     .folder-chat-item.dragging { opacity: 0.35; }
-
     .folder-chat-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Folder chat-list view (main area) ── */
+    .folder-list-view {
+      display: none; flex-direction: column; height: 100vh; overflow: hidden;
+      background: #fcfcfd;
+    }
+    .folder-list-view.visible { display: flex; }
+
+    .flv-header {
+      height: 64px; min-height: 64px; display: flex; align-items: center;
+      gap: 8px; padding: 0 24px 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .flv-header-title {
+      display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+    }
+    .flv-icon { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
+    .flv-title { font-size: 16px; font-weight: 400; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .flv-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+    .flv-body {
+      flex: 1; overflow-y: auto; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding-bottom: 50vh;
+    }
+    .flv-body::-webkit-scrollbar { width: 4px; }
+    .flv-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+    /* Chats section inside body */
+    .flv-section {
+      max-width: 1300px; width: 100%; padding: 0 32px;
+    }
+    .flv-section-head {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+    }
+    .flv-section-head-left {
+      display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+    }
+    .flv-section-head-icon { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+    .flv-section-label {
+      font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em;
+    }
+    .flv-new-chat-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+      border-radius: 9999px; border: none; background: transparent; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      font-family: 'Inter', sans-serif; transition: background 0.1s; flex-shrink: 0;
+    }
+    .flv-new-chat-btn:hover { background: var(--hover-bg); }
+
+    /* Chat rows in the list view */
+    .chat-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 0; border-bottom: 1px solid var(--border-md);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .chat-row:last-child { border-bottom: none; }
+    .chat-row:hover { background: none; }
+    .chat-row:hover .chat-row-title { color: var(--brand); }
+    .chat-row.active .chat-row-title { color: var(--brand); font-weight: 500; }
+    .chat-row-title {
+      flex: 1; font-size: 15px; font-weight: 400; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color 0.1s;
+    }
+    .chat-row-chevron {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 16px; flex-shrink: 0;
+      color: var(--text-disabled);
+    }
+
+    .flv-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 10px; padding-bottom: 60px;
+    }
+    .flv-empty p { font-size: 14px; color: var(--text-disabled); }
+    .flv-empty-icon { opacity: 0.35; }
 
     .row-menu-btn {
       width: 20px; height: 20px; border-radius: 3px; border: none;
@@ -490,9 +551,9 @@
 
 <!-- Prototype switcher -->
 <div style="position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:#fff;border:1px solid rgba(124,123,132,0.25);border-radius:8px;padding:3px;z-index:500;box-shadow:0 2px 8px rgba(18,0,69,0.08);">
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders.html">A — Collapsible</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders.html">A — Collapsible</a>
   <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-2.html">B — Drill-down</a>
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
 </div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════ -->
@@ -581,6 +642,25 @@
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" stroke="#949399" stroke-width="1.5"/><path d="M12 16h16M12 22h10" stroke="#949399" stroke-width="1.5" stroke-linecap="round"/></svg>
     </div>
     <p>Select a chat or start a new one</p>
+  </div>
+
+  <!-- Folder list view — shows when a folder is selected -->
+  <div class="folder-list-view" id="folderListView">
+    <div class="flv-header">
+      <div class="flv-header-title">
+        <span class="flv-icon" id="flvIcon"></span>
+        <span class="flv-title" id="flvTitle"></span>
+      </div>
+      <div class="flv-actions">
+        <button class="tb-btn" title="Share" id="flvShareBtn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="12" cy="2.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="13.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="8" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7.3 10.5 4.2M5.5 8.7l5 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tb-btn" title="Filter" id="flvFilterBtn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 4.5h11M5 8h6M7.5 11.5h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="flv-body" id="flvBody"></div>
   </div>
 
   <div id="chatView" style="display:none; flex-direction:column; height:100vh; overflow:hidden; flex:1;">
@@ -701,6 +781,7 @@ let state = {
   },
   recentChats: ['c5','c6','c7','c8','c9','c10','c11','c12'],
   activeChat: null,
+  openFolderId: null,
 };
 
 // Modal editing state
@@ -713,6 +794,7 @@ let deletingFolderId = null;
 function render() {
   renderFolders();
   renderRecent();
+  if (state.openFolderId) renderFolderListView(state.openFolderId);
 }
 
 function renderFolders() {
@@ -725,21 +807,17 @@ function renderFolders() {
 
 function buildFolderEl(folder) {
   const item = document.createElement('div');
-  item.className = 'folder-item' + (folder.expanded ? ' expanded' : '');
+  item.className = 'folder-item';
   item.dataset.fid = folder.id;
 
-  // Header
+  const isOpen = state.openFolderId === folder.id;
   const header = document.createElement('div');
-  header.className = 'folder-header';
+  header.className = 'folder-header' + (isOpen ? ' active' : '');
   header.dataset.fid = folder.id;
   header.innerHTML = `
-    <span class="folder-icon">
-      <span class="fi-folder">${folderSvg(14)}</span>
-      <span class="fi-chevron">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-    </span>
+    <span class="folder-icon">${folderSvg(14)}</span>
     <span class="folder-name" id="fname-${folder.id}">${esc(folder.name)}</span>
+    ${folder.chats.length > 0 ? `<span class="folder-count">${folder.chats.length}</span>` : ''}
     <span class="folder-actions">
       <button class="folder-action-btn" title="New chat in folder" onclick="newChatInFolder('${folder.id}',event)">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -753,27 +831,19 @@ function buildFolderEl(folder) {
   header.addEventListener('click', (e) => {
     if (e.target.closest('.folder-action-btn')) return;
     if (e.target.closest('.folder-name-input')) return;
-    toggleFolder(folder.id);
+    openFolderInMain(folder.id);
   });
 
-  // Drag-over for chats
   header.addEventListener('dragover', (e) => {
-    if (dragState.type === 'chat') {
-      e.preventDefault();
-      clearDropTargets();
-      header.classList.add('drop-target');
-    }
+    if (dragState.type === 'chat') { e.preventDefault(); clearDropTargets(); header.classList.add('drop-target'); }
   });
   header.addEventListener('drop', (e) => {
     if (dragState.type === 'chat') {
-      e.preventDefault();
-      moveChatToFolder(dragState.chatId, folder.id);
-      clearDropTargets();
-      endDrag();
+      e.preventDefault(); moveChatToFolder(dragState.chatId, folder.id);
+      clearDropTargets(); endDrag();
     }
   });
 
-  // Drag folder reorder
   if (state.folders.length > 1) {
     item.setAttribute('draggable', 'true');
     item.addEventListener('dragstart', (e) => {
@@ -783,52 +853,18 @@ function buildFolderEl(folder) {
     item.addEventListener('dragend', endDrag);
     item.addEventListener('dragover', (e) => {
       if (dragState.type === 'folder' && dragState.folderId !== folder.id) {
-        e.preventDefault();
-        clearDropTargets();
-        item.classList.add('folder-drag-over-below');
+        e.preventDefault(); clearDropTargets(); item.classList.add('folder-drag-over-below');
       }
     });
     item.addEventListener('drop', (e) => {
       if (dragState.type === 'folder') {
-        e.preventDefault();
-        reorderFolder(dragState.folderId, folder.id);
-        clearDropTargets();
-        endDrag();
+        e.preventDefault(); reorderFolder(dragState.folderId, folder.id);
+        clearDropTargets(); endDrag();
       }
     });
   }
 
-  // Body
-  const body = document.createElement('div');
-  body.className = 'folder-body';
-
-  if (folder.chats.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'folder-empty';
-    empty.textContent = 'No chats yet';
-    body.appendChild(empty);
-  } else {
-    folder.chats.forEach(cid => {
-      const chatEl = buildFolderChatEl(cid, folder.id);
-      body.appendChild(chatEl);
-    });
-  }
-
-  // Body also a drop target
-  body.addEventListener('dragover', (e) => {
-    if (dragState.type === 'chat') { e.preventDefault(); header.classList.add('drop-target'); }
-  });
-  body.addEventListener('drop', (e) => {
-    if (dragState.type === 'chat') {
-      e.preventDefault();
-      moveChatToFolder(dragState.chatId, folder.id);
-      clearDropTargets();
-      endDrag();
-    }
-  });
-
   item.appendChild(header);
-  item.appendChild(body);
   return item;
 }
 
@@ -969,9 +1005,13 @@ function openDeleteModal(fid) {
 function confirmDelete() {
   const folder = state.folders.find(f => f.id === deletingFolderId);
   if (!folder) return;
-  // Return chats to recent
   folder.chats.forEach(cid => state.recentChats.unshift(cid));
   state.folders = state.folders.filter(f => f.id !== deletingFolderId);
+  if (state.openFolderId === deletingFolderId) {
+    state.openFolderId = null;
+    document.getElementById('folderListView').classList.remove('visible');
+    document.getElementById('mainEmpty').style.display = 'flex';
+  }
   closeModal('deleteModal');
   toast(`"${folder.name}" deleted — chats moved to Recent`);
   render();
@@ -1242,8 +1282,84 @@ function renderChatView(cid) {
   messages.scrollTop = messages.scrollHeight;
 
   document.getElementById('mainEmpty').style.display = 'none';
+  document.getElementById('folderListView').classList.remove('visible');
   const chatView = document.getElementById('chatView');
   chatView.style.display = 'flex';
+}
+
+// ════════════════════════════════════════════════════════════
+// Folder list view (main area)
+// ════════════════════════════════════════════════════════════
+function openFolderInMain(fid) {
+  state.openFolderId = fid;
+  state.activeChat = null;
+  renderFolders();
+  document.getElementById('mainEmpty').style.display = 'none';
+  document.getElementById('chatView').style.display = 'none';
+  const panel = document.getElementById('folderListView');
+  panel.classList.add('visible');
+  renderFolderListView(fid);
+}
+
+function renderFolderListView(fid) {
+  const folder = state.folders.find(f => f.id === fid);
+  if (!folder) return;
+
+  document.getElementById('flvIcon').innerHTML = folderSvg(20);
+  document.getElementById('flvTitle').textContent = folder.name;
+
+  document.getElementById('flvShareBtn').onclick = (e) => { e.stopPropagation(); toast('Share link copied'); };
+  document.getElementById('flvFilterBtn').onclick = (e) => openFolderMenu(fid, e);
+
+  const body = document.getElementById('flvBody');
+  body.innerHTML = '';
+
+  if (folder.chats.length === 0) {
+    body.innerHTML = `
+      <div class="flv-section" style="display:flex;align-items:center;justify-content:center;height:60vh;">
+        <div class="flv-empty" style="height:auto;">
+          <div class="flv-empty-icon">${folderSvg(40)}</div>
+          <p>No chats in this folder yet</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const section = document.createElement('div');
+  section.className = 'flv-section';
+
+  // Section header: "Chats" + "New chat in the group" button
+  const head = document.createElement('div');
+  head.className = 'flv-section-head';
+  head.innerHTML = `
+    <div class="flv-section-head-left">
+      <span class="flv-section-head-icon">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M14 8.5a5.5 5.5 0 0 1-8.25 4.77L2 14l.76-3.5A5.5 5.5 0 1 1 14 8.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="flv-section-label">Chats</span>
+    </div>
+    <button class="flv-new-chat-btn" id="flvNewChatBtn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      New chat in the group
+    </button>`;
+  head.querySelector('#flvNewChatBtn').addEventListener('click', () => toast(`New chat will be added to "${folder.name}"`));
+  section.appendChild(head);
+
+  // Chat rows
+  const items = document.createElement('div');
+  folder.chats.forEach(cid => {
+    const row = document.createElement('div');
+    row.className = 'chat-row' + (state.activeChat === cid ? ' active' : '');
+    row.innerHTML = `
+      <span class="chat-row-title">${esc(state.chats[cid] || 'Unknown chat')}</span>
+      <span class="chat-row-chevron">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>`;
+    row.addEventListener('click', () => setActiveChat(cid));
+    items.appendChild(row);
+  });
+  section.appendChild(items);
+  body.appendChild(section);
 }
 
 // ════════════════════════════════════════════════════════════

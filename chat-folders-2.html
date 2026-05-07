@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexos.ai — Chat Folders</title>
+  <title>Nexos.ai — Chat Folders (Drill-down)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -115,7 +115,23 @@
     }
     .section-add-btn:hover { background: var(--hover-bg); color: var(--text-secondary); }
 
-    /* ── Folder items ── */
+    /* Prototype switcher */
+    .proto-switcher {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 2px;
+      background: var(--bg-secondary); border: 1px solid var(--border-md);
+      border-radius: 8px; padding: 3px; z-index: 500;
+      box-shadow: 0 2px 8px rgba(18,0,69,0.08);
+    }
+    .proto-tab {
+      padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+      color: var(--text-tertiary); cursor: pointer; white-space: nowrap;
+      transition: background 0.1s, color 0.1s; text-decoration: none; display: block;
+    }
+    .proto-tab:hover { color: var(--text-primary); }
+    .proto-tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+
+    /* ── Folder items — flat list, no expand/collapse ── */
     .folder-item { margin-bottom: 1px; }
 
     .folder-header {
@@ -125,24 +141,15 @@
       user-select: none;
     }
     .folder-header:hover { background: var(--hover-bg); }
+    .folder-header.active { background: #8c75ff1a; }
+    .folder-header.active .folder-name { color: var(--text-primary); font-weight: 500; }
+    .folder-header.active .folder-icon { color: var(--brand); }
 
     .folder-icon {
       width: 16px; height: 16px; flex-shrink: 0; margin-right: 5px;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text-tertiary); position: relative;
+      color: var(--text-tertiary);
     }
-
-    /* Folder icon swaps to chevron on hover */
-    .fi-folder { display: flex; }
-    .fi-chevron { display: none; align-items: center; justify-content: center; }
-    .fi-chevron svg { transition: transform 0.15s; }
-
-    .folder-header:hover .fi-folder { display: none; }
-    .folder-header:hover .fi-chevron { display: flex; }
-
-    /* Chevron points right when collapsed, down when expanded */
-    .folder-item:not(.expanded) .fi-chevron svg { transform: rotate(-90deg); }
-    .folder-item.expanded .fi-chevron svg { transform: rotate(0deg); }
 
     .folder-name {
       flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary);
@@ -172,20 +179,10 @@
     }
     .folder-action-btn:hover { background: rgba(124,123,132,0.12); color: var(--text-primary); }
 
-    /* Folder body */
-    .folder-body {
-      display: none; padding-left: 14px; position: relative;
-    }
-    .folder-item.expanded .folder-body { display: block; }
-
-    .folder-body::before {
-      content: ''; position: absolute; left: 20px;
-      top: 0; bottom: 4px; width: 1px; background: var(--folder-line);
-    }
-
+    /* Chat items inside the folder panel */
     .folder-chat-item {
       display: flex; align-items: center; height: 32px;
-      padding: 4px 4px 4px 14px; border-radius: 8px;
+      padding: 4px 4px 4px 12px; border-radius: 8px;
       cursor: pointer; font-size: 14px; color: var(--text-secondary);
       transition: background 0.1s;
     }
@@ -194,6 +191,56 @@
     .folder-chat-item.dragging { opacity: 0.35; }
 
     .folder-chat-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Folder detail panel (drill-down) ── */
+    .folder-panel {
+      display: none; flex-direction: column; height: 100%;
+    }
+    .folder-panel.visible { display: flex; }
+
+    .folder-panel-header {
+      display: flex; align-items: center; gap: 6px; height: 36px;
+      padding: 0 8px 0 4px; flex-shrink: 0; margin-bottom: 4px;
+    }
+    .fp-back {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; color: var(--text-tertiary);
+      flex-shrink: 0; transition: background 0.1s, color 0.1s;
+    }
+    .fp-back:hover { background: var(--hover-bg); color: var(--text-primary); }
+    .fp-icon {
+      width: 16px; height: 16px; display: flex; align-items: center;
+      justify-content: center; color: var(--brand); flex-shrink: 0;
+    }
+    .fp-title {
+      flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .fp-new-btn {
+      width: 24px; height: 24px; border-radius: 4px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; color: var(--text-tertiary);
+      transition: background 0.1s, color 0.1s; flex-shrink: 0;
+    }
+    .fp-new-btn:hover { background: var(--hover-bg); color: var(--text-primary); }
+    .fp-more-btn {
+      width: 24px; height: 24px; border-radius: 4px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; color: var(--text-tertiary);
+      transition: background 0.1s, color 0.1s; flex-shrink: 0;
+    }
+    .fp-more-btn:hover { background: var(--hover-bg); color: var(--text-primary); }
+
+    .folder-panel-list { flex: 1; overflow-y: auto; }
+    .folder-panel-list::-webkit-scrollbar { width: 3px; }
+    .folder-panel-list::-webkit-scrollbar-thumb { background: rgba(124,123,132,0.25); border-radius: 3px; }
+
+    /* Empty state inside folder panel */
+    .fp-empty {
+      padding: 24px 12px; text-align: center;
+      font-size: 13px; color: var(--text-disabled);
+    }
 
     .row-menu-btn {
       width: 20px; height: 20px; border-radius: 3px; border: none;
@@ -489,10 +536,10 @@
 <body>
 
 <!-- Prototype switcher -->
-<div style="position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:#fff;border:1px solid rgba(124,123,132,0.25);border-radius:8px;padding:3px;z-index:500;box-shadow:0 2px 8px rgba(18,0,69,0.08);">
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders.html">A — Collapsible</a>
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-2.html">B — Drill-down</a>
-  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
+<div class="proto-switcher">
+  <a class="proto-tab" href="chat-folders.html">A — Collapsible</a>
+  <a class="proto-tab active" href="chat-folders-2.html">B — Drill-down</a>
+  <a class="proto-tab" href="chat-folders-3.html">C — List view</a>
 </div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════ -->
@@ -541,8 +588,8 @@
 
   <div class="sidebar-sep"></div>
 
-  <div class="sidebar-scroll" id="sidebarScroll">
-    <!-- Folders section -->
+  <!-- Root view: folder list + recent chats -->
+  <div class="sidebar-scroll" id="rootView">
     <div class="section-head">
       <div class="section-head-left">
         <span class="section-label">Folders</span>
@@ -551,11 +598,8 @@
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-
     <div id="folderList"></div>
 
-
-    <!-- Recent chats -->
     <div class="recent-section" id="recentSection">
       <div class="section-head" style="cursor:default">
         <div class="section-head-left">
@@ -564,6 +608,24 @@
       </div>
       <div id="recentList" class="recent-drop-zone"></div>
     </div>
+  </div>
+
+  <!-- Folder detail view (drill-down) -->
+  <div class="sidebar-scroll folder-panel" id="folderPanel">
+    <div class="folder-panel-header">
+      <button class="fp-back" onclick="closeFolder()" title="Back to folders">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="fp-icon" id="fpIcon"></span>
+      <span class="fp-title" id="fpTitle"></span>
+      <button class="fp-new-btn" title="New chat in folder" id="fpNewBtn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="fp-more-btn" title="Folder options" id="fpMoreBtn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="2.5" r="0.9" fill="currentColor"/><circle cx="6" cy="6" r="0.9" fill="currentColor"/><circle cx="6" cy="9.5" r="0.9" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="folder-panel-list" id="folderPanelList"></div>
   </div>
 
   <div class="sidebar-footer">
@@ -701,6 +763,7 @@ let state = {
   },
   recentChats: ['c5','c6','c7','c8','c9','c10','c11','c12'],
   activeChat: null,
+  openFolderId: null,
 };
 
 // Modal editing state
@@ -713,6 +776,7 @@ let deletingFolderId = null;
 function render() {
   renderFolders();
   renderRecent();
+  if (state.openFolderId) renderFolderPanel(state.openFolderId);
 }
 
 function renderFolders() {
@@ -725,20 +789,14 @@ function renderFolders() {
 
 function buildFolderEl(folder) {
   const item = document.createElement('div');
-  item.className = 'folder-item' + (folder.expanded ? ' expanded' : '');
+  item.className = 'folder-item';
   item.dataset.fid = folder.id;
 
-  // Header
   const header = document.createElement('div');
-  header.className = 'folder-header';
+  header.className = 'folder-header' + (state.openFolderId === folder.id ? ' active' : '');
   header.dataset.fid = folder.id;
   header.innerHTML = `
-    <span class="folder-icon">
-      <span class="fi-folder">${folderSvg(14)}</span>
-      <span class="fi-chevron">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-    </span>
+    <span class="folder-icon">${folderSvg(14)}</span>
     <span class="folder-name" id="fname-${folder.id}">${esc(folder.name)}</span>
     <span class="folder-actions">
       <button class="folder-action-btn" title="New chat in folder" onclick="newChatInFolder('${folder.id}',event)">
@@ -753,82 +811,21 @@ function buildFolderEl(folder) {
   header.addEventListener('click', (e) => {
     if (e.target.closest('.folder-action-btn')) return;
     if (e.target.closest('.folder-name-input')) return;
-    toggleFolder(folder.id);
+    openFolder(folder.id);
   });
 
   // Drag-over for chats
   header.addEventListener('dragover', (e) => {
-    if (dragState.type === 'chat') {
-      e.preventDefault();
-      clearDropTargets();
-      header.classList.add('drop-target');
-    }
+    if (dragState.type === 'chat') { e.preventDefault(); clearDropTargets(); header.classList.add('drop-target'); }
   });
   header.addEventListener('drop', (e) => {
     if (dragState.type === 'chat') {
-      e.preventDefault();
-      moveChatToFolder(dragState.chatId, folder.id);
-      clearDropTargets();
-      endDrag();
-    }
-  });
-
-  // Drag folder reorder
-  if (state.folders.length > 1) {
-    item.setAttribute('draggable', 'true');
-    item.addEventListener('dragstart', (e) => {
-      if (e.target.closest('.folder-action-btn')) { e.preventDefault(); return; }
-      startFolderDrag(folder.id, e);
-    });
-    item.addEventListener('dragend', endDrag);
-    item.addEventListener('dragover', (e) => {
-      if (dragState.type === 'folder' && dragState.folderId !== folder.id) {
-        e.preventDefault();
-        clearDropTargets();
-        item.classList.add('folder-drag-over-below');
-      }
-    });
-    item.addEventListener('drop', (e) => {
-      if (dragState.type === 'folder') {
-        e.preventDefault();
-        reorderFolder(dragState.folderId, folder.id);
-        clearDropTargets();
-        endDrag();
-      }
-    });
-  }
-
-  // Body
-  const body = document.createElement('div');
-  body.className = 'folder-body';
-
-  if (folder.chats.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'folder-empty';
-    empty.textContent = 'No chats yet';
-    body.appendChild(empty);
-  } else {
-    folder.chats.forEach(cid => {
-      const chatEl = buildFolderChatEl(cid, folder.id);
-      body.appendChild(chatEl);
-    });
-  }
-
-  // Body also a drop target
-  body.addEventListener('dragover', (e) => {
-    if (dragState.type === 'chat') { e.preventDefault(); header.classList.add('drop-target'); }
-  });
-  body.addEventListener('drop', (e) => {
-    if (dragState.type === 'chat') {
-      e.preventDefault();
-      moveChatToFolder(dragState.chatId, folder.id);
-      clearDropTargets();
-      endDrag();
+      e.preventDefault(); moveChatToFolder(dragState.chatId, folder.id);
+      clearDropTargets(); endDrag();
     }
   });
 
   item.appendChild(header);
-  item.appendChild(body);
   return item;
 }
 
@@ -888,9 +885,100 @@ function buildChatEl(cid) {
 // ════════════════════════════════════════════════════════════
 // Folder actions
 // ════════════════════════════════════════════════════════════
-function toggleFolder(fid) {
-  const f = state.folders.find(f => f.id === fid);
-  if (f) { f.expanded = !f.expanded; renderFolders(); }
+function openFolder(fid) {
+  state.openFolderId = fid;
+  const folder = state.folders.find(f => f.id === fid);
+
+  // Show folder panel, hide root view
+  document.getElementById('rootView').style.display = 'none';
+  const panel = document.getElementById('folderPanel');
+  panel.classList.add('visible');
+
+  // Populate header
+  document.getElementById('fpTitle').textContent = folder.name;
+  document.getElementById('fpIcon').innerHTML = folderSvg(14);
+
+  // Wire up panel action buttons
+  document.getElementById('fpNewBtn').onclick = (e) => { e.stopPropagation(); newChatInFolder(fid, e); };
+  document.getElementById('fpMoreBtn').onclick = (e) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const idx = state.folders.indexOf(folder);
+    showDropdown([
+      { label: 'Rename', icon: pencilIcon(), action: () => startRenamePanel(fid) },
+      { label: 'Move up', icon: upIcon(), disabled: idx === 0,
+        action: () => { if (idx > 0) { state.folders.splice(idx,1); state.folders.splice(idx-1,0,folder); renderFolders(); } }
+      },
+      { label: 'Move down', icon: downIcon(), disabled: idx === state.folders.length - 1,
+        action: () => { if (idx < state.folders.length-1) { state.folders.splice(idx,1); state.folders.splice(idx+1,0,folder); renderFolders(); } }
+      },
+      { sep: true },
+      { label: 'Delete folder', icon: trashIcon(), danger: true, action: () => openDeleteModal(fid) },
+    ], rect.right, rect.bottom + 4);
+  };
+
+  // Populate chat list
+  renderFolderPanel(fid);
+  renderFolders(); // re-render to show active highlight
+}
+
+function closeFolder() {
+  state.openFolderId = null;
+  document.getElementById('rootView').style.display = '';
+  document.getElementById('folderPanel').classList.remove('visible');
+  renderFolders();
+}
+
+function renderFolderPanel(fid) {
+  const folder = state.folders.find(f => f.id === fid);
+  const list = document.getElementById('folderPanelList');
+  list.innerHTML = '';
+
+  if (!folder || folder.chats.length === 0) {
+    list.innerHTML = `<div class="fp-empty">No chats yet</div>`;
+    return;
+  }
+
+  folder.chats.forEach(cid => {
+    const el = buildFolderChatEl(cid, fid);
+    list.appendChild(el);
+  });
+}
+
+function startRenamePanel(fid) {
+  closeAllDropdowns();
+  const folder = state.folders.find(f => f.id === fid);
+  const titleEl = document.getElementById('fpTitle');
+  const orig = folder.name;
+
+  const input = document.createElement('input');
+  input.className = 'folder-name-input';
+  input.style.cssText = 'flex:1;height:20px;font-size:13px;font-weight:600;';
+  input.value = orig;
+  titleEl.replaceWith(input);
+  input.focus(); input.select();
+
+  const commit = () => {
+    const val = input.value.trim();
+    if (val && val !== orig) {
+      const dupe = state.folders.find(f => f.id !== fid && f.name.toLowerCase() === val.toLowerCase());
+      if (dupe) { toast(`"${val}" already exists`); input.focus(); return; }
+      folder.name = val;
+      toast(`Folder renamed to "${val}"`);
+    }
+    const newTitle = document.createElement('span');
+    newTitle.id = 'fpTitle';
+    newTitle.className = 'fp-title';
+    newTitle.textContent = folder.name;
+    input.replaceWith(newTitle);
+    renderFolders();
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') commit();
+    if (e.key === 'Escape') { folder.name = orig; commit(); }
+    e.stopPropagation();
+  });
+  input.addEventListener('blur', commit);
 }
 
 function openFolderMenu(fid, e) {
@@ -969,9 +1057,9 @@ function openDeleteModal(fid) {
 function confirmDelete() {
   const folder = state.folders.find(f => f.id === deletingFolderId);
   if (!folder) return;
-  // Return chats to recent
   folder.chats.forEach(cid => state.recentChats.unshift(cid));
   state.folders = state.folders.filter(f => f.id !== deletingFolderId);
+  if (state.openFolderId === deletingFolderId) closeFolder();
   closeModal('deleteModal');
   toast(`"${folder.name}" deleted — chats moved to Recent`);
   render();
