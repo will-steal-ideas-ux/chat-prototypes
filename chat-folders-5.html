@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexos.ai — Chat Folders (Drill-down)</title>
+  <title>Nexos.ai — Chat Folders (Tile styles)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -115,23 +115,7 @@
     }
     .section-add-btn:hover { background: var(--hover-bg); color: var(--text-secondary); }
 
-    /* Prototype switcher */
-    .proto-switcher {
-      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 2px;
-      background: var(--bg-secondary); border: 1px solid var(--border-md);
-      border-radius: 8px; padding: 3px; z-index: 500;
-      box-shadow: 0 2px 8px rgba(18,0,69,0.08);
-    }
-    .proto-tab {
-      padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
-      color: var(--text-tertiary); cursor: pointer; white-space: nowrap;
-      transition: background 0.1s, color 0.1s; text-decoration: none; display: block;
-    }
-    .proto-tab:hover { color: var(--text-primary); }
-    .proto-tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
-
-    /* ── Folder items — flat list, no expand/collapse ── */
+    /* ── Folder items — flat, no expand ── */
     .folder-item { margin-bottom: 1px; }
 
     .folder-header {
@@ -141,9 +125,9 @@
       user-select: none;
     }
     .folder-header:hover { background: var(--hover-bg); }
-    .folder-header.active { background: #8c75ff1a; }
-    .folder-header.active .folder-name { color: var(--text-primary); font-weight: 500; }
-    .folder-header.active .folder-icon { color: var(--brand); }
+    .folder-header.active { background: transparent; }
+    .folder-header.active .folder-name { color: #4700cf; font-weight: 500; }
+    .folder-header.active .folder-icon { color: #4700cf; }
 
     .folder-icon {
       width: 16px; height: 16px; flex-shrink: 0; margin-right: 5px;
@@ -154,6 +138,11 @@
     .folder-name {
       flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .folder-count {
+      font-size: 11px; font-weight: 500; color: var(--text-disabled);
+      margin-right: 4px; flex-shrink: 0;
     }
 
     .folder-name-input {
@@ -179,7 +168,7 @@
     }
     .folder-action-btn:hover { background: rgba(124,123,132,0.12); color: var(--text-primary); }
 
-    /* Chat items inside the folder panel */
+    /* No folder body — chats show in main panel */
     .folder-chat-item {
       display: flex; align-items: center; height: 32px;
       padding: 4px 4px 4px 12px; border-radius: 8px;
@@ -189,58 +178,83 @@
     .folder-chat-item:hover { background: var(--hover-bg); }
     .folder-chat-item.active { background: #8c75ff1a; color: var(--text-primary); font-weight: 500; }
     .folder-chat-item.dragging { opacity: 0.35; }
-
     .folder-chat-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ── Folder detail panel (drill-down) ── */
-    .folder-panel {
-      display: none; flex-direction: column; height: 100%;
+    /* ── Folder chat-list view (main area) ── */
+    .folder-list-view {
+      display: none; flex-direction: column; height: 100vh; overflow: hidden;
+      background: #fcfcfd;
     }
-    .folder-panel.visible { display: flex; }
+    .folder-list-view.visible { display: flex; }
 
-    .folder-panel-header {
-      display: flex; align-items: center; gap: 6px; height: 36px;
-      padding: 0 8px 0 4px; flex-shrink: 0; margin-bottom: 4px;
+    .flv-header {
+      height: 64px; min-height: 64px; display: flex; align-items: center;
+      gap: 8px; padding: 0 24px 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
-    .fp-back {
-      width: 28px; height: 28px; border-radius: 6px; border: none;
-      background: transparent; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; color: var(--text-tertiary);
-      flex-shrink: 0; transition: background 0.1s, color 0.1s;
+    .flv-header-title {
+      display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
     }
-    .fp-back:hover { background: var(--hover-bg); color: var(--text-primary); }
-    .fp-icon {
-      width: 16px; height: 16px; display: flex; align-items: center;
-      justify-content: center; color: var(--brand); flex-shrink: 0;
+    .flv-icon { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
+    .flv-title { font-size: 16px; font-weight: 400; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .flv-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+    .flv-body {
+      flex: 1; overflow-y: auto; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding-bottom: 50vh;
     }
-    .fp-title {
-      flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary);
+    .flv-body::-webkit-scrollbar { width: 4px; }
+    .flv-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+    /* Chats section inside body */
+    .flv-section {
+      max-width: 1300px; width: 100%; padding: 0 32px;
+    }
+    .flv-section-head {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+    }
+    .flv-section-head-left {
+      display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+    }
+    .flv-section-head-icon { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+    .flv-section-label {
+      font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em;
+    }
+    .flv-new-chat-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+      border-radius: 9999px; border: none; background: transparent; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      font-family: 'Inter', sans-serif; transition: background 0.1s; flex-shrink: 0;
+    }
+    .flv-new-chat-btn:hover { background: var(--hover-bg); }
+
+    /* Chat rows in the list view (legacy, kept for reference) */
+    .chat-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 0; border-bottom: 1px solid var(--border-md);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .chat-row:last-child { border-bottom: none; }
+    .chat-row:hover { background: none; }
+    .chat-row:hover .chat-row-title { color: var(--brand); }
+    .chat-row.active .chat-row-title { color: var(--brand); font-weight: 500; }
+    .chat-row-title {
+      flex: 1; font-size: 15px; font-weight: 400; color: var(--text-primary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color 0.1s;
     }
-    .fp-new-btn {
-      width: 24px; height: 24px; border-radius: 4px; border: none;
-      background: transparent; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; color: var(--text-tertiary);
-      transition: background 0.1s, color 0.1s; flex-shrink: 0;
+    .chat-row-chevron {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 16px; flex-shrink: 0;
+      color: var(--text-disabled);
     }
-    .fp-new-btn:hover { background: var(--hover-bg); color: var(--text-primary); }
-    .fp-more-btn {
-      width: 24px; height: 24px; border-radius: 4px; border: none;
-      background: transparent; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; color: var(--text-tertiary);
-      transition: background 0.1s, color 0.1s; flex-shrink: 0;
-    }
-    .fp-more-btn:hover { background: var(--hover-bg); color: var(--text-primary); }
 
-    .folder-panel-list { flex: 1; overflow-y: auto; }
-    .folder-panel-list::-webkit-scrollbar { width: 3px; }
-    .folder-panel-list::-webkit-scrollbar-thumb { background: rgba(124,123,132,0.25); border-radius: 3px; }
-
-    /* Empty state inside folder panel */
-    .fp-empty {
-      padding: 24px 12px; text-align: center;
-      font-size: 13px; color: var(--text-disabled);
+    .flv-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 10px; padding-bottom: 60px;
     }
+    .flv-empty p { font-size: 14px; color: var(--text-disabled); }
+    .flv-empty-icon { opacity: 0.35; }
 
     .row-menu-btn {
       width: 20px; height: 20px; border-radius: 3px; border: none;
@@ -490,6 +504,96 @@
     .btn-danger { background: #e53e3e; color: white; }
     .btn-danger:hover { background: #c0392b; }
 
+    /* ══ Knowledge base panel ═══════════════════════════════ */
+    .kb-panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 400px; background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      z-index: 300;
+      box-shadow: -8px 0 32px rgba(18,0,69,0.09);
+    }
+    .kb-panel.open { transform: translateX(0); }
+
+    .kb-header {
+      height: 66px; min-height: 66px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 16px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .kb-header-title { display: flex; align-items: center; gap: 8px; }
+    .kb-header-title-text { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .kb-header-actions { display: flex; align-items: center; gap: 4px; }
+
+    .kb-body {
+      flex: 1; overflow-y: auto; padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .kb-body::-webkit-scrollbar { width: 4px; }
+    .kb-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+    .kb-add-row {
+      background: var(--bg-tertiary); border-radius: 8px;
+      padding: 4px 8px 4px 4px;
+      display: flex; align-items: center;
+    }
+    .kb-add-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+      border-radius: 9999px; border: none; background: transparent; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: #4700cf;
+      font-family: 'Inter', sans-serif; transition: background 0.1s;
+    }
+    .kb-add-btn:hover { background: rgba(71,0,207,0.06); }
+
+    .kb-section-label {
+      font-size: 16px; font-weight: 600; color: var(--text-primary);
+      padding: 4px 0 2px;
+    }
+    .kb-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-secondary);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .kb-item:hover { background: var(--bg-tertiary); border-color: var(--border-md); }
+    .kb-item.connected { border-color: rgba(71,0,207,0.25); background: rgba(71,0,207,0.03); }
+    .kb-item-icon {
+      width: 32px; height: 32px; border-radius: 6px; background: var(--bg-tertiary);
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--text-tertiary); font-size: 15px;
+    }
+    .kb-item.connected .kb-item-icon { background: rgba(71,0,207,0.08); border-color: rgba(71,0,207,0.2); color: #4700cf; }
+    .kb-item-body { flex: 1; min-width: 0; }
+    .kb-item-name { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 1px; }
+    .kb-item-meta { font-size: 12px; color: var(--text-disabled); }
+    .kb-item-action {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; color: var(--text-tertiary);
+      transition: background 0.1s, color 0.1s; flex-shrink: 0;
+    }
+    .kb-item-action:hover { background: var(--hover-bg); color: var(--text-primary); }
+    .kb-connect-btn {
+      height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border-md);
+      background: var(--bg-secondary); cursor: pointer; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); font-family: 'Inter', sans-serif; transition: background 0.1s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .kb-connect-btn:hover { background: var(--bg-tertiary); }
+    .kb-connect-btn.connected { background: rgba(71,0,207,0.08); border-color: rgba(71,0,207,0.25); color: #4700cf; }
+
+    /* KB button in flv-header */
+    .kb-toggle-btn {
+      display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+      border-radius: 8px; border: 1px solid var(--border-md); background: var(--bg-secondary);
+      cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      font-family: 'Inter', sans-serif; transition: background 0.1s, border-color 0.1s, color 0.1s;
+      flex-shrink: 0;
+    }
+    .kb-toggle-btn:hover { background: var(--bg-tertiary); }
+    .kb-toggle-btn.active { background: rgba(71,0,207,0.07); border-color: rgba(71,0,207,0.3); color: #4700cf; }
+
     /* ══ Toast ═══════════════════════════════════════════════ */
     .toast-wrap {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -531,17 +635,174 @@
     /* Folder reorder highlight */
     .folder-item.folder-drag-over-above { border-top: 2px solid var(--brand); border-radius: 0; }
     .folder-item.folder-drag-over-below { border-bottom: 2px solid var(--brand); border-radius: 0; }
+
+    /* ══ Style toggle pills ══════════════════════════════════ */
+    .cl-style-toggle { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cl-style-btn { height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-secondary); font-family: 'Inter', sans-serif; transition: all 0.1s; }
+    .cl-style-btn:hover { background: var(--hover-bg); }
+    .cl-style-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    /* ══ Style 1 — Plain ═════════════════════════════════════ */
+    .cl-plain { display: flex; flex-direction: column; }
+    .cl-plain-row {
+      display: flex; align-items: center; padding: 12px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer; gap: 8px;
+    }
+    .cl-plain-row:last-child { border-bottom: none; }
+    .cl-plain-row:hover .cl-plain-title { color: var(--brand); }
+    .cl-plain-row.active .cl-plain-title { color: var(--brand); font-weight: 600; }
+    .cl-plain-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--brand);
+      flex-shrink: 0; opacity: 0; transition: opacity 0.1s; margin-left: 2px;
+    }
+    .cl-plain-row:hover .cl-plain-dot,
+    .cl-plain-row.active .cl-plain-dot { opacity: 1; }
+    .cl-plain-title {
+      flex: 1; font-size: 14px; font-weight: 400; color: var(--text-primary);
+      transition: color 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-plain-time { font-size: 11px; color: var(--text-disabled); flex-shrink: 0; }
+
+    /* ══ Style 2 — Preview ═══════════════════════════════════ */
+    .cl-preview-list { display: flex; flex-direction: column; }
+    .cl-preview-row {
+      display: flex; align-items: flex-start; padding: 13px 0; gap: 12px;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .cl-preview-row:last-child { border-bottom: none; }
+    .cl-preview-row:hover { background: transparent; }
+    .cl-preview-row:hover .cl-preview-title { color: var(--brand); }
+    .cl-preview-row.active .cl-preview-title { color: var(--brand); font-weight: 600; }
+    .cl-preview-accent {
+      width: 3px; min-height: 20px; border-radius: 2px; background: var(--brand);
+      flex-shrink: 0; margin-top: 2px; opacity: 0; transition: opacity 0.1s;
+    }
+    .cl-preview-row:hover .cl-preview-accent,
+    .cl-preview-row.active .cl-preview-accent { opacity: 1; }
+    .cl-preview-body { flex: 1; min-width: 0; }
+    .cl-preview-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .cl-preview-title {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      transition: color 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-preview-badge {
+      background: var(--brand); color: white; font-size: 10px; font-weight: 600;
+      padding: 1px 6px; border-radius: 999px; flex-shrink: 0;
+    }
+    .cl-preview-text {
+      font-size: 12px; color: var(--text-tertiary); margin-top: 3px;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .cl-preview-time { font-size: 11px; color: var(--text-disabled); margin-top: 3px; }
+
+    /* ══ Style 3 — Avatar ════════════════════════════════════ */
+    .cl-avatar-list { display: flex; flex-direction: column; gap: 2px; }
+    .cl-avatar-row {
+      display: flex; align-items: center; gap: 12px; padding: 9px 10px;
+      border-radius: 10px; cursor: pointer; transition: background 0.12s;
+    }
+    .cl-avatar-row:hover { background: var(--hover-bg); }
+    .cl-avatar-row.active { background: var(--brand-bg); }
+    .cl-avatar-circle {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .cl-avatar-mid { flex: 1; min-width: 0; }
+    .cl-avatar-title {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-avatar-row:hover .cl-avatar-title,
+    .cl-avatar-row.active .cl-avatar-title { color: var(--brand); }
+    .cl-avatar-sub {
+      font-size: 12px; color: var(--text-tertiary); margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-avatar-right { flex-shrink: 0; text-align: right; }
+    .cl-avatar-time { font-size: 11px; color: var(--text-disabled); }
+
+    /* ══ Style 4 — Grouped ═══════════════════════════════════ */
+    .cl-grouped { display: flex; flex-direction: column; gap: 24px; }
+    .cl-group-header {
+      font-size: 11px; font-weight: 600; color: var(--text-disabled);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+    }
+    .cl-group-rows { display: flex; flex-direction: column; }
+    .cl-group-row {
+      display: flex; align-items: center; gap: 12px; padding: 11px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .cl-group-row:last-child { border-bottom: none; }
+    .cl-group-row:hover .cl-group-title { color: var(--brand); }
+    .cl-group-row.active .cl-group-title { color: var(--brand); font-weight: 600; }
+    .cl-group-icon {
+      width: 28px; height: 28px; border-radius: 7px; background: var(--bg-tertiary);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary);
+    }
+    .cl-group-body { flex: 1; min-width: 0; }
+    .cl-group-title {
+      font-size: 14px; font-weight: 400; color: var(--text-primary);
+      transition: color 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-group-meta { font-size: 11px; color: var(--text-disabled); margin-top: 1px; }
+    .cl-group-time { font-size: 11px; color: var(--text-disabled); flex-shrink: 0; }
+
+    /* ══ Style 5 — Actions ═══════════════════════════════════ */
+    .cl-actions-list { display: flex; flex-direction: column; }
+    .cl-action-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer; position: relative;
+    }
+    .cl-action-row:last-child { border-bottom: none; }
+    .cl-action-row:hover .cl-action-title { color: var(--brand); }
+    .cl-action-row.active .cl-action-title { color: var(--brand); font-weight: 600; }
+    .cl-action-accent {
+      width: 3px; height: 18px; border-radius: 2px; background: var(--brand);
+      flex-shrink: 0; opacity: 0; transition: opacity 0.1s;
+    }
+    .cl-action-row:hover .cl-action-accent,
+    .cl-action-row.active .cl-action-accent { opacity: 1; }
+    .cl-action-title {
+      flex: 1; font-size: 14px; font-weight: 400; color: var(--text-primary);
+      transition: color 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cl-action-time {
+      font-size: 11px; color: var(--text-disabled); flex-shrink: 0;
+      transition: opacity 0.12s;
+    }
+    .cl-action-row:hover .cl-action-time { opacity: 0; }
+    .cl-action-btns {
+      position: absolute; right: 0; display: flex; gap: 6px;
+      opacity: 0; transition: opacity 0.12s; pointer-events: none;
+    }
+    .cl-action-row:hover .cl-action-btns { opacity: 1; pointer-events: all; }
+    .cl-action-open {
+      height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: white; font-size: 12px; font-weight: 500; color: var(--text-primary);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: border-color 0.1s, background 0.1s;
+    }
+    .cl-action-open:hover { border-color: var(--brand); color: var(--brand); }
+    .cl-action-more {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+      background: white; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-secondary); transition: border-color 0.1s;
+    }
+    .cl-action-more:hover { border-color: var(--border-md); }
   </style>
 </head>
 <body>
 
 <!-- Prototype switcher -->
-<div class="proto-switcher">
-  <a class="proto-tab" href="chat-folders.html">A — Collapsible</a>
-  <a class="proto-tab active" href="chat-folders-2.html">B — Drill-down</a>
-  <a class="proto-tab" href="chat-folders-3.html">C — List view</a>
-  <a class="proto-tab" href="chat-folders-4.html">D — List styles</a>
-  <a class="proto-tab" href="chat-folders-5.html">E — Tile styles</a>
+<div style="position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:#fff;border:1px solid rgba(124,123,132,0.25);border-radius:8px;padding:3px;z-index:500;box-shadow:0 2px 8px rgba(18,0,69,0.08);">
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders.html">A — Collapsible</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-2.html">B — Drill-down</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-3.html">C — List view</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#6f6e78;cursor:pointer;text-decoration:none;" href="chat-folders-4.html">D — List styles</a>
+  <a style="padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#252429;background:#f2f2f3;cursor:pointer;text-decoration:none;" href="chat-folders-5.html">E — Tile styles</a>
 </div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════ -->
@@ -590,8 +851,8 @@
 
   <div class="sidebar-sep"></div>
 
-  <!-- Root view: folder list + recent chats -->
-  <div class="sidebar-scroll" id="rootView">
+  <div class="sidebar-scroll" id="sidebarScroll">
+    <!-- Folders section -->
     <div class="section-head">
       <div class="section-head-left">
         <span class="section-label">Folders</span>
@@ -600,8 +861,11 @@
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
+
     <div id="folderList"></div>
 
+
+    <!-- Recent chats -->
     <div class="recent-section" id="recentSection">
       <div class="section-head" style="cursor:default">
         <div class="section-head-left">
@@ -610,24 +874,6 @@
       </div>
       <div id="recentList" class="recent-drop-zone"></div>
     </div>
-  </div>
-
-  <!-- Folder detail view (drill-down) -->
-  <div class="sidebar-scroll folder-panel" id="folderPanel">
-    <div class="folder-panel-header">
-      <button class="fp-back" onclick="closeFolder()" title="Back to folders">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <span class="fp-icon" id="fpIcon"></span>
-      <span class="fp-title" id="fpTitle"></span>
-      <button class="fp-new-btn" title="New chat in folder" id="fpNewBtn">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-      <button class="fp-more-btn" title="Folder options" id="fpMoreBtn">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="2.5" r="0.9" fill="currentColor"/><circle cx="6" cy="6" r="0.9" fill="currentColor"/><circle cx="6" cy="9.5" r="0.9" fill="currentColor"/></svg>
-      </button>
-    </div>
-    <div class="folder-panel-list" id="folderPanelList"></div>
   </div>
 
   <div class="sidebar-footer">
@@ -645,6 +891,62 @@
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="3" stroke="#949399" stroke-width="1.5"/><path d="M12 16h16M12 22h10" stroke="#949399" stroke-width="1.5" stroke-linecap="round"/></svg>
     </div>
     <p>Select a chat or start a new one</p>
+  </div>
+
+  <!-- Folder list view — shows when a folder is selected -->
+  <div class="folder-list-view" id="folderListView">
+    <div class="flv-header">
+      <div class="flv-header-title">
+        <span class="flv-icon" id="flvIcon"></span>
+        <span class="flv-title" id="flvTitle"></span>
+      </div>
+      <div class="flv-actions">
+        <button class="kb-toggle-btn" id="kbToggleBtn" onclick="toggleKbPanel()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4.5 4.5 0 0 1 3.5 7.3l.5 2.7H4L4.5 9.3A4.5 4.5 0 0 1 8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 12.5h4M7 14h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Knowledge base
+        </button>
+        <button class="tb-btn" title="Share" id="flvShareBtn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="12" cy="2.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="13.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="8" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7.3 10.5 4.2M5.5 8.7l5 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tb-btn" title="Filter" id="flvFilterBtn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 4.5h11M5 8h6M7.5 11.5h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="flv-body" id="flvBody"></div>
+  </div>
+
+  <!-- Knowledge base panel -->
+  <div class="kb-panel" id="kbPanel">
+    <div class="kb-header">
+      <div class="kb-header-title">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" color="#44434b"><path d="M10 2.5a6 6 0 0 1 4.8 9.6l.7 3.4H4.5l.7-3.4A6 6 0 0 1 10 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M7.5 15.5h5M8.5 17.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span class="kb-header-title-text">Knowledge base</span>
+      </div>
+      <div class="kb-header-actions">
+        <button class="tb-btn" title="Refresh" onclick="toast('Refreshing knowledge bases…')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 0 5.5-5.5 5.3 5.3 0 0 0-3.8 1.6L2.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2.5 3v2.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tb-btn" title="Close" onclick="toggleKbPanel()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="kb-body">
+      <!-- Add button row -->
+      <div class="kb-add-row">
+        <button class="kb-add-btn" onclick="toast('Opening knowledge base connector…')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add knowledge base
+        </button>
+      </div>
+
+      <!-- Connected KBs -->
+      <div>
+        <div class="kb-section-label">Client info docs</div>
+      </div>
+      <div id="kbItemList"></div>
+    </div>
   </div>
 
   <div id="chatView" style="display:none; flex-direction:column; height:100vh; overflow:hidden; flex:1;">
@@ -743,6 +1045,8 @@
 let nextId = 100;
 const uid = () => `id${nextId++}`;
 
+let chatListStyle = 'plain';
+
 let state = {
   folders: [
     { id:'f1', name:'Work', expanded: true,  chats:['c1','c2','c3'] },
@@ -768,6 +1072,14 @@ let state = {
   openFolderId: null,
 };
 
+const CHAT_PREVIEWS = {
+  c1: { preview: 'AI-powered threats and zero trust adoption are reshaping enterprise security strategies…', time: '2h ago', msgs: 4 },
+  c2: { preview: 'Recommended shifting LinkedIn budget to 40% given your ICP is VP+ enterprise buyers…', time: 'Yesterday', msgs: 7 },
+  c3: { preview: 'Five high-converting headline options focused on speed and ROI for your landing page…', time: '3d ago', msgs: 3 },
+  c4: { preview: 'Draft press release ready for review. Highlights product-market fit and launch date…', time: '1w ago', msgs: 5 },
+  default: { preview: 'Click to continue this conversation with your AI assistant…', time: 'Today', msgs: 2 },
+};
+
 // Modal editing state
 let editingFolderId = null;
 let deletingFolderId = null;
@@ -778,7 +1090,7 @@ let deletingFolderId = null;
 function render() {
   renderFolders();
   renderRecent();
-  if (state.openFolderId) renderFolderPanel(state.openFolderId);
+  if (state.openFolderId) renderFolderListView(state.openFolderId);
 }
 
 function renderFolders() {
@@ -794,12 +1106,14 @@ function buildFolderEl(folder) {
   item.className = 'folder-item';
   item.dataset.fid = folder.id;
 
+  const isOpen = state.openFolderId === folder.id;
   const header = document.createElement('div');
-  header.className = 'folder-header' + (state.openFolderId === folder.id ? ' active' : '');
+  header.className = 'folder-header' + (isOpen ? ' active' : '');
   header.dataset.fid = folder.id;
   header.innerHTML = `
     <span class="folder-icon">${folderSvg(14)}</span>
     <span class="folder-name" id="fname-${folder.id}">${esc(folder.name)}</span>
+    ${folder.chats.length > 0 ? `<span class="folder-count">${folder.chats.length}</span>` : ''}
     <span class="folder-actions">
       <button class="folder-action-btn" title="New chat in folder" onclick="newChatInFolder('${folder.id}',event)">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -813,10 +1127,9 @@ function buildFolderEl(folder) {
   header.addEventListener('click', (e) => {
     if (e.target.closest('.folder-action-btn')) return;
     if (e.target.closest('.folder-name-input')) return;
-    openFolder(folder.id);
+    openFolderInMain(folder.id);
   });
 
-  // Drag-over for chats
   header.addEventListener('dragover', (e) => {
     if (dragState.type === 'chat') { e.preventDefault(); clearDropTargets(); header.classList.add('drop-target'); }
   });
@@ -826,6 +1139,26 @@ function buildFolderEl(folder) {
       clearDropTargets(); endDrag();
     }
   });
+
+  if (state.folders.length > 1) {
+    item.setAttribute('draggable', 'true');
+    item.addEventListener('dragstart', (e) => {
+      if (e.target.closest('.folder-action-btn')) { e.preventDefault(); return; }
+      startFolderDrag(folder.id, e);
+    });
+    item.addEventListener('dragend', endDrag);
+    item.addEventListener('dragover', (e) => {
+      if (dragState.type === 'folder' && dragState.folderId !== folder.id) {
+        e.preventDefault(); clearDropTargets(); item.classList.add('folder-drag-over-below');
+      }
+    });
+    item.addEventListener('drop', (e) => {
+      if (dragState.type === 'folder') {
+        e.preventDefault(); reorderFolder(dragState.folderId, folder.id);
+        clearDropTargets(); endDrag();
+      }
+    });
+  }
 
   item.appendChild(header);
   return item;
@@ -887,100 +1220,9 @@ function buildChatEl(cid) {
 // ════════════════════════════════════════════════════════════
 // Folder actions
 // ════════════════════════════════════════════════════════════
-function openFolder(fid) {
-  state.openFolderId = fid;
-  const folder = state.folders.find(f => f.id === fid);
-
-  // Show folder panel, hide root view
-  document.getElementById('rootView').style.display = 'none';
-  const panel = document.getElementById('folderPanel');
-  panel.classList.add('visible');
-
-  // Populate header
-  document.getElementById('fpTitle').textContent = folder.name;
-  document.getElementById('fpIcon').innerHTML = folderSvg(14);
-
-  // Wire up panel action buttons
-  document.getElementById('fpNewBtn').onclick = (e) => { e.stopPropagation(); newChatInFolder(fid, e); };
-  document.getElementById('fpMoreBtn').onclick = (e) => {
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const idx = state.folders.indexOf(folder);
-    showDropdown([
-      { label: 'Rename', icon: pencilIcon(), action: () => startRenamePanel(fid) },
-      { label: 'Move up', icon: upIcon(), disabled: idx === 0,
-        action: () => { if (idx > 0) { state.folders.splice(idx,1); state.folders.splice(idx-1,0,folder); renderFolders(); } }
-      },
-      { label: 'Move down', icon: downIcon(), disabled: idx === state.folders.length - 1,
-        action: () => { if (idx < state.folders.length-1) { state.folders.splice(idx,1); state.folders.splice(idx+1,0,folder); renderFolders(); } }
-      },
-      { sep: true },
-      { label: 'Delete folder', icon: trashIcon(), danger: true, action: () => openDeleteModal(fid) },
-    ], rect.right, rect.bottom + 4);
-  };
-
-  // Populate chat list
-  renderFolderPanel(fid);
-  renderFolders(); // re-render to show active highlight
-}
-
-function closeFolder() {
-  state.openFolderId = null;
-  document.getElementById('rootView').style.display = '';
-  document.getElementById('folderPanel').classList.remove('visible');
-  renderFolders();
-}
-
-function renderFolderPanel(fid) {
-  const folder = state.folders.find(f => f.id === fid);
-  const list = document.getElementById('folderPanelList');
-  list.innerHTML = '';
-
-  if (!folder || folder.chats.length === 0) {
-    list.innerHTML = `<div class="fp-empty">No chats yet</div>`;
-    return;
-  }
-
-  folder.chats.forEach(cid => {
-    const el = buildFolderChatEl(cid, fid);
-    list.appendChild(el);
-  });
-}
-
-function startRenamePanel(fid) {
-  closeAllDropdowns();
-  const folder = state.folders.find(f => f.id === fid);
-  const titleEl = document.getElementById('fpTitle');
-  const orig = folder.name;
-
-  const input = document.createElement('input');
-  input.className = 'folder-name-input';
-  input.style.cssText = 'flex:1;height:20px;font-size:13px;font-weight:600;';
-  input.value = orig;
-  titleEl.replaceWith(input);
-  input.focus(); input.select();
-
-  const commit = () => {
-    const val = input.value.trim();
-    if (val && val !== orig) {
-      const dupe = state.folders.find(f => f.id !== fid && f.name.toLowerCase() === val.toLowerCase());
-      if (dupe) { toast(`"${val}" already exists`); input.focus(); return; }
-      folder.name = val;
-      toast(`Folder renamed to "${val}"`);
-    }
-    const newTitle = document.createElement('span');
-    newTitle.id = 'fpTitle';
-    newTitle.className = 'fp-title';
-    newTitle.textContent = folder.name;
-    input.replaceWith(newTitle);
-    renderFolders();
-  };
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') commit();
-    if (e.key === 'Escape') { folder.name = orig; commit(); }
-    e.stopPropagation();
-  });
-  input.addEventListener('blur', commit);
+function toggleFolder(fid) {
+  const f = state.folders.find(f => f.id === fid);
+  if (f) { f.expanded = !f.expanded; renderFolders(); }
 }
 
 function openFolderMenu(fid, e) {
@@ -1061,7 +1303,11 @@ function confirmDelete() {
   if (!folder) return;
   folder.chats.forEach(cid => state.recentChats.unshift(cid));
   state.folders = state.folders.filter(f => f.id !== deletingFolderId);
-  if (state.openFolderId === deletingFolderId) closeFolder();
+  if (state.openFolderId === deletingFolderId) {
+    state.openFolderId = null;
+    document.getElementById('folderListView').classList.remove('visible');
+    document.getElementById('mainEmpty').style.display = 'flex';
+  }
   closeModal('deleteModal');
   toast(`"${folder.name}" deleted — chats moved to Recent`);
   render();
@@ -1200,25 +1446,19 @@ function openMoveToFolderMenu(cid, currentFolderId, anchorRect) {
     label: 'New folder…',
     icon: plusIcon(),
     action: () => {
-      const nameHint = state.chats[cid] ? state.chats[cid].slice(0,20) : '';
       openCreateModal();
-      // After create, auto-move — simplified for prototype
       toast('Create folder then move the chat from its menu');
     }
   });
 
-  // Position submenu to the right of the anchor, or flip left if near edge
   let x = anchorRect.right + 8;
   if (x + 200 > window.innerWidth) x = anchorRect.left - 208;
   showDropdown(items, x, anchorRect.top, true);
 }
 
 function moveChatToFolder(cid, folderId) {
-  // Remove from current folder if any
   state.folders.forEach(f => { f.chats = f.chats.filter(c => c !== cid); });
-  // Remove from recent
   state.recentChats = state.recentChats.filter(c => c !== cid);
-  // Add to target folder
   const target = state.folders.find(f => f.id === folderId);
   if (!target) return;
   target.chats.unshift(cid);
@@ -1332,8 +1572,263 @@ function renderChatView(cid) {
   messages.scrollTop = messages.scrollHeight;
 
   document.getElementById('mainEmpty').style.display = 'none';
+  document.getElementById('folderListView').classList.remove('visible');
   const chatView = document.getElementById('chatView');
   chatView.style.display = 'flex';
+}
+
+// ════════════════════════════════════════════════════════════
+// Folder list view (main area)
+// ════════════════════════════════════════════════════════════
+function openFolderInMain(fid) {
+  state.openFolderId = fid;
+  state.activeChat = null;
+  renderFolders();
+  document.getElementById('mainEmpty').style.display = 'none';
+  document.getElementById('chatView').style.display = 'none';
+  const panel = document.getElementById('folderListView');
+  panel.classList.add('visible');
+  renderFolderListView(fid);
+}
+
+function renderFolderListView(fid) {
+  const folder = state.folders.find(f => f.id === fid);
+  if (!folder) return;
+
+  document.getElementById('flvIcon').innerHTML = folderSvg(20);
+  document.getElementById('flvTitle').textContent = folder.name;
+
+  document.getElementById('flvShareBtn').onclick = (e) => { e.stopPropagation(); toast('Share link copied'); };
+  document.getElementById('flvFilterBtn').onclick = (e) => openFolderMenu(fid, e);
+
+  const body = document.getElementById('flvBody');
+  body.innerHTML = '';
+
+  if (folder.chats.length === 0) {
+    body.innerHTML = `
+      <div class="flv-section" style="display:flex;align-items:center;justify-content:center;height:60vh;">
+        <div class="flv-empty" style="height:auto;">
+          <div class="flv-empty-icon">${folderSvg(40)}</div>
+          <p>No chats in this folder yet</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const section = document.createElement('div');
+  section.className = 'flv-section';
+
+  // Section header: "Chats" + "New chat in the group" button
+  const head = document.createElement('div');
+  head.className = 'flv-section-head';
+  head.innerHTML = `
+    <div class="flv-section-head-left">
+      <span class="flv-section-head-icon">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M14 8.5a5.5 5.5 0 0 1-8.25 4.77L2 14l.76-3.5A5.5 5.5 0 1 1 14 8.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="flv-section-label">Chats</span>
+    </div>
+    <button class="flv-new-chat-btn" id="flvNewChatBtn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      New chat in the group
+    </button>`;
+  head.querySelector('#flvNewChatBtn').addEventListener('click', () => toast(`New chat will be added to "${folder.name}"`));
+  section.appendChild(head);
+
+  // Style toggle
+  const toggle = document.createElement('div');
+  toggle.className = 'cl-style-toggle';
+  ['Plain', 'Preview', 'Avatar', 'Grouped', 'Actions'].forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'cl-style-btn' + (chatListStyle === label.toLowerCase() ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      chatListStyle = label.toLowerCase();
+      renderFolderListView(fid);
+    });
+    toggle.appendChild(btn);
+  });
+  section.appendChild(toggle);
+
+  // Render chosen style
+  if (chatListStyle === 'plain') {
+    renderChatPlain(folder, section);
+  } else if (chatListStyle === 'preview') {
+    renderChatPreview(folder, section);
+  } else if (chatListStyle === 'avatar') {
+    renderChatAvatar(folder, section);
+  } else if (chatListStyle === 'grouped') {
+    renderChatGrouped(folder, section);
+  } else {
+    renderChatActions(folder, section);
+  }
+
+  body.appendChild(section);
+}
+
+// ── Style 1: Plain ────────────────────────────────────────
+function renderChatPlain(folder, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-plain';
+
+  folder.chats.forEach(cid => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const isActive = state.activeChat === cid;
+
+    const row = document.createElement('div');
+    row.className = 'cl-plain-row' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <span class="cl-plain-dot"></span>
+      <span class="cl-plain-title">${esc(title)}</span>
+      <span class="cl-plain-time">${esc(data.time)}</span>`;
+    row.addEventListener('click', () => setActiveChat(cid));
+    wrap.appendChild(row);
+  });
+
+  container.appendChild(wrap);
+}
+
+// ── Style 2: Preview ──────────────────────────────────────
+function renderChatPreview(folder, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-preview-list';
+
+  folder.chats.forEach(cid => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const isActive = state.activeChat === cid;
+
+    const row = document.createElement('div');
+    row.className = 'cl-preview-row' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <div class="cl-preview-accent"></div>
+      <div class="cl-preview-body">
+        <div class="cl-preview-top">
+          <span class="cl-preview-title">${esc(title)}</span>
+          <span class="cl-preview-badge">${data.msgs}</span>
+        </div>
+        <div class="cl-preview-text">${esc(data.preview)}</div>
+        <div class="cl-preview-time">${esc(data.time)}</div>
+      </div>`;
+    row.addEventListener('click', () => setActiveChat(cid));
+    wrap.appendChild(row);
+  });
+
+  container.appendChild(wrap);
+}
+
+// ── Style 3: Avatar ───────────────────────────────────────
+const AVATAR_COLORS = ['#693bff','#e0375e','#0ea271','#d97706','#2563eb','#7c3aed'];
+function renderChatAvatar(folder, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-avatar-list';
+
+  folder.chats.forEach((cid, idx) => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const initials = title.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+    const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+    const isActive = state.activeChat === cid;
+
+    const row = document.createElement('div');
+    row.className = 'cl-avatar-row' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <div class="cl-avatar-circle" style="background:${color}">${esc(initials)}</div>
+      <div class="cl-avatar-mid">
+        <div class="cl-avatar-title">${esc(title)}</div>
+        <div class="cl-avatar-sub">${esc(data.preview)}</div>
+      </div>
+      <div class="cl-avatar-right">
+        <span class="cl-avatar-time">${esc(data.time)}</span>
+      </div>`;
+    row.addEventListener('click', () => setActiveChat(cid));
+    wrap.appendChild(row);
+  });
+
+  container.appendChild(wrap);
+}
+
+// ── Style 4: Grouped ──────────────────────────────────────
+function renderChatGrouped(folder, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-grouped';
+
+  const groups = [
+    { label: 'Today',     ids: folder.chats.slice(0, 1) },
+    { label: 'Yesterday', ids: folder.chats.slice(1, 2) },
+    { label: 'Earlier',   ids: folder.chats.slice(2) },
+  ].filter(g => g.ids.length > 0);
+
+  const chatIcon = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1.5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 5.5h6M4 8h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+
+  groups.forEach(group => {
+    const section = document.createElement('div');
+    section.innerHTML = `<div class="cl-group-header">${esc(group.label)}</div>`;
+    const rows = document.createElement('div');
+    rows.className = 'cl-group-rows';
+
+    group.ids.forEach(cid => {
+      const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+      const title = state.chats[cid] || 'Unknown chat';
+      const isActive = state.activeChat === cid;
+
+      const row = document.createElement('div');
+      row.className = 'cl-group-row' + (isActive ? ' active' : '');
+      row.innerHTML = `
+        <div class="cl-group-icon">${chatIcon}</div>
+        <div class="cl-group-body">
+          <div class="cl-group-title">${esc(title)}</div>
+          <div class="cl-group-meta">${data.msgs} messages</div>
+        </div>
+        <span class="cl-group-time">${esc(data.time)}</span>`;
+      row.addEventListener('click', () => setActiveChat(cid));
+      rows.appendChild(row);
+    });
+
+    section.appendChild(rows);
+    wrap.appendChild(section);
+  });
+
+  container.appendChild(wrap);
+}
+
+// ── Style 5: Actions ──────────────────────────────────────
+function renderChatActions(folder, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-actions-list';
+
+  folder.chats.forEach(cid => {
+    const data = CHAT_PREVIEWS[cid] || CHAT_PREVIEWS.default;
+    const title = state.chats[cid] || 'Unknown chat';
+    const isActive = state.activeChat === cid;
+
+    const row = document.createElement('div');
+    row.className = 'cl-action-row' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <div class="cl-action-accent"></div>
+      <span class="cl-action-title">${esc(title)}</span>
+      <span class="cl-action-time">${esc(data.time)}</span>
+      <div class="cl-action-btns">
+        <button class="cl-action-open">Open</button>
+        <button class="cl-action-more">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="11" cy="7" r="1" fill="currentColor"/></svg>
+        </button>
+      </div>`;
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.cl-action-btns')) return;
+      setActiveChat(cid);
+    });
+    row.querySelector('.cl-action-open').addEventListener('click', (e) => {
+      e.stopPropagation(); setActiveChat(cid);
+    });
+    row.querySelector('.cl-action-more').addEventListener('click', (e) => {
+      e.stopPropagation(); toast('More options');
+    });
+    wrap.appendChild(row);
+  });
+
+  container.appendChild(wrap);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1358,7 +1853,6 @@ function startChatDrag(cid, folderId, e) {
   const el = e.currentTarget;
   setTimeout(() => el.classList.add('dragging'), 0);
 
-  // Setup recent drop zone
   const recentEl = document.getElementById('recentList');
   recentEl.addEventListener('dragover', onRecentDragOver);
   recentEl.addEventListener('drop', onRecentDrop);
@@ -1403,9 +1897,7 @@ function onRecentDrop(e) {
   if (dragState.type === 'chat') {
     e.preventDefault();
     const cid = dragState.chatId;
-    // Remove from folder if in one
     state.folders.forEach(f => { f.chats = f.chats.filter(c => c !== cid); });
-    // Add to recent if not already there
     if (!state.recentChats.includes(cid)) {
       state.recentChats.unshift(cid);
       toast('Removed from folder — back in Recent chats');
@@ -1482,7 +1974,6 @@ function showDropdown(items, x, y, isSubmenu) {
 
   document.body.appendChild(dd);
 
-  // Position — flip if near edge
   const ddW = 200, ddH = items.length * 36;
   let left = x, top = y;
   if (left + ddW > window.innerWidth - 8) left = x - ddW - (isSubmenu ? 0 : 0);
@@ -1490,7 +1981,6 @@ function showDropdown(items, x, y, isSubmenu) {
   dd.style.left = `${Math.max(8, left)}px`;
   dd.style.top  = `${Math.max(8, top)}px`;
 
-  // Close on outside click
   setTimeout(() => {
     document.addEventListener('click', closeAllDropdowns, { once: true });
   }, 0);
@@ -1529,7 +2019,6 @@ function toast(msg) {
 // ════════════════════════════════════════════════════════════
 function esc(s) { const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
-// Design system folder icon — cms/icons/16x16/folder (sm, regular)
 const FOLDER_PATH = `M 11.2 1.6 H 6.9 L 5.69 0.47 C 5.39 0.17 4.98 0 4.56 0 H 1.6 C 0.72 0 0 0.72 0 1.6 V 9.6 C 0 10.48 0.72 11.2 1.6 11.2 H 11.2 C 12.08 11.2 12.8 10.48 12.8 9.6 V 3.2 C 12.8 2.32 12.1 1.6 11.2 1.6 Z M 11.6 9.6 C 11.6 9.82 11.42 10 11.2 10 H 1.6 C 1.38 10 1.2 9.82 1.2 9.6 V 1.6 C 1.2 1.38 1.38 1.2 1.6 1.2 H 4.54 C 4.64 1.2 4.74 1.24 4.82 1.32 L 6.4 2.8 H 11.2 C 11.42 2.8 11.6 2.98 11.6 3.2 V 9.6 Z`;
 
 function folderSvg(size = 14) {
@@ -1552,7 +2041,6 @@ function chevronRightIcon() { return `<svg width="12" height="12" viewBox="0 0 1
 function demo_createFolder() { openCreateModal(); }
 
 function demo_moveChat() {
-  // Simulate clicking ⋮ on first recent chat
   const cid = state.recentChats[0];
   if (!cid) { toast('No recent chats to move'); return; }
   const fid = state.folders[0]?.id;
@@ -1578,6 +2066,56 @@ function demo_dragDrop() {
 }
 
 // ════════════════════════════════════════════════════════════
+// Knowledge base panel
+// ════════════════════════════════════════════════════════════
+const KB_ITEMS = [
+  { id:'kb1', name:'Client info docs', meta:'12 files · Updated 2 days ago', connected: true },
+  { id:'kb2', name:'Branding style', meta:'5 files · Updated today', connected: true },
+  { id:'kb3', name:'Notion workspace', meta:'Not connected', connected: false },
+  { id:'kb4', name:'Google Drive', meta:'Not connected', connected: false },
+  { id:'kb5', name:'Confluence', meta:'Not connected', connected: false },
+];
+
+let kbConnected = { kb1: true, kb2: true, kb3: false, kb4: false, kb5: false };
+
+function toggleKbPanel() {
+  const panel = document.getElementById('kbPanel');
+  const btn = document.getElementById('kbToggleBtn');
+  const isOpen = panel.classList.toggle('open');
+  if (btn) btn.classList.toggle('active', isOpen);
+  if (isOpen) renderKbItems();
+}
+
+function renderKbItems() {
+  const list = document.getElementById('kbItemList');
+  list.innerHTML = '';
+  KB_ITEMS.forEach(item => {
+    const connected = kbConnected[item.id];
+    const el = document.createElement('div');
+    el.className = 'kb-item' + (connected ? ' connected' : '');
+    el.innerHTML = `
+      <div class="kb-item-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2a4 4 0 0 1 3.2 6.4l.3 1.6H2.5l.3-1.6A4 4 0 0 1 10 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 10h3M7 11.5h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="kb-item-body">
+        <div class="kb-item-name">${esc(item.name)}</div>
+        <div class="kb-item-meta">${connected ? (item.meta.includes('Not') ? item.meta : item.meta) : item.meta}</div>
+      </div>
+      <button class="kb-connect-btn ${connected ? 'connected' : ''}" onclick="toggleKbItem('${item.id}')">
+        ${connected ? 'Connected' : 'Connect'}
+      </button>`;
+    list.appendChild(el);
+  });
+}
+
+function toggleKbItem(id) {
+  kbConnected[id] = !kbConnected[id];
+  const item = KB_ITEMS.find(k => k.id === id);
+  toast(kbConnected[id] ? `"${item.name}" connected` : `"${item.name}" disconnected`);
+  renderKbItems();
+}
+
+// ════════════════════════════════════════════════════════════
 // Keyboard shortcuts
 // ════════════════════════════════════════════════════════════
 document.addEventListener('keydown', (e) => {
@@ -1585,6 +2123,8 @@ document.addEventListener('keydown', (e) => {
     closeAllDropdowns();
     closeModal('folderModal');
     closeModal('deleteModal');
+    const kbPanel = document.getElementById('kbPanel');
+    if (kbPanel.classList.contains('open')) toggleKbPanel();
   }
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'O') {
     e.preventDefault();
@@ -1593,7 +2133,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Init
-document.addEventListener('DOMContentLoaded', render);
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  if (state.folders.length > 0) {
+    openFolderInMain(state.folders[0].id);
+  }
+});
 </script>
 </body>
 </html>
