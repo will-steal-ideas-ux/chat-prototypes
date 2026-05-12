@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — Presentation Editor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 258 6% 15%;
+      --muted: 240 5% 97%;
+      --muted-foreground: 258 4% 45%;
+      --border: 240 6% 90%;
+      --primary: 252 100% 64%;
+      --primary-foreground: 0 0% 100%;
+      --accent: 252 100% 96%;
+      --radius: 0.5rem;
+
+      --bg-primary:         hsl(var(--muted));
+      --bg-secondary:       hsl(var(--background));
+      --bg-tertiary:        hsl(240 4% 50% / 0.10);
+      --border-secondary:   hsl(var(--border));
+      --text-primary:       hsl(var(--foreground));
+      --text-secondary:     hsl(300 1% 27%);
+      --text-tertiary:      hsl(var(--muted-foreground));
+      --brand-purple:       hsl(var(--primary));
+      --brand-purple-light: hsl(var(--accent));
+
+      --radius-xs:   calc(var(--radius) * 0.5);
+      --radius-sm:   var(--radius);
+      --radius-md:   calc(var(--radius) * 2);
+      --shadow-sm: 0 1px 3px hsl(252 100% 14% / 0.10), 0 1px 2px hsl(252 100% 14% / 0.05);
+      --shadow-lg: 0 8px 15px hsl(252 100% 14% / 0.06), 0 4px 7px hsl(252 100% 14% / 0.03);
+      --transition: .15s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Icons (inline SVG helpers) ─────────────────────── */
+    .icon { width: 16px; height: 16px; display: block; flex-shrink: 0; }
+    .icon-20 { width: 20px; height: 20px; display: block; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT — Chat + Preview panel
+    ═══════════════════════════════════════════════════════ */
+    .body-layout { display: flex; flex: 1; overflow: hidden; height: 100vh; }
+
+    /* ── Sidebar ──────────────────────────────────────────── */
+    .sidebar {
+      width: 58px; background: var(--bg-primary);
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0; border-right: 1px solid var(--border-secondary);
+      padding: 12px 0; gap: 4px;
+    }
+    .sidebar-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px; flex-shrink: 0;
+    }
+    .sidebar-logo svg { color: white; }
+    .sidebar-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-tertiary); border: none;
+      background: transparent; transition: background var(--transition), color var(--transition);
+    }
+    .sidebar-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .sidebar-btn.active { background: var(--brand-purple-light); color: var(--brand-purple); }
+
+    /* ── Chat column ─────────────────────────────────────── */
+    .chat-col {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0; overflow: hidden; position: relative;
+    }
+    .chat-scroll {
+      flex: 1; overflow-y: auto; padding: 32px 80px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .chat-scroll::-webkit-scrollbar { width: 4px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 4px; }
+
+    /* messages */
+    .msg { display: flex; gap: 10px; align-items: flex-start; }
+    .msg.user { justify-content: flex-end; }
+    .msg-bubble {
+      max-width: 540px; padding: 10px 14px; border-radius: 12px;
+      font-size: 14px; line-height: 1.5; color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    .msg.user .msg-bubble {
+      background: var(--brand-purple); color: white;
+      border-radius: 12px 12px 2px 12px;
+    }
+    .msg.ai .msg-bubble {
+      background: var(--bg-primary);
+      border-radius: 12px 12px 12px 2px;
+    }
+    .msg-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #693bff, #a48aff);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 600; color: white;
+    }
+
+    /* file attachment chip */
+    .file-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: var(--bg-primary);
+      border: 1px solid var(--border-secondary); border-radius: 10px;
+      cursor: pointer; max-width: 320px; transition: border-color var(--transition);
+    }
+    .file-chip:hover { border-color: var(--brand-purple); }
+    .file-chip-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .file-chip-icon.pptx { background: #fff4ed; }
+    .file-chip-icon.xlsx { background: #edfff4; }
+    .file-chip-info { min-width: 0; }
+    .file-chip-name { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-chip-size { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+    .file-chip-dl { margin-left: auto; color: var(--text-tertiary); cursor: pointer; }
+    .file-chip-dl:hover { color: var(--brand-purple); }
+
+    .ai-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px;
+    }
+    .ai-label-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--brand-purple);
+    }
+
+    /* chat actions row */
+    .chat-actions {
+      display: flex; align-items: center; gap: 8px; margin-top: 4px; padding-left: 38px;
+    }
+    .chat-action-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; border-radius: 6px; border: none;
+      background: transparent; color: var(--text-tertiary);
+      font-size: 12px; cursor: pointer; transition: background var(--transition), color var(--transition);
+    }
+    .chat-action-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+    /* prompt box */
+    .prompt-wrap {
+      padding: 16px 80px 20px; flex-shrink: 0;
+      background: linear-gradient(to top, var(--bg-secondary) 80%, transparent);
+    }
+    .prompt-box {
+      display: flex; align-items: flex-end; gap: 8px;
+      padding: 10px 10px 10px 14px;
+      background: var(--bg-primary); border: 1px solid var(--border-secondary);
+      border-radius: 14px; box-shadow: var(--shadow-sm);
+    }
+    .prompt-input {
+      flex: 1; border: none; background: transparent; resize: none;
+      font-family: inherit; font-size: 14px; color: var(--text-primary);
+      line-height: 1.5; min-height: 24px; max-height: 120px;
+      outline: none;
+    }
+    .prompt-input::placeholder { color: var(--text-tertiary); }
+    .prompt-send {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--brand-purple); border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: opacity var(--transition);
+    }
+    .prompt-send:hover { opacity: 0.85; }
+    .prompt-send svg { color: white; }
+
+    /* ═══════════════════════════════════════════════════════
+       PREVIEW PANEL (right slide-in)
+    ═══════════════════════════════════════════════════════ */
+    .preview-panel {
+      width: 800px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      border-left: 1px solid var(--border-secondary);
+      background: white;
+      transition: width .3s ease;
+      overflow: hidden;
+    }
+    .preview-panel.hidden { width: 0; }
+
+    /* panel header */
+    .panel-header {
+      height: 48px; display: flex; align-items: center;
+      padding: 0 16px; border-bottom: 1px solid var(--border-secondary);
+      flex-shrink: 0; gap: 8px;
+    }
+    .panel-title {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .panel-icon-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: transparent; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: var(--text-tertiary);
+      transition: background var(--transition), color var(--transition);
+      flex-shrink: 0;
+    }
+    .panel-icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .panel-icon-btn.danger:hover { background: #fff0f0; color: #d0021b; }
+
+    /* slide preview in panel */
+    .panel-body {
+      flex: 1; overflow-y: auto; padding: 24px;
+      display: flex; flex-direction: column; gap: 16px;
+      background: #f5f5f7;
+    }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+    .slide-preview-card {
+      background: white; border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden; position: relative;
+      cursor: pointer;
+    }
+    .slide-preview-card:hover { box-shadow: 0 4px 16px hsl(252 100% 14% / 0.12); }
+    .slide-num {
+      position: absolute; bottom: 10px; right: 14px;
+      font-size: 11px; color: rgba(255,255,255,0.7);
+      font-weight: 500;
+    }
+
+    /* ─── Slide renderings ─────────────────────────── */
+    .slide { aspect-ratio: 16/9; width: 100%; position: relative; overflow: hidden; }
+
+    /* Slide 1 — dark green title */
+    .s1 { background: #1c3a2e; }
+    .s1-badge {
+      position: absolute; top: 32px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.15); border-radius: 20px;
+      padding: 5px 18px; font-size: 11px; letter-spacing: 1.5px;
+      color: #b8d4c4; font-weight: 600; text-transform: uppercase; white-space: nowrap;
+    }
+    .s1-title { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-55%); text-align: center; width: 80%; }
+    .s1-title h1 { font-family: 'DM Sans', sans-serif; font-size: 52px; font-weight: 700; color: white; line-height: 1.1; }
+    .s1-title h1 span { color: #7bc49a; }
+    .s1-subtitle { position: absolute; top: 72%; left: 50%; transform: translateX(-50%);
+      font-size: 13px; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; white-space: nowrap; }
+    .s1-line { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 1px; background: rgba(255,255,255,0.15); }
+
+    /* Slide 2 — "What Are Frogs?" */
+    .s2 { background: white; display: flex; }
+    .s2-left { width: 50%; background: #1c3a2e; padding: 36px 32px; display: flex; flex-direction: column; justify-content: center; }
+    .s2-left h2 { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 700; color: white; line-height: 1.2; }
+    .s2-left .stat { font-size: 40px; font-weight: 700; color: #7bc49a; margin-top: 20px; }
+    .s2-left .stat-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .s2-right { width: 50%; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .s2-fact { border-left: 3px solid #7bc49a; padding-left: 12px; }
+    .s2-fact h4 { font-size: 13px; font-weight: 600; color: #1c3a2e; }
+    .s2-fact p { font-size: 11px; color: #666; margin-top: 3px; line-height: 1.4; }
+
+    /* Slide 3 — Habitats */
+    .s3 { background: #f9f7f2; padding: 28px 32px; }
+    .s3 h2 { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: #1c3a2e; margin-bottom: 18px; }
+    .s3-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; height: calc(100% - 60px); }
+    .s3-item { background: #1c3a2e; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .s3-item-label { font-size: 13px; font-weight: 600; color: white; }
+    .s3-item-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+    .s3-item:nth-child(2) { background: #2d5a45; }
+    .s3-item:nth-child(3) { background: #7bc49a; }
+    .s3-item:nth-child(3) .s3-item-label { color: #1c3a2e; }
+    .s3-item:nth-child(3) .s3-item-sub { color: rgba(0,0,0,0.4); }
+
+    /* Slide 4 — Adaptations */
+    .s4 { background: #1c3a2e; padding: 28px 32px; }
+    .s4 h2 { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: white; margin-bottom: 18px; }
+    .s4-list { display: flex; flex-direction: column; gap: 12px; }
+    .s4-item { display: flex; gap: 12px; align-items: flex-start; }
+    .s4-num { font-size: 28px; font-weight: 700; color: rgba(123,196,154,0.3); line-height: 1; min-width: 36px; }
+    .s4-text h4 { font-size: 13px; font-weight: 600; color: #7bc49a; }
+    .s4-text p { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; line-height: 1.4; }
+
+    /* Slide 5 — Conservation */
+    .s5 { background: white; display: flex; flex-direction: column; padding: 28px 32px; }
+    .s5 h2 { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: #1c3a2e; margin-bottom: 16px; }
+    .s5-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .s5-bar-label { font-size: 11px; color: #555; width: 100px; flex-shrink: 0; }
+    .s5-bar-track { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+    .s5-bar-fill { height: 100%; background: #7bc49a; border-radius: 4px; }
+    .s5-bar-pct { font-size: 11px; font-weight: 600; color: #1c3a2e; width: 36px; text-align: right; }
+
+    /* Slide 6 — End */
+    .s6 { background: #1c3a2e; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+    .s6 h2 { font-family: 'DM Sans', sans-serif; font-size: 36px; font-weight: 700; color: white; text-align: center; }
+    .s6 p { font-size: 14px; color: rgba(255,255,255,0.5); text-align: center; }
+    .s6-logo { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       EDITOR MODE (full-screen overlay)
+    ═══════════════════════════════════════════════════════ */
+    .editor-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: #f0f0f2;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .editor-overlay.open { opacity: 1; pointer-events: all; }
+
+    /* editor top bar */
+    .editor-topbar {
+      height: 52px; background: white;
+      border-bottom: 1px solid var(--border-secondary);
+      display: flex; align-items: center; gap: 0;
+      flex-shrink: 0;
+    }
+    .editor-topbar-left {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; border-right: 1px solid var(--border-secondary);
+      height: 100%; min-width: 200px;
+    }
+    .editor-filename {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .editor-toolbar {
+      flex: 1; display: flex; align-items: center; gap: 2px;
+      padding: 0 16px; overflow-x: auto;
+    }
+    .editor-toolbar::-webkit-scrollbar { display: none; }
+    .tb-sep { width: 1px; height: 24px; background: var(--border-secondary); margin: 0 6px; flex-shrink: 0; }
+    .tb-btn {
+      height: 30px; padding: 0 8px; border-radius: 6px; border: none;
+      background: transparent; color: var(--text-secondary); font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: background var(--transition); white-space: nowrap; flex-shrink: 0;
+      font-family: inherit;
+    }
+    .tb-btn:hover { background: var(--bg-primary); }
+    .tb-btn.active { background: var(--brand-purple-light); color: var(--brand-purple); }
+    .tb-btn-icon { height: 30px; width: 30px; padding: 0; }
+    .tb-select {
+      height: 30px; padding: 0 8px; border-radius: 6px;
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-primary); color: var(--text-primary);
+      font-size: 13px; font-family: inherit; cursor: pointer; outline: none;
+    }
+
+    .editor-topbar-right {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; border-left: 1px solid var(--border-secondary);
+      height: 100%;
+    }
+    .btn-ghost {
+      height: 32px; padding: 0 14px; border-radius: 8px;
+      border: 1px solid var(--border-secondary); background: transparent;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+      color: var(--text-primary); transition: background var(--transition);
+    }
+    .btn-ghost:hover { background: var(--bg-primary); }
+    .btn-primary {
+      height: 32px; padding: 0 16px; border-radius: 8px;
+      border: none; background: var(--brand-purple);
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+      color: white; transition: opacity var(--transition);
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* editor body */
+    .editor-body {
+      flex: 1; display: flex; overflow: hidden;
+    }
+
+    /* slides panel */
+    .slides-panel {
+      width: 200px; flex-shrink: 0;
+      background: white; border-right: 1px solid var(--border-secondary);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .slides-panel-header {
+      padding: 10px 12px 8px; border-bottom: 1px solid var(--border-secondary);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .slides-panel-title { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .slides-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .slides-list::-webkit-scrollbar { width: 3px; }
+    .slides-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+    .slide-thumb {
+      position: relative; border-radius: 6px; overflow: hidden;
+      cursor: pointer; border: 2px solid transparent;
+      transition: border-color var(--transition);
+    }
+    .slide-thumb:hover { border-color: #c5b8ff; }
+    .slide-thumb.active { border-color: var(--brand-purple); }
+    .slide-thumb .slide { pointer-events: none; transform-origin: top left; }
+    .slide-thumb-num {
+      position: absolute; bottom: 4px; right: 6px;
+      font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 600;
+    }
+    .slide-thumb-num.dark { color: rgba(0,0,0,0.4); }
+
+    .slide-thumb-add {
+      display: flex; align-items: center; justify-content: center;
+      height: 40px; border-radius: 6px; border: 1.5px dashed var(--border-secondary);
+      color: var(--text-tertiary); font-size: 12px; gap: 4px; cursor: pointer;
+      margin-top: 4px; transition: border-color var(--transition), color var(--transition);
+    }
+    .slide-thumb-add:hover { border-color: var(--brand-purple); color: var(--brand-purple); }
+
+    /* main canvas */
+    .editor-canvas {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 32px; overflow: auto; background: #f0f0f2;
+    }
+    .canvas-slide {
+      background: white; box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+      border-radius: 4px; width: 100%; max-width: 900px;
+      aspect-ratio: 16/9; position: relative; overflow: hidden;
+    }
+    /* make editable regions clickable */
+    .ed-text {
+      cursor: text; outline: none; border-radius: 4px;
+      transition: box-shadow .1s ease;
+    }
+    .ed-text:focus {
+      box-shadow: 0 0 0 2px var(--brand-purple);
+    }
+    .ed-image {
+      cursor: pointer; position: relative;
+    }
+    .ed-image .img-overlay {
+      position: absolute; inset: 0;
+      background: rgba(105,59,255,0.0);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s ease;
+    }
+    .ed-image:hover .img-overlay { background: rgba(105,59,255,0.3); }
+    .replace-img-btn {
+      opacity: 0; background: var(--brand-purple); color: white;
+      border: none; border-radius: 8px; padding: 8px 16px;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 6px;
+      transition: opacity .15s ease;
+    }
+    .ed-image:hover .replace-img-btn { opacity: 1; }
+
+    /* properties panel */
+    .props-panel {
+      width: 232px; flex-shrink: 0;
+      background: white; border-left: 1px solid var(--border-secondary);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .props-tabs {
+      display: flex; border-bottom: 1px solid var(--border-secondary);
+      flex-shrink: 0;
+    }
+    .props-tab {
+      flex: 1; height: 40px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .props-tab.active { color: var(--brand-purple); border-color: var(--brand-purple); }
+    .props-body { flex: 1; overflow-y: auto; padding: 12px; }
+    .props-body::-webkit-scrollbar { width: 3px; }
+    .props-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+    .prop-section { margin-bottom: 16px; }
+    .prop-section-title { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .prop-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .prop-label { font-size: 12px; color: var(--text-secondary); min-width: 60px; }
+    .prop-input {
+      flex: 1; height: 28px; padding: 0 8px; border-radius: 6px;
+      border: 1px solid var(--border-secondary); background: var(--bg-primary);
+      font-size: 12px; font-family: inherit; color: var(--text-primary); outline: none;
+    }
+    .prop-input:focus { border-color: var(--brand-purple); }
+    .prop-color {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border-secondary); cursor: pointer;
+      overflow: hidden; padding: 0; flex-shrink: 0;
+    }
+    .color-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .color-swatch {
+      width: 20px; height: 20px; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: border-color .1s; flex-shrink: 0;
+    }
+    .color-swatch.active { border-color: var(--brand-purple); }
+    .color-swatch:hover { transform: scale(1.1); }
+
+    .add-block-list { display: flex; flex-direction: column; gap: 6px; }
+    .add-block-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 8px;
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-primary); cursor: pointer;
+      font-size: 12px; font-family: inherit; color: var(--text-primary);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .add-block-btn:hover { border-color: var(--brand-purple); background: var(--brand-purple-light); }
+    .add-block-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: white; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; box-shadow: var(--shadow-sm);
+    }
+
+    /* ai assist button */
+    .ai-assist-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px 5px 8px; border-radius: 20px;
+      background: linear-gradient(135deg, #693bff, #9f77ff);
+      color: white; font-size: 12px; font-weight: 500; cursor: pointer;
+      border: none; font-family: inherit;
+      box-shadow: 0 2px 8px rgba(105,59,255,0.35);
+      transition: opacity var(--transition);
+      flex-shrink: 0;
+    }
+    .ai-assist-pill:hover { opacity: 0.9; }
+
+    /* toast notification */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: hsl(var(--foreground)); color: white;
+      padding: 10px 20px; border-radius: 10px; font-size: 13px;
+      box-shadow: var(--shadow-lg); z-index: 999;
+      transition: transform .3s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* context menu */
+    .ctx-menu {
+      position: fixed; z-index: 200;
+      background: white; border: 1px solid var(--border-secondary);
+      border-radius: 10px; box-shadow: var(--shadow-lg);
+      padding: 4px; min-width: 160px;
+      opacity: 0; pointer-events: none;
+      transform: scale(0.95); transform-origin: top left;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .ctx-menu.open { opacity: 1; pointer-events: all; transform: scale(1); }
+    .ctx-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; color: var(--text-primary);
+      transition: background var(--transition);
+    }
+    .ctx-item:hover { background: var(--bg-primary); }
+    .ctx-item.danger { color: #d0021b; }
+    .ctx-item.danger:hover { background: #fff0f0; }
+    .ctx-sep { height: 1px; background: var(--border-secondary); margin: 4px 0; }
+
+    /* slide selection highlight */
+    .el-selected {
+      outline: 2px solid var(--brand-purple);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ CHAT + PREVIEW LAYOUT ═══════ -->
+<div class="body-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <button class="sidebar-btn">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="sidebar-btn">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="sidebar-btn">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="sidebar-btn active">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </button>
+  </aside>
+
+  <!-- Chat column -->
+  <main class="chat-col">
+    <div class="chat-scroll">
+
+      <!-- user message -->
+      <div class="msg user">
+        <div class="msg-bubble">Get me temperature data in Barcelona. And info about frogs in the city.</div>
+      </div>
+
+      <!-- AI response -->
+      <div class="msg ai">
+        <div class="msg-avatar">N</div>
+        <div style="display:flex;flex-direction:column;gap:8px;max-width:540px;">
+          <div class="ai-label">
+            <div class="ai-label-dot"></div>
+            GPT-4o mini Search Preview
+          </div>
+          <div class="msg-bubble">
+            Processing temperature data for Barcelona involves multiple layers of data handling, computation, and analysis to provide accurate city-wide temperature averages.<br><br>
+            Here are the files you asked:
+          </div>
+          <!-- file chips -->
+          <div class="file-chip" onclick="showPreview()">
+            <div class="file-chip-icon pptx">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="file-chip-info">
+              <div class="file-chip-name">frogsmigration.pptx</div>
+              <div class="file-chip-size">200 KB</div>
+            </div>
+            <div class="file-chip-dl">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+          </div>
+          <div class="file-chip">
+            <div class="file-chip-icon xlsx">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            </div>
+            <div class="file-chip-info">
+              <div class="file-chip-name">frogsmigration.xlsx</div>
+              <div class="file-chip-size">200 KB</div>
+            </div>
+            <div class="file-chip-dl">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+          </div>
+          <!-- actions -->
+          <div class="chat-actions">
+            <button class="chat-action-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            </button>
+            <button class="chat-action-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+            </button>
+            <button class="chat-action-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="chat-action-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- prompt box -->
+    <div class="prompt-wrap">
+      <div class="prompt-box">
+        <textarea class="prompt-input" rows="1" placeholder="Ask follow up…"></textarea>
+        <button class="prompt-send">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Preview panel -->
+  <div class="preview-panel hidden" id="previewPanel">
+    <div class="panel-header">
+      <div class="panel-title">frogsmigration.pptx</div>
+      <button class="panel-icon-btn" title="Edit" onclick="openEditor()" id="editBtn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="panel-icon-btn" title="Download">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <button class="panel-icon-btn danger" title="Close" onclick="hidePreview()">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body">
+      <!-- Slide 1 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s1">
+          <div class="s1-badge">Natural World</div>
+          <div class="s1-title"><h1>The World<br><span>of Frogs</span></h1></div>
+          <div class="s1-subtitle">Biology · Habitats · Adaptations · Conservation</div>
+          <div class="s1-line"></div>
+        </div>
+        <div class="slide-num">Page 1 of 6</div>
+      </div>
+      <!-- Slide 2 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s2">
+          <div class="s2-left">
+            <h2>What Are Frogs?</h2>
+            <div class="stat">7,000+</div>
+            <div class="stat-label">species worldwide</div>
+          </div>
+          <div class="s2-right">
+            <div class="s2-fact"><h4>Amphibians</h4><p>Frogs belong to order Anura and are cold-blooded, living both on land and in water.</p></div>
+            <div class="s2-fact"><h4>Ancient Lineage</h4><p>They have roamed Earth for over 250 million years, predating dinosaurs.</p></div>
+          </div>
+        </div>
+        <div class="slide-num dark">Page 2 of 6</div>
+      </div>
+      <!-- Slide 3 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s3">
+          <h2>Habitats Around the World</h2>
+          <div class="s3-grid">
+            <div class="s3-item"><div class="s3-item-label">Tropical Rainforest</div><div class="s3-item-sub">60% of all species</div></div>
+            <div class="s3-item"><div class="s3-item-label">Wetlands</div><div class="s3-item-sub">Breeding grounds</div></div>
+            <div class="s3-item"><div class="s3-item-label">Deserts</div><div class="s3-item-sub">Burrowing species</div></div>
+          </div>
+        </div>
+        <div class="slide-num dark">Page 3 of 6</div>
+      </div>
+      <!-- Slide 4 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s4">
+          <h2>Remarkable Adaptations</h2>
+          <div class="s4-list">
+            <div class="s4-item"><div class="s4-num">01</div><div class="s4-text"><h4>Camouflage</h4><p>Skin patterns blend with leaf litter and bark.</p></div></div>
+            <div class="s4-item"><div class="s4-num">02</div><div class="s4-text"><h4>Toxic Skin</h4><p>Poison dart frogs carry enough toxin to deter predators.</p></div></div>
+            <div class="s4-item"><div class="s4-num">03</div><div class="s4-text"><h4>Freeze Tolerance</h4><p>Wood frogs survive being nearly completely frozen.</p></div></div>
+          </div>
+        </div>
+        <div class="slide-num">Page 4 of 6</div>
+      </div>
+      <!-- Slide 5 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s5">
+          <h2>Conservation Status</h2>
+          <div class="s5-bar-row"><div class="s5-bar-label">Least Concern</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:45%"></div></div><div class="s5-bar-pct">45%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label">Vulnerable</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:22%;background:#f59e0b"></div></div><div class="s5-bar-pct">22%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label">Endangered</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:19%;background:#ef4444"></div></div><div class="s5-bar-pct">19%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label">Critical</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:14%;background:#991b1b"></div></div><div class="s5-bar-pct">14%</div></div>
+        </div>
+        <div class="slide-num dark">Page 5 of 6</div>
+      </div>
+      <!-- Slide 6 preview -->
+      <div class="slide-preview-card">
+        <div class="slide s6">
+          <div class="s6-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h2>Thank You</h2>
+          <p>Protect amphibian habitats worldwide.</p>
+        </div>
+        <div class="slide-num">Page 6 of 6</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /body-layout -->
+
+
+<!-- ═══════ EDITOR OVERLAY ═══════ -->
+<div class="editor-overlay" id="editorOverlay">
+
+  <!-- Top bar -->
+  <div class="editor-topbar">
+    <div class="editor-topbar-left">
+      <button class="panel-icon-btn" onclick="closeEditor()" title="Back to preview">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="editor-filename">frogsmigration.pptx</div>
+    </div>
+
+    <!-- Formatting toolbar -->
+    <div class="editor-toolbar">
+      <!-- Text style -->
+      <select class="tb-select" id="fontFamily" onchange="applyFont(this.value)">
+        <option value="DM Sans">DM Sans</option>
+        <option value="Inter">Inter</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Arial">Arial</option>
+      </select>
+      <select class="tb-select" id="fontSize" style="width:56px;" onchange="applyFontSize(this.value)">
+        <option>12</option><option>14</option><option>16</option><option>18</option>
+        <option selected>24</option><option>32</option><option>48</option><option>64</option>
+      </select>
+      <div class="tb-sep"></div>
+      <button class="tb-btn tb-btn-icon" id="btnBold" onclick="toggleBold()" title="Bold"><strong>B</strong></button>
+      <button class="tb-btn tb-btn-icon" id="btnItalic" onclick="toggleItalic()" title="Italic"><em>I</em></button>
+      <button class="tb-btn tb-btn-icon" id="btnUnderline" onclick="toggleUnderline()" title="Underline" style="text-decoration:underline">U</button>
+      <div class="tb-sep"></div>
+      <!-- Color -->
+      <button class="tb-btn" onclick="showColorPicker()" title="Text color" style="gap:4px;">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        Color
+      </button>
+      <div class="tb-sep"></div>
+      <!-- Align -->
+      <button class="tb-btn tb-btn-icon" onclick="applyAlign('left')" title="Align left">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+      </button>
+      <button class="tb-btn tb-btn-icon active" onclick="applyAlign('center')" title="Center">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+      </button>
+      <button class="tb-btn tb-btn-icon" onclick="applyAlign('right')" title="Align right">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <!-- Slide bg -->
+      <button class="tb-btn" onclick="switchSlideTheme()" title="Slide theme">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Theme
+      </button>
+    </div>
+
+    <div class="editor-topbar-right">
+      <button class="ai-assist-pill" onclick="showAIAssist()">
+        <svg class="icon" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="0"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        AI Improve
+      </button>
+      <button class="btn-ghost" onclick="closeEditor()">Cancel</button>
+      <button class="btn-primary" onclick="saveAndClose()">Save changes</button>
+    </div>
+  </div>
+
+  <!-- Editor body -->
+  <div class="editor-body">
+
+    <!-- Slides panel -->
+    <div class="slides-panel">
+      <div class="slides-panel-header">
+        <div class="slides-panel-title">Slides</div>
+        <button class="panel-icon-btn" style="width:24px;height:24px;" onclick="addSlide()" title="Add slide">
+          <svg style="width:12px;height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="slides-list" id="slidesList">
+        <!-- thumbs injected by JS -->
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="editor-canvas" id="editorCanvas" oncontextmenu="showCtxMenu(event)">
+      <!-- Active slide rendered here by JS -->
+      <div class="canvas-slide" id="canvasSlide">
+        <!-- content injected by JS -->
+      </div>
+    </div>
+
+    <!-- Properties panel -->
+    <div class="props-panel">
+      <div class="props-tabs">
+        <div class="props-tab active" onclick="switchPropsTab(this,'format')">Format</div>
+        <div class="props-tab" onclick="switchPropsTab(this,'insert')">Insert</div>
+        <div class="props-tab" onclick="switchPropsTab(this,'slide')">Slide</div>
+      </div>
+      <div class="props-body">
+
+        <!-- FORMAT tab -->
+        <div id="tab-format">
+          <div class="prop-section">
+            <div class="prop-section-title">Text</div>
+            <div class="prop-row">
+              <div class="prop-label">Size</div>
+              <input class="prop-input" type="number" value="24" style="max-width:60px" onchange="applyFontSize(this.value)" />
+              <span style="font-size:11px;color:var(--text-tertiary)">px</span>
+            </div>
+            <div class="prop-row">
+              <div class="prop-label">Weight</div>
+              <select class="prop-input" onchange="applyFontWeight(this.value)">
+                <option value="400">Regular</option>
+                <option value="500">Medium</option>
+                <option value="600" selected>SemiBold</option>
+                <option value="700">Bold</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <div class="prop-label">Color</div>
+              <input class="prop-color" type="color" value="#ffffff" onchange="applyTextColor(this.value)" />
+              <span style="font-size:11px;color:var(--text-tertiary);flex:1">#ffffff</span>
+            </div>
+          </div>
+          <div class="prop-section">
+            <div class="prop-section-title">Background</div>
+            <div class="color-row">
+              <div class="color-swatch active" style="background:#1c3a2e" onclick="applyBg('#1c3a2e',this)" title="Forest"></div>
+              <div class="color-swatch" style="background:#2d5a45" onclick="applyBg('#2d5a45',this)" title="Fern"></div>
+              <div class="color-swatch" style="background:#7bc49a" onclick="applyBg('#7bc49a',this)" title="Mint"></div>
+              <div class="color-swatch" style="background:#ffffff;border:1px solid #e5e5e5" onclick="applyBg('#ffffff',this)" title="White"></div>
+              <div class="color-swatch" style="background:#f9f7f2" onclick="applyBg('#f9f7f2',this)" title="Cream"></div>
+              <div class="color-swatch" style="background:#1a1a2e" onclick="applyBg('#1a1a2e',this)" title="Navy"></div>
+              <div class="color-swatch" style="background:#693bff" onclick="applyBg('#693bff',this)" title="Purple"></div>
+              <div class="color-swatch" style="background:#f97316" onclick="applyBg('#f97316',this)" title="Orange"></div>
+            </div>
+          </div>
+          <div class="prop-section">
+            <div class="prop-section-title">Position</div>
+            <div class="prop-row">
+              <div class="prop-label">X</div>
+              <input class="prop-input" type="number" value="0" style="max-width:60px" />
+              <div class="prop-label" style="margin-left:4px">Y</div>
+              <input class="prop-input" type="number" value="0" style="max-width:60px" />
+            </div>
+          </div>
+        </div>
+
+        <!-- INSERT tab -->
+        <div id="tab-insert" style="display:none">
+          <div class="prop-section">
+            <div class="prop-section-title">Add element</div>
+            <div class="add-block-list">
+              <button class="add-block-btn" onclick="addTextBlock()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
+                Text box
+              </button>
+              <button class="add-block-btn" onclick="addImageBlock()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                Image
+              </button>
+              <button class="add-block-btn" onclick="addShapeBlock()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+                Shape
+              </button>
+              <button class="add-block-btn" onclick="addChartBlock()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+                Chart
+              </button>
+              <button class="add-block-btn" onclick="addDividerBlock()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+                Divider
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE tab -->
+        <div id="tab-slide" style="display:none">
+          <div class="prop-section">
+            <div class="prop-section-title">Slide actions</div>
+            <div class="add-block-list">
+              <button class="add-block-btn" onclick="duplicateSlide()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+                Duplicate slide
+              </button>
+              <button class="add-block-btn" onclick="moveSlideUp()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/></svg></div>
+                Move up
+              </button>
+              <button class="add-block-btn" onclick="moveSlideDown()">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 12 15 18 9"/></svg></div>
+                Move down
+              </button>
+              <button class="add-block-btn" onclick="deleteSlide()" style="color:#d0021b;border-color:#fecaca">
+                <div class="add-block-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#d0021b" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
+                Delete slide
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Context menu -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxEdit()">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit text
+  </div>
+  <div class="ctx-item" onclick="ctxDuplicate()">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    Duplicate element
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAddSlide()">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add slide after
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxDelete()">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+    Delete
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+  // ── State ─────────────────────────────────────────────
+  let currentSlide = 0;
+  const slides = [
+    { id: 's1', label: 'Title', bg: '#1c3a2e' },
+    { id: 's2', label: 'What Are Frogs?', bg: '#ffffff' },
+    { id: 's3', label: 'Habitats', bg: '#f9f7f2' },
+    { id: 's4', label: 'Adaptations', bg: '#1c3a2e' },
+    { id: 's5', label: 'Conservation', bg: '#ffffff' },
+    { id: 's6', label: 'Thank You', bg: '#1c3a2e' },
+  ];
+
+  // ── Slide HTML templates ───────────────────────────────
+  function getSlideHTML(idx) {
+    const s = slides[idx];
+    const templates = {
+      s1: `
+        <div class="slide s1" style="width:100%;height:100%;background:${s.bg}">
+          <div class="s1-badge ed-text" contenteditable="true" spellcheck="false">Natural World</div>
+          <div class="s1-title">
+            <h1 class="ed-text" contenteditable="true" spellcheck="false" style="font-size:clamp(28px,5vw,52px)">The World<br><span style="color:#7bc49a">of Frogs</span></h1>
+          </div>
+          <div class="s1-subtitle ed-text" contenteditable="true" spellcheck="false">Biology · Habitats · Adaptations · Conservation</div>
+          <div class="s1-line"></div>
+        </div>`,
+      s2: `
+        <div class="slide s2" style="width:100%;height:100%;background:${s.bg}">
+          <div class="s2-left" style="background:#1c3a2e">
+            <h2 class="ed-text" contenteditable="true" spellcheck="false">What Are Frogs?</h2>
+            <div class="stat ed-text" contenteditable="true" spellcheck="false">7,000+</div>
+            <div class="stat-label ed-text" contenteditable="true" spellcheck="false">species worldwide</div>
+          </div>
+          <div class="s2-right">
+            <div class="s2-fact">
+              <h4 class="ed-text" contenteditable="true" spellcheck="false">Amphibians</h4>
+              <p class="ed-text" contenteditable="true" spellcheck="false">Frogs belong to order Anura and are cold-blooded, living both on land and in water.</p>
+            </div>
+            <div class="s2-fact">
+              <h4 class="ed-text" contenteditable="true" spellcheck="false">Ancient Lineage</h4>
+              <p class="ed-text" contenteditable="true" spellcheck="false">They have roamed Earth for over 250 million years, predating dinosaurs.</p>
+            </div>
+          </div>
+        </div>`,
+      s3: `
+        <div class="slide s3" style="width:100%;height:100%;background:${s.bg}">
+          <h2 class="ed-text" contenteditable="true" spellcheck="false">Habitats Around the World</h2>
+          <div class="s3-grid">
+            <div class="s3-item">
+              <div class="s3-item-label ed-text" contenteditable="true" spellcheck="false">Tropical Rainforest</div>
+              <div class="s3-item-sub ed-text" contenteditable="true" spellcheck="false">60% of all species</div>
+            </div>
+            <div class="s3-item">
+              <div class="s3-item-label ed-text" contenteditable="true" spellcheck="false">Wetlands</div>
+              <div class="s3-item-sub ed-text" contenteditable="true" spellcheck="false">Breeding grounds</div>
+            </div>
+            <div class="s3-item">
+              <div class="s3-item-label ed-text" contenteditable="true" spellcheck="false">Deserts</div>
+              <div class="s3-item-sub ed-text" contenteditable="true" spellcheck="false">Burrowing species</div>
+            </div>
+          </div>
+        </div>`,
+      s4: `
+        <div class="slide s4" style="width:100%;height:100%;background:${s.bg}">
+          <h2 class="ed-text" contenteditable="true" spellcheck="false">Remarkable Adaptations</h2>
+          <div class="s4-list">
+            <div class="s4-item">
+              <div class="s4-num ed-text" contenteditable="true" spellcheck="false">01</div>
+              <div class="s4-text">
+                <h4 class="ed-text" contenteditable="true" spellcheck="false">Camouflage</h4>
+                <p class="ed-text" contenteditable="true" spellcheck="false">Skin patterns blend with leaf litter and bark.</p>
+              </div>
+            </div>
+            <div class="s4-item">
+              <div class="s4-num ed-text" contenteditable="true" spellcheck="false">02</div>
+              <div class="s4-text">
+                <h4 class="ed-text" contenteditable="true" spellcheck="false">Toxic Skin</h4>
+                <p class="ed-text" contenteditable="true" spellcheck="false">Poison dart frogs carry enough toxin to deter predators.</p>
+              </div>
+            </div>
+            <div class="s4-item">
+              <div class="s4-num ed-text" contenteditable="true" spellcheck="false">03</div>
+              <div class="s4-text">
+                <h4 class="ed-text" contenteditable="true" spellcheck="false">Freeze Tolerance</h4>
+                <p class="ed-text" contenteditable="true" spellcheck="false">Wood frogs survive being nearly completely frozen.</p>
+              </div>
+            </div>
+          </div>
+        </div>`,
+      s5: `
+        <div class="slide s5" style="width:100%;height:100%;background:${s.bg}">
+          <h2 class="ed-text" contenteditable="true" spellcheck="false">Conservation Status</h2>
+          <div class="s5-bar-row"><div class="s5-bar-label ed-text" contenteditable="true" spellcheck="false">Least Concern</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:45%"></div></div><div class="s5-bar-pct">45%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label ed-text" contenteditable="true" spellcheck="false">Vulnerable</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:22%;background:#f59e0b"></div></div><div class="s5-bar-pct">22%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label ed-text" contenteditable="true" spellcheck="false">Endangered</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:19%;background:#ef4444"></div></div><div class="s5-bar-pct">19%</div></div>
+          <div class="s5-bar-row"><div class="s5-bar-label ed-text" contenteditable="true" spellcheck="false">Critical</div><div class="s5-bar-track"><div class="s5-bar-fill" style="width:14%;background:#991b1b"></div></div><div class="s5-bar-pct">14%</div></div>
+          <div class="ed-image" style="margin-top:16px;height:60px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="img-overlay">
+              <button class="replace-img-btn" onclick="triggerImageUpload(event)">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Replace image
+              </button>
+            </div>
+          </div>
+        </div>`,
+      s6: `
+        <div class="slide s6" style="width:100%;height:100%;background:${s.bg}">
+          <div class="s6-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h2 class="ed-text" contenteditable="true" spellcheck="false">Thank You</h2>
+          <p class="ed-text" contenteditable="true" spellcheck="false">Protect amphibian habitats worldwide.</p>
+        </div>`,
+    };
+    return templates[s.id] || `<div class="slide" style="background:${s.bg};width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><div class="ed-text" contenteditable="true" spellcheck="false" style="font-size:24px;font-weight:600;color:#333;">New Slide</div></div>`;
+  }
+
+  // ── Thumb HTML (scaled version of slide) ───────────────
+  function getThumbHTML(idx) {
+    const s = slides[idx];
+    const thumbSlides = {
+      s1: `<div class="slide s1" style="background:${s.bg}"><div class="s1-badge" style="font-size:4px;padding:2px 6px;top:8px">Natural World</div><div class="s1-title"><h1 style="font-size:14px;line-height:1.1">The World<br><span style="color:#7bc49a">of Frogs</span></h1></div><div class="s1-subtitle" style="font-size:4px;top:72%">Biology · Habitats · Adaptations · Conservation</div></div>`,
+      s2: `<div class="slide s2" style="background:${s.bg}"><div class="s2-left" style="background:#1c3a2e;padding:8px"><h2 style="font-size:8px">What Are Frogs?</h2><div class="stat" style="font-size:12px;margin-top:4px">7,000+</div></div><div class="s2-right" style="padding:8px;gap:6px"><div class="s2-fact" style="border-left:1px solid #7bc49a;padding-left:4px"><h4 style="font-size:4px">Amphibians</h4></div><div class="s2-fact" style="border-left:1px solid #7bc49a;padding-left:4px"><h4 style="font-size:4px">Ancient Lineage</h4></div></div></div>`,
+      s3: `<div class="slide s3" style="background:${s.bg};padding:8px"><h2 style="font-size:7px;margin-bottom:6px">Habitats Around the World</h2><div class="s3-grid" style="gap:4px"><div class="s3-item" style="border-radius:4px;padding:4px"><div class="s3-item-label" style="font-size:4px">Rainforest</div></div><div class="s3-item" style="border-radius:4px;padding:4px;background:#2d5a45"><div class="s3-item-label" style="font-size:4px">Wetlands</div></div><div class="s3-item" style="border-radius:4px;padding:4px;background:#7bc49a"><div class="s3-item-label" style="font-size:4px;color:#1c3a2e">Deserts</div></div></div></div>`,
+      s4: `<div class="slide s4" style="background:${s.bg};padding:8px"><h2 style="font-size:7px;margin-bottom:6px">Adaptations</h2><div class="s4-list" style="gap:4px"><div class="s4-item" style="gap:4px"><div class="s4-num" style="font-size:10px">01</div><div class="s4-text"><h4 style="font-size:4px">Camouflage</h4></div></div></div></div>`,
+      s5: `<div class="slide s5" style="background:${s.bg};padding:8px"><h2 style="font-size:7px;color:#1c3a2e;margin-bottom:8px">Conservation</h2><div class="s5-bar-row" style="gap:4px;margin-bottom:4px"><div style="font-size:4px;width:40px">Least Concern</div><div class="s5-bar-track" style="height:4px;flex:1"><div class="s5-bar-fill" style="width:45%;height:100%"></div></div></div><div class="s5-bar-row" style="gap:4px;margin-bottom:4px"><div style="font-size:4px;width:40px">Vulnerable</div><div class="s5-bar-track" style="height:4px;flex:1"><div class="s5-bar-fill" style="width:22%;height:100%;background:#f59e0b"></div></div></div></div>`,
+      s6: `<div class="slide s6" style="background:${s.bg};gap:4px"><h2 style="font-size:10px">Thank You</h2><p style="font-size:4px;color:rgba(255,255,255,0.5)">Protect amphibian habitats.</p></div>`,
+    };
+    return thumbSlides[s.id] || `<div class="slide" style="background:${s.bg};width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;color:#999">Slide ${idx+1}</span></div>`;
+  }
+
+  // ── Render functions ───────────────────────────────────
+  function renderSlidesList() {
+    const list = document.getElementById('slidesList');
+    list.innerHTML = '';
+    slides.forEach((s, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'slide-thumb' + (i === currentSlide ? ' active' : '');
+      thumb.innerHTML = getThumbHTML(i) + `<div class="slide-thumb-num ${s.bg === '#ffffff' || s.bg === '#f9f7f2' ? 'dark' : ''}">${i+1}</div>`;
+      thumb.onclick = () => selectSlide(i);
+      list.appendChild(thumb);
+    });
+    // Add button
+    const addBtn = document.createElement('div');
+    addBtn.className = 'slide-thumb-add';
+    addBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add slide`;
+    addBtn.onclick = addSlide;
+    list.appendChild(addBtn);
+  }
+
+  function renderCanvas() {
+    const canvas = document.getElementById('canvasSlide');
+    canvas.style.background = slides[currentSlide].bg;
+    canvas.innerHTML = getSlideHTML(currentSlide);
+  }
+
+  function selectSlide(i) {
+    currentSlide = i;
+    renderCanvas();
+    renderSlidesList();
+  }
+
+  // ── Preview panel ──────────────────────────────────────
+  function showPreview() {
+    const panel = document.getElementById('previewPanel');
+    panel.classList.remove('hidden');
+  }
+  function hidePreview() {
+    const panel = document.getElementById('previewPanel');
+    panel.classList.add('hidden');
+  }
+
+  // ── Editor open / close ────────────────────────────────
+  function openEditor() {
+    renderSlidesList();
+    renderCanvas();
+    document.getElementById('editorOverlay').classList.add('open');
+  }
+  function closeEditor() {
+    document.getElementById('editorOverlay').classList.remove('open');
+  }
+  function saveAndClose() {
+    closeEditor();
+    toast('Changes saved to frogsmigration.pptx');
+  }
+
+  // ── Slide management ──────────────────────────────────
+  function addSlide() {
+    const newSlide = { id: `s-custom-${Date.now()}`, label: 'New Slide', bg: '#1c3a2e' };
+    slides.splice(currentSlide + 1, 0, newSlide);
+    selectSlide(currentSlide + 1);
+  }
+  function deleteSlide() {
+    if (slides.length <= 1) { toast('Cannot delete the last slide'); return; }
+    slides.splice(currentSlide, 1);
+    selectSlide(Math.min(currentSlide, slides.length - 1));
+    toast('Slide deleted');
+  }
+  function duplicateSlide() {
+    const copy = { ...slides[currentSlide], id: `s-copy-${Date.now()}`, label: slides[currentSlide].label + ' (copy)' };
+    slides.splice(currentSlide + 1, 0, copy);
+    selectSlide(currentSlide + 1);
+    toast('Slide duplicated');
+  }
+  function moveSlideUp() {
+    if (currentSlide === 0) return;
+    [slides[currentSlide - 1], slides[currentSlide]] = [slides[currentSlide], slides[currentSlide - 1]];
+    selectSlide(currentSlide - 1);
+  }
+  function moveSlideDown() {
+    if (currentSlide === slides.length - 1) return;
+    [slides[currentSlide], slides[currentSlide + 1]] = [slides[currentSlide + 1], slides[currentSlide]];
+    selectSlide(currentSlide + 1);
+  }
+
+  // ── Text formatting (acts on selection or focused element) ─
+  function getActiveSel() { return window.getSelection(); }
+  function toggleBold() {
+    document.execCommand('bold');
+    document.getElementById('btnBold').classList.toggle('active');
+  }
+  function toggleItalic() {
+    document.execCommand('italic');
+    document.getElementById('btnItalic').classList.toggle('active');
+  }
+  function toggleUnderline() {
+    document.execCommand('underline');
+    document.getElementById('btnUnderline').classList.toggle('active');
+  }
+  function applyFont(val) { document.execCommand('fontName', false, val); }
+  function applyFontSize(val) {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.fontSize = val + 'px';
+      range.surroundContents(span);
+    }
+  }
+  function applyFontWeight(val) { document.execCommand('fontWeight', false, val); }
+  function applyTextColor(val) { document.execCommand('foreColor', false, val); }
+  function applyAlign(dir) {
+    document.querySelectorAll('.tb-btn.active').forEach(b => {
+      if (b.title && b.title.startsWith('Align') || b.title === 'Center') b.classList.remove('active');
+    });
+    document.execCommand('justify' + dir.charAt(0).toUpperCase() + dir.slice(1));
+  }
+
+  // ── Background ─────────────────────────────────────────
+  function applyBg(color, swatch) {
+    slides[currentSlide].bg = color;
+    document.getElementById('canvasSlide').style.background = color;
+    const slide = document.querySelector('#canvasSlide .slide');
+    if (slide) slide.style.background = color;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    if (swatch) swatch.classList.add('active');
+    renderSlidesList();
+  }
+
+  // ── Theme toggle ──────────────────────────────────────
+  let themeIdx = 0;
+  const themes = ['#1c3a2e', '#ffffff', '#1a1a2e', '#693bff', '#f97316'];
+  function switchSlideTheme() {
+    themeIdx = (themeIdx + 1) % themes.length;
+    applyBg(themes[themeIdx]);
+  }
+
+  // ── Insert blocks ──────────────────────────────────────
+  function addTextBlock() {
+    const canvas = document.getElementById('canvasSlide');
+    const block = document.createElement('div');
+    block.className = 'ed-text';
+    block.contentEditable = 'true';
+    block.spellcheck = false;
+    block.textContent = 'New text block';
+    block.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:600;color:inherit;padding:4px 8px;min-width:120px;text-align:center;cursor:text;';
+    canvas.appendChild(block);
+    block.focus();
+    toast('Text block added — click to edit');
+  }
+  function addImageBlock() {
+    const canvas = document.getElementById('canvasSlide');
+    const block = document.createElement('div');
+    block.className = 'ed-image';
+    block.style.cssText = 'position:absolute;top:20%;left:20%;width:60%;height:40%;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;';
+    block.innerHTML = `<div style="text-align:center;color:#aaa"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div style="font-size:12px;margin-top:8px">Click to add image</div></div><div class="img-overlay"><button class="replace-img-btn" onclick="triggerImageUpload(event)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Upload image</button></div>`;
+    canvas.appendChild(block);
+    toast('Image block added');
+  }
+  function addShapeBlock() {
+    const canvas = document.getElementById('canvasSlide');
+    const block = document.createElement('div');
+    block.style.cssText = 'position:absolute;top:30%;left:30%;width:200px;height:100px;border-radius:8px;background:rgba(123,196,154,0.3);border:2px solid #7bc49a;cursor:move;';
+    canvas.appendChild(block);
+    toast('Shape added');
+  }
+  function addChartBlock() {
+    const canvas = document.getElementById('canvasSlide');
+    const block = document.createElement('div');
+    block.style.cssText = 'position:absolute;top:20%;left:15%;width:70%;height:50%;display:flex;align-items:flex-end;gap:10px;padding:12px;background:rgba(255,255,255,0.08);border-radius:8px;border:1px solid rgba(255,255,255,0.15);';
+    const bars = [60,85,45,95,70,55];
+    const colors = ['#7bc49a','#7bc49a','#7bc49a','#7bc49a','#7bc49a','#7bc49a'];
+    block.innerHTML = bars.map((h,i)=>`<div style="flex:1;height:${h}%;background:${colors[i]};border-radius:4px 4px 0 0;opacity:0.85"></div>`).join('');
+    canvas.appendChild(block);
+    toast('Chart added');
+  }
+  function addDividerBlock() {
+    const canvas = document.getElementById('canvasSlide');
+    const block = document.createElement('div');
+    block.style.cssText = 'position:absolute;top:50%;left:10%;right:10%;height:1px;background:rgba(255,255,255,0.2);cursor:move;';
+    canvas.appendChild(block);
+    toast('Divider added');
+  }
+
+  // ── Image upload simulation ────────────────────────────
+  function triggerImageUpload(e) {
+    e.stopPropagation();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (ev) => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (re) => {
+        const container = e.target.closest('.ed-image');
+        if (container) {
+          container.style.background = `url(${re.result}) center/cover`;
+          container.querySelector('.img-overlay') && (container.querySelector('.img-overlay').style.opacity = '0');
+          container.querySelector('svg') && container.querySelector('svg').remove();
+          container.querySelector('div[style*="text-align"]') && container.querySelector('div[style*="text-align"]').remove();
+        }
+        toast('Image replaced');
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+
+  // ── Color picker (via toolbar) ─────────────────────────
+  function showColorPicker() {
+    const input = document.createElement('input');
+    input.type = 'color';
+    input.value = '#ffffff';
+    input.onchange = () => applyTextColor(input.value);
+    input.click();
+  }
+
+  // ── Context menu ───────────────────────────────────────
+  let ctxTarget = null;
+  function showCtxMenu(e) {
+    e.preventDefault();
+    ctxTarget = e.target.closest('.ed-text, .ed-image');
+    const menu = document.getElementById('ctxMenu');
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    menu.classList.add('open');
+    document.addEventListener('click', closeCtxMenu, { once: true });
+  }
+  function closeCtxMenu() { document.getElementById('ctxMenu').classList.remove('open'); }
+  function ctxEdit() { if (ctxTarget && ctxTarget.contentEditable) { ctxTarget.focus(); } closeCtxMenu(); }
+  function ctxDuplicate() {
+    if (ctxTarget) {
+      const clone = ctxTarget.cloneNode(true);
+      clone.style.top = (parseInt(ctxTarget.style.top||'50') + 5) + '%';
+      ctxTarget.parentNode.appendChild(clone);
+      toast('Element duplicated');
+    }
+    closeCtxMenu();
+  }
+  function ctxAddSlide() { closeCtxMenu(); addSlide(); }
+  function ctxDelete() {
+    if (ctxTarget) ctxTarget.remove();
+    closeCtxMenu();
+    toast('Element deleted');
+  }
+
+  // ── Props tabs ─────────────────────────────────────────
+  function switchPropsTab(el, name) {
+    document.querySelectorAll('.props-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-format').style.display = name === 'format' ? '' : 'none';
+    document.getElementById('tab-insert').style.display = name === 'insert' ? '' : 'none';
+    document.getElementById('tab-slide').style.display  = name === 'slide'  ? '' : 'none';
+  }
+
+  // ── AI Assist ─────────────────────────────────────────
+  function showAIAssist() {
+    toast('✨ AI is improving your slide content…');
+    setTimeout(() => toast('Done! Slide content improved'), 2200);
+  }
+
+  // ── Toast ──────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // ── Auto-show preview on load ─────────────────────────
+  window.addEventListener('load', () => {
+    setTimeout(showPreview, 300);
+  });
+
+  // ── Keyboard shortcuts ────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('editorOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape') closeCtxMenu();
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); saveAndClose(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') { document.execCommand('undo'); }
+    if (e.key === 'ArrowLeft' && !e.target.isContentEditable) selectSlide(Math.max(0, currentSlide - 1));
+    if (e.key === 'ArrowRight' && !e.target.isContentEditable) selectSlide(Math.min(slides.length - 1, currentSlide + 1));
+  });
+</script>
+</body>
+</html>
