@@ -1554,7 +1554,7 @@
         doneBtn.className = 'ts-status-done';
         doneBtn.innerHTML = `
           <div class="ts-status-done-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-          Done in ${totalDur(sc.steps)} · ${sc.steps.length} steps ›`;
+          ${buildDoneSummary(sc.steps)} ›`;
         doneBtn.onclick = () => logWrap.classList.toggle('open');
         wrap.appendChild(doneBtn);
         setTimeout(() => {
@@ -1921,6 +1921,27 @@
     }
     const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1500;
     setTimeout(next, firstDelay);
+  }
+
+  function buildDoneSummary(steps) {
+    const searches  = steps.filter(s => s.icon === '🔍').length;
+    const reads     = steps.filter(s => s.icon === '📄').length;
+    const apiCalls  = steps.filter(s => ['📊','💰','🔑'].includes(s.icon)).length;
+    const writing   = steps.filter(s => ['✍️','📝'].includes(s.icon)).length;
+
+    const parts = [];
+    if (searches)  parts.push(`searched ${searches} ${searches === 1 ? 'source' : 'sources'}`);
+    if (reads)     parts.push(`read ${reads} ${reads === 1 ? 'article' : 'articles'}`);
+    if (apiCalls)  parts.push(`called ${apiCalls} ${apiCalls === 1 ? 'API' : 'APIs'}`);
+    if (writing)   parts.push(`drafted the content`);
+
+    if (!parts.length) return `Completed ${steps.length} steps`;
+
+    const list = parts.length === 1
+      ? parts[0]
+      : parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+
+    return list.charAt(0).toUpperCase() + list.slice(1);
   }
 
   function buildNarration(steps) {
