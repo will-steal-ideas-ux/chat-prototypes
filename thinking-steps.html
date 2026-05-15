@@ -446,26 +446,6 @@
     .scenario-btn:hover { border-color: var(--brand-purple); color: var(--brand-purple); }
     .scenario-btn.active { background: var(--brand-purple-light); border-color: hsl(252 100% 64% / .4); color: var(--brand-purple); }
 
-    /* Variant toggle */
-    .variant-strip {
-      width: 100%; max-width: 760px; margin: 0 auto;
-      padding: 0 24px 4px;
-      display: flex; gap: 4px; align-items: center;
-    }
-    .variant-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; margin-right: 4px; }
-    .variant-tab {
-      height: 30px; padding: 0 12px;
-      border-radius: var(--radius-sm); border: none;
-      background: transparent;
-      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
-      cursor: pointer; transition: all var(--transition);
-    }
-    .variant-tab:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
-    .variant-tab.active {
-      background: var(--brand-purple-light);
-      color: var(--brand-purple);
-    }
-    .variant-divider { height: 1px; background: var(--border-secondary); width: 100%; max-width: 760px; margin: 0 auto 16px; }
 
     /* ════════════════════════════════════════════════════════════
        VARIANT D — Morphing Status Line
@@ -1064,26 +1044,6 @@
     <div class="chat-thread" id="chat-thread">
 
       <!-- Variant tabs -->
-      <div class="variant-strip">
-        <span class="variant-label">Variant:</span>
-        <button class="variant-tab active" onclick="switchVariant('d', this)">D — Status Line</button>
-        <button class="variant-tab" onclick="switchVariant('a', this)">A — Pill Stream</button>
-        <button class="variant-tab" onclick="switchVariant('b', this)">B — Activity Log</button>
-        <button class="variant-tab" onclick="switchVariant('c', this)">C — Ghost Cards</button>
-        <button class="variant-tab" onclick="switchVariant('e', this)">E — Timeline Rail</button>
-        <button class="variant-tab" onclick="switchVariant('f', this)">F — Source Chips</button>
-        <button class="variant-tab" onclick="switchVariant('g', this)">G — Receipt Card</button>
-        <button class="variant-tab" onclick="switchVariant('h', this)">H — Dot Counter</button>
-        <button class="variant-tab" onclick="switchVariant('i', this)">I — Prose Narration</button>
-        <button class="variant-tab" onclick="switchVariant('j', this)">J — Terminal</button>
-        <button class="variant-tab" onclick="switchVariant('k', this)">K — Breadcrumb</button>
-        <button class="variant-tab" onclick="switchVariant('l', this)">L — Icon Cluster</button>
-        <button class="variant-tab" onclick="switchVariant('m', this)">M — Skeleton Reveal</button>
-        <button class="variant-tab" onclick="switchVariant('n', this)">N — Inner Monologue</button>
-        <button class="variant-tab" onclick="switchVariant('o', this)">O — Floating HUD</button>
-      </div>
-      <div class="variant-divider"></div>
-
       <!-- Scenario chips -->
       <div class="scenario-strip">
         <span class="scenario-label">Try a scenario:</span>
@@ -1144,7 +1104,6 @@
 
 <script>
   // ─── State ───────────────────────────────────────────────────
-  let currentVariant = 'd';
   let currentScenario = 'search';
 
   const SCENARIOS = {
@@ -1190,15 +1149,6 @@
     }
   };
 
-  // ─── Scenario + Variant switching ────────────────────────────
-  function switchVariant(v, btn) {
-    currentVariant = v;
-    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    clearMessages();
-    runScenarioAuto();
-  }
-
   function runScenario(s, btn) {
     currentScenario = s;
     document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
@@ -1226,23 +1176,8 @@
     scrollBottom();
   }
 
-  // ─── Dispatch to variant builders ────────────────────────────
   function startThinkingSequence(sc) {
-    if      (currentVariant === 'a') startPillStream(sc);
-    else if (currentVariant === 'b') startActivityLog(sc);
-    else if (currentVariant === 'c') startGhostCards(sc);
-    else if (currentVariant === 'd') startStatusLine(sc);
-    else if (currentVariant === 'e') startTimelineRail(sc);
-    else if (currentVariant === 'f') startSourceChips(sc);
-    else if (currentVariant === 'g') startReceiptCard(sc);
-    else if (currentVariant === 'h') startDotCounter(sc);
-    else if (currentVariant === 'i') startProseNarration(sc);
-    else if (currentVariant === 'j') startTerminal(sc);
-    else if (currentVariant === 'k') startBreadcrumb(sc);
-    else if (currentVariant === 'l') startIconCluster(sc);
-    else if (currentVariant === 'm') startSkeletonReveal(sc);
-    else if (currentVariant === 'n') startInnerMonologue(sc);
-    else if (currentVariant === 'o') startFloatingHUD(sc);
+    startStatusLine(sc);
   }
 
   // ════════════════════════════════════
