@@ -498,6 +498,17 @@
       100% { background-position: -100% 0; }
     }
     .ts-status-text.fade { opacity: 0; }
+    .ts-status-arrow {
+      display: flex; align-items: center;
+      color: hsl(240 4% 72%);
+      animation: arrow-nudge 2.8s ease infinite;
+      flex-shrink: 0;
+    }
+    .ts-status-arrow svg { width: 14px; height: 14px; }
+    @keyframes arrow-nudge {
+      0%,100% { transform: translateX(0); opacity: .4; }
+      50%      { transform: translateX(4px); opacity: .9; }
+    }
     .ts-status-done {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 13px; font-weight: 500; color: var(--text-tertiary);
@@ -1493,7 +1504,11 @@
     wrap.className = 'ts-status-line';
     const textEl = document.createElement('span');
     textEl.className = 'ts-status-text';
+    const arrowEl = document.createElement('span');
+    arrowEl.className = 'ts-status-arrow';
+    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
     wrap.appendChild(textEl);
+    wrap.appendChild(arrowEl);
     aiRow.appendChild(wrap);
     scrollBottom();
 
@@ -1527,8 +1542,9 @@
     let i = 0;
     function runStep() {
       if (i >= sc.steps.length) {
-        // Done — replace shimmer text with plain done button
+        // Done — replace shimmer text + arrow with plain done button
         textEl.style.display = 'none';
+        arrowEl.style.display = 'none';
         const doneBtn = document.createElement('button');
         doneBtn.className = 'ts-status-done';
         doneBtn.innerHTML = `${buildDoneSummary(sc)} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>`;
