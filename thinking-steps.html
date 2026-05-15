@@ -2098,7 +2098,7 @@
       .replace(/[?!.]$/, '')
       .trim();
     const capped = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-    return capped.length > 42 ? capped.slice(0, 40).trimEnd() + '…' : capped;
+    return capped;
   }
 
   function buildNarration(steps) {
