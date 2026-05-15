@@ -216,7 +216,7 @@
        compresses to a single "Done" chip after completion.
        ════════════════════════════════════════════════════════════ */
     .ts-pill-stream {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
       min-height: 32px;
     }
     .ts-pill {
@@ -461,6 +461,235 @@
       color: var(--brand-purple);
     }
     .variant-divider { height: 1px; background: var(--border-secondary); width: 100%; max-width: 760px; margin: 0 auto 16px; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT D — Morphing Status Line
+       Single line that updates in-place as each step finishes.
+       Fades between states. Collapses to "Done in Xs ›" link.
+       ════════════════════════════════════════════════════════════ */
+    .ts-status-line {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-secondary);
+      min-height: 22px;
+    }
+    .ts-status-spinner {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid hsl(252 100% 64% / .25);
+      border-top-color: var(--brand-purple);
+      animation: log-spin .8s linear infinite;
+    }
+    .ts-status-text {
+      transition: opacity .18s ease;
+    }
+    .ts-status-text.fade { opacity: 0; }
+    .ts-status-done {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
+      cursor: pointer; border: none; background: none; padding: 0;
+      transition: color var(--transition);
+    }
+    .ts-status-done:hover { color: var(--text-primary); }
+    .ts-status-done-check {
+      width: 14px; height: 14px;
+      background: hsl(142 70% 45%); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ts-status-done-check svg { width: 8px; height: 8px; color: #fff; }
+
+    .ts-status-log {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease, margin .15s ease;
+      opacity: 0; margin-top: 0;
+    }
+    .ts-status-log.open { max-height: 300px; opacity: 1; margin-top: 8px; }
+    .ts-status-log-inner {
+      background: var(--bg-primary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .ts-status-log-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; border-bottom: 1px solid var(--border-secondary);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .ts-status-log-row:last-child { border-bottom: none; }
+    .ts-status-log-check { width: 13px; height: 13px; color: hsl(142 70% 40%); flex-shrink: 0; }
+    .ts-status-log-icon { font-size: 13px; flex-shrink: 0; }
+    .ts-status-log-label { flex: 1; }
+    .ts-status-log-dur { font-size: 12px; color: var(--text-tertiary); }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT E — Timeline Rail
+       Thin vertical track with step dots on the left.
+       Active dot pulses purple. Done = filled green. Hover = tooltip.
+       ════════════════════════════════════════════════════════════ */
+    .ts-rail {
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .ts-rail-track {
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0; padding-top: 3px;
+    }
+    .ts-rail-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      background: var(--border-secondary); position: relative; cursor: default;
+      transition: background .2s ease, box-shadow .2s ease;
+    }
+    .ts-rail-dot.done { background: hsl(142 70% 45%); }
+    .ts-rail-dot.active {
+      background: var(--brand-purple);
+      box-shadow: 0 0 0 3px hsl(252 100% 64% / .2);
+      animation: rail-pulse 1.4s ease infinite;
+    }
+    @keyframes rail-pulse {
+      0%,100% { box-shadow: 0 0 0 3px hsl(252 100% 64% / .2); }
+      50% { box-shadow: 0 0 0 6px hsl(252 100% 64% / .08); }
+    }
+    .ts-rail-line {
+      width: 2px; flex: 1; min-height: 20px;
+      background: var(--border-secondary);
+      margin: 3px 0;
+    }
+    .ts-rail-line.done { background: hsl(142 70% 45% / .4); }
+
+    .ts-rail-steps { display: flex; flex-direction: column; gap: 0; flex: 1; }
+    .ts-rail-step {
+      display: flex; align-items: flex-start; gap: 6px;
+      padding: 0 0 20px 0; font-size: 13px; line-height: 18px;
+      color: var(--text-tertiary); position: relative;
+    }
+    .ts-rail-step:last-child { padding-bottom: 0; }
+    .ts-rail-step.active { color: var(--text-primary); font-weight: 500; }
+    .ts-rail-step.done { color: var(--text-secondary); }
+    .ts-rail-step-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+    .ts-rail-step-text { flex: 1; }
+    .ts-rail-step-dur { font-size: 11px; color: var(--text-tertiary); flex-shrink: 0; margin-top: 2px; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT F — Source Chips
+       Steps run silently. Reply appears with [n] footnotes.
+       Below reply: a row of expandable reference cards.
+       ════════════════════════════════════════════════════════════ */
+    .ts-working-line {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-tertiary);
+    }
+    .ts-working-spinner {
+      width: 11px; height: 11px; border-radius: 50%;
+      border: 2px solid hsl(252 100% 64% / .2);
+      border-top-color: var(--brand-purple);
+      animation: log-spin .8s linear infinite; flex-shrink: 0;
+    }
+
+    .ts-reply-with-refs { font-size: 15px; line-height: 24px; color: var(--text-primary); }
+    .ts-ref-tag {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 3px;
+      background: var(--brand-purple-light); color: var(--brand-purple);
+      font-size: 10px; font-weight: 700; line-height: 1;
+      cursor: pointer; margin: 0 1px; vertical-align: middle;
+      transition: background var(--transition);
+      text-decoration: none;
+    }
+    .ts-ref-tag:hover { background: hsl(252 100% 64% / .2); }
+
+    .ts-sources-row {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .ts-source-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 28px; padding: 0 10px;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      background: var(--bg-secondary);
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; white-space: nowrap;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .ts-source-chip:hover { border-color: var(--brand-purple); background: var(--brand-purple-light); color: var(--brand-purple); }
+    .ts-source-chip.expanded { border-color: var(--brand-purple); background: var(--brand-purple-light); color: var(--brand-purple); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+    .ts-source-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 3px;
+      background: var(--brand-purple); color: #fff;
+      font-size: 9px; font-weight: 700; flex-shrink: 0;
+    }
+    .ts-source-detail {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 0;
+    }
+    .ts-source-detail.open { max-height: 120px; opacity: 1; }
+    .ts-source-detail-inner {
+      background: var(--brand-purple-light);
+      border: 1px solid hsl(252 100% 64% / .3); border-top: none;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px; color: hsl(252 30% 35%); line-height: 18px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT G — Step-before-reply Card
+       Single collapsed card sits above reply text.
+       Loading during processing, shows summary after done.
+       Click to expand a clean step list.
+       ════════════════════════════════════════════════════════════ */
+    .ts-receipt {
+      display: flex; flex-direction: column;
+    }
+    .ts-receipt-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; user-select: none;
+      transition: border-color var(--transition), border-radius var(--transition);
+    }
+    .ts-receipt-header:hover { border-color: hsl(252 100% 64% / .4); }
+    .ts-receipt-header.expanded { border-radius: var(--radius-sm) var(--radius-sm) 0 0; border-color: var(--border-secondary); }
+    .ts-receipt-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: var(--brand-purple-light);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ts-receipt-icon svg { width: 11px; height: 11px; color: var(--brand-purple); }
+    .ts-receipt-icon-spin {
+      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid hsl(252 100% 64% / .2);
+      border-top-color: var(--brand-purple);
+      animation: log-spin .8s linear infinite;
+    }
+    .ts-receipt-label { flex: 1; }
+    .ts-receipt-meta { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
+    .ts-receipt-chevron { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform .2s; flex-shrink: 0; }
+    .ts-receipt-header.expanded .ts-receipt-chevron { transform: rotate(180deg); }
+
+    .ts-receipt-body {
+      overflow: hidden; max-height: 0;
+      transition: max-height .3s ease, opacity .2s ease;
+      opacity: 0;
+    }
+    .ts-receipt-body.open { max-height: 400px; opacity: 1; }
+    .ts-receipt-body-inner {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary); border-top: none;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      overflow: hidden;
+    }
+    .ts-receipt-step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-bottom: 1px solid var(--border-secondary);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .ts-receipt-step:last-child { border-bottom: none; }
+    .ts-receipt-step-check { width: 14px; height: 14px; color: hsl(142 70% 40%); flex-shrink: 0; }
+    .ts-receipt-step-icon { font-size: 13px; flex-shrink: 0; }
+    .ts-receipt-step-label { flex: 1; }
+    .ts-receipt-step-dur { font-size: 12px; color: var(--text-tertiary); }
   </style>
 </head>
 <body>
@@ -496,6 +725,10 @@
         <button class="variant-tab active" onclick="switchVariant('a', this)">A — Pill Stream</button>
         <button class="variant-tab" onclick="switchVariant('b', this)">B — Activity Log</button>
         <button class="variant-tab" onclick="switchVariant('c', this)">C — Ghost Cards</button>
+        <button class="variant-tab" onclick="switchVariant('d', this)">D — Status Line</button>
+        <button class="variant-tab" onclick="switchVariant('e', this)">E — Timeline Rail</button>
+        <button class="variant-tab" onclick="switchVariant('f', this)">F — Source Chips</button>
+        <button class="variant-tab" onclick="switchVariant('g', this)">G — Receipt Card</button>
       </div>
       <div class="variant-divider"></div>
 
@@ -643,9 +876,13 @@
 
   // ─── Dispatch to variant builders ────────────────────────────
   function startThinkingSequence(sc) {
-    if (currentVariant === 'a') startPillStream(sc);
+    if      (currentVariant === 'a') startPillStream(sc);
     else if (currentVariant === 'b') startActivityLog(sc);
-    else startGhostCards(sc);
+    else if (currentVariant === 'c') startGhostCards(sc);
+    else if (currentVariant === 'd') startStatusLine(sc);
+    else if (currentVariant === 'e') startTimelineRail(sc);
+    else if (currentVariant === 'f') startSourceChips(sc);
+    else if (currentVariant === 'g') startReceiptCard(sc);
   }
 
   // ════════════════════════════════════
@@ -908,6 +1145,321 @@
     const open = detail.classList.toggle('open');
     card.classList.toggle('expanded', open);
   }
+
+  // ════════════════════════════════════
+  // VARIANT D — Morphing Status Line
+  // ════════════════════════════════════
+  function startStatusLine(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ts-status-line';
+    const spinner = document.createElement('div');
+    spinner.className = 'ts-status-spinner';
+    const textEl = document.createElement('span');
+    textEl.className = 'ts-status-text';
+    wrap.appendChild(spinner);
+    wrap.appendChild(textEl);
+    aiRow.appendChild(wrap);
+    scrollBottom();
+
+    // Build log for later reveal
+    const logWrap = document.createElement('div');
+    logWrap.className = 'ts-status-log';
+    const logInner = document.createElement('div');
+    logInner.className = 'ts-status-log-inner';
+    sc.steps.forEach(step => {
+      const row = document.createElement('div');
+      row.className = 'ts-status-log-row';
+      row.innerHTML = `
+        <svg class="ts-status-log-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span class="ts-status-log-icon">${step.icon}</span>
+        <span class="ts-status-log-label">${step.label}</span>
+        ${step.dur ? `<span class="ts-status-log-dur">${step.dur}</span>` : ''}`;
+      logInner.appendChild(row);
+    });
+    logWrap.appendChild(logInner);
+    aiRow.appendChild(logWrap);
+
+    function morphText(newText, cb) {
+      textEl.classList.add('fade');
+      setTimeout(() => {
+        textEl.textContent = newText;
+        textEl.classList.remove('fade');
+        if (cb) setTimeout(cb, 60);
+      }, 180);
+    }
+
+    let i = 0;
+    function runStep() {
+      if (i >= sc.steps.length) {
+        // Done — swap spinner + text for "Done" button
+        spinner.style.display = 'none';
+        textEl.style.display = 'none';
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'ts-status-done';
+        doneBtn.innerHTML = `
+          <div class="ts-status-done-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          Done in ${totalDur(sc.steps)} · ${sc.steps.length} steps ›`;
+        doneBtn.onclick = () => logWrap.classList.toggle('open');
+        wrap.appendChild(doneBtn);
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 350);
+        return;
+      }
+      const step = sc.steps[i];
+      morphText(step.label + '…', () => { scrollBottom(); });
+      i++;
+      const delay = step.dur ? parseFloat(step.dur) * 900 + 400 : 1500;
+      setTimeout(runStep, delay);
+    }
+    morphText(sc.steps[0].label + '…');
+    i = 1;
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1500;
+    setTimeout(runStep, firstDelay);
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT E — Timeline Rail
+  // ════════════════════════════════════
+  function startTimelineRail(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const rail = document.createElement('div');
+    rail.className = 'ts-rail';
+
+    // Track column (dots + lines)
+    const track = document.createElement('div');
+    track.className = 'ts-rail-track';
+    sc.steps.forEach((step, idx) => {
+      const dot = document.createElement('div');
+      dot.className = 'ts-rail-dot' + (idx === 0 ? ' active' : '');
+      dot.id = `rail-dot-${idx}`;
+      track.appendChild(dot);
+      if (idx < sc.steps.length - 1) {
+        const line = document.createElement('div');
+        line.className = 'ts-rail-line';
+        line.id = `rail-line-${idx}`;
+        track.appendChild(line);
+      }
+    });
+
+    // Steps column
+    const stepsCol = document.createElement('div');
+    stepsCol.className = 'ts-rail-steps';
+    sc.steps.forEach((step, idx) => {
+      const s = document.createElement('div');
+      s.className = 'ts-rail-step' + (idx === 0 ? ' active' : '');
+      s.id = `rail-step-${idx}`;
+      s.innerHTML = `
+        <span class="ts-rail-step-icon">${step.icon}</span>
+        <span class="ts-rail-step-text">${step.label}</span>
+        ${step.dur ? `<span class="ts-rail-step-dur">${step.dur}</span>` : '<span class="ts-rail-step-dur" style="color:var(--brand-purple)">…</span>'}`;
+      stepsCol.appendChild(s);
+    });
+
+    rail.appendChild(track);
+    rail.appendChild(stepsCol);
+    aiRow.appendChild(rail);
+    scrollBottom();
+
+    let i = 0;
+    function advance() {
+      if (i >= sc.steps.length) {
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      // Mark previous done
+      if (i > 0) {
+        const prevDot = document.getElementById(`rail-dot-${i-1}`);
+        const prevLine = document.getElementById(`rail-line-${i-1}`);
+        const prevStep = document.getElementById(`rail-step-${i-1}`);
+        if (prevDot) { prevDot.classList.remove('active'); prevDot.classList.add('done'); }
+        if (prevLine) prevLine.classList.add('done');
+        if (prevStep) { prevStep.classList.remove('active'); prevStep.classList.add('done'); }
+      }
+      // Activate current
+      const dot = document.getElementById(`rail-dot-${i}`);
+      const step = document.getElementById(`rail-step-${i}`);
+      if (dot) dot.classList.add('active');
+      if (step) step.classList.add('active');
+      scrollBottom();
+      i++;
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1600;
+      setTimeout(advance, delay);
+    }
+    advance();
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT F — Source Chips
+  // ════════════════════════════════════
+  function startSourceChips(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    // Show a brief working indicator while steps run silently
+    const workingEl = document.createElement('div');
+    workingEl.className = 'ts-working-line';
+    workingEl.innerHTML = `<div class="ts-working-spinner"></div> Researching…`;
+    aiRow.appendChild(workingEl);
+    scrollBottom();
+
+    // Simulate all steps running, then reveal reply + chips
+    const totalMs = sc.steps.reduce((a, s) => a + (s.dur ? parseFloat(s.dur) * 900 + 300 : 1400), 0);
+    setTimeout(() => {
+      // Remove working indicator
+      workingEl.remove();
+
+      // Build reply with inline [n] markers
+      let replyHtml = mdLite(sc.reply);
+      // Inject refs naturally at end of first sentence and after key facts
+      const refCount = Math.min(sc.steps.length, 3);
+      // Append refs inline at end of reply content naturally
+      const sentences = replyHtml.split('. ');
+      for (let r = 0; r < refCount && r < sentences.length; r++) {
+        sentences[r] += ` <a class="ts-ref-tag" onclick="toggleSource(${r})" href="#">${r+1}</a>`;
+      }
+      replyHtml = sentences.join('. ');
+
+      const replyEl = document.createElement('div');
+      replyEl.className = 'ts-reply-with-refs animate-in';
+      replyEl.innerHTML = replyHtml;
+      aiRow.appendChild(replyEl);
+
+      // Build source chips
+      const sourcesWrap = document.createElement('div');
+      sourcesWrap.id = 'ts-sources-wrap';
+
+      const chipsRow = document.createElement('div');
+      chipsRow.className = 'ts-sources-row';
+
+      sc.steps.forEach((step, idx) => {
+        const chip = document.createElement('div');
+        chip.className = 'ts-source-chip';
+        chip.id = `source-chip-${idx}`;
+        chip.innerHTML = `<span class="ts-source-num">${idx+1}</span>${step.icon} ${step.label.length > 32 ? step.label.slice(0,32) + '…' : step.label}`;
+        chip.onclick = () => toggleSource(idx);
+        chipsRow.appendChild(chip);
+
+        const detail = document.createElement('div');
+        detail.className = 'ts-source-detail';
+        detail.id = `source-detail-${idx}`;
+        detail.innerHTML = `<div class="ts-source-detail-inner">${step.detail.replace(/\n/g,'<br>')}</div>`;
+        chipsRow.appendChild(detail);
+      });
+
+      sourcesWrap.appendChild(chipsRow);
+      aiRow.appendChild(sourcesWrap);
+      scrollBottom();
+    }, Math.min(totalMs, 3200));
+  }
+
+  function toggleSource(idx) {
+    const chip = document.getElementById(`source-chip-${idx}`);
+    const detail = document.getElementById(`source-detail-${idx}`);
+    if (!chip || !detail) return;
+    const open = detail.classList.toggle('open');
+    chip.classList.toggle('expanded', open);
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT G — Receipt Card
+  // ════════════════════════════════════
+  function startReceiptCard(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const receipt = document.createElement('div');
+    receipt.className = 'ts-receipt';
+
+    const header = document.createElement('div');
+    header.className = 'ts-receipt-header';
+    header.id = 'ts-receipt-header';
+    header.innerHTML = `
+      <div class="ts-receipt-icon-spin" id="ts-receipt-spin"></div>
+      <span class="ts-receipt-label" id="ts-receipt-label">Working…</span>`;
+
+    const body = document.createElement('div');
+    body.className = 'ts-receipt-body';
+    body.id = 'ts-receipt-body';
+    const bodyInner = document.createElement('div');
+    bodyInner.className = 'ts-receipt-body-inner';
+    sc.steps.forEach(step => {
+      const row = document.createElement('div');
+      row.className = 'ts-receipt-step';
+      row.innerHTML = `
+        <svg class="ts-receipt-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span class="ts-receipt-step-icon">${step.icon}</span>
+        <span class="ts-receipt-step-label">${step.label}</span>
+        ${step.dur ? `<span class="ts-receipt-step-dur">${step.dur}</span>` : ''}`;
+      bodyInner.appendChild(row);
+    });
+    body.appendChild(bodyInner);
+    receipt.appendChild(header);
+    receipt.appendChild(body);
+    aiRow.appendChild(receipt);
+    scrollBottom();
+
+    const totalMs = sc.steps.reduce((a, s) => a + (s.dur ? parseFloat(s.dur) * 900 + 300 : 1400), 0);
+    setTimeout(() => {
+      // Replace spinner with icon, update label, wire up toggle
+      const spin = document.getElementById('ts-receipt-spin');
+      if (spin) {
+        spin.outerHTML = `<div class="ts-receipt-icon" id="ts-receipt-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </div>`;
+      }
+      const labelEl = document.getElementById('ts-receipt-label');
+      if (labelEl) labelEl.innerHTML = `<strong>${sc.steps.length} steps completed</strong> <span class="ts-receipt-meta">· ${totalDur(sc.steps)}</span>`;
+
+      const hdr = document.getElementById('ts-receipt-header');
+      if (hdr) {
+        hdr.innerHTML += `<svg class="ts-receipt-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>`;
+        hdr.onclick = () => {
+          hdr.classList.toggle('expanded');
+          body.classList.toggle('open');
+        };
+      }
+
+      setTimeout(() => {
+        const msgBubble = document.createElement('div');
+        msgBubble.className = 'msg-bubble ai animate-in';
+        msgBubble.innerHTML = mdLite(sc.reply);
+        aiRow.appendChild(msgBubble);
+        scrollBottom();
+      }, 350);
+    }, Math.min(totalMs, 3200));
+  }
+
 
   // ─── Shared helpers ───────────────────────────────────────────
   function badge() {
