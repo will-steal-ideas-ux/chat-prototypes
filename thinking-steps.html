@@ -29,6 +29,8 @@
       --brand-purple-light: hsl(var(--accent));
       --accent-color:       hsl(var(--primary));
 
+      /* HUD positioning anchor */
+      --hud-top: 0;
       --radius-xs:   calc(var(--radius) * 0.5);
       --radius-sm:   var(--radius);
       --radius-md:   calc(var(--radius) * 2);
@@ -690,6 +692,312 @@
     .ts-receipt-step-icon { font-size: 13px; flex-shrink: 0; }
     .ts-receipt-step-label { flex: 1; }
     .ts-receipt-step-dur { font-size: 12px; color: var(--text-tertiary); }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT H — Dot Counter
+       Absolute minimum. One pulsing dot + "N / total steps".
+       Click to expand a log.
+       ════════════════════════════════════════════════════════════ */
+    .ts-dot-counter {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-tertiary);
+    }
+    .ts-dot-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--brand-purple); flex-shrink: 0;
+      animation: dot-pulse 1.2s ease infinite;
+    }
+    @keyframes dot-pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .4; transform: scale(.7); }
+    }
+    .ts-dot-done-icon {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: hsl(142 70% 45%); flex-shrink: 0;
+    }
+    .ts-dot-summary-btn {
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 13px; color: var(--text-tertiary);
+      transition: color var(--transition);
+    }
+    .ts-dot-summary-btn:hover { color: var(--text-primary); }
+    .ts-dot-log {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease, margin .15s ease;
+      opacity: 0; margin-top: 0;
+    }
+    .ts-dot-log.open { max-height: 300px; opacity: 1; margin-top: 8px; }
+    .ts-dot-log-inner {
+      background: var(--bg-primary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .ts-dot-log-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; border-bottom: 1px solid var(--border-secondary);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .ts-dot-log-row:last-child { border-bottom: none; }
+    .ts-dot-log-check { width: 13px; height: 13px; color: hsl(142 70% 40%); flex-shrink: 0; }
+    .ts-dot-log-icon { font-size: 13px; flex-shrink: 0; }
+    .ts-dot-log-label { flex: 1; }
+    .ts-dot-log-dur { font-size: 12px; color: var(--text-tertiary); }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT I — Prose Narration
+       AI narrates what it's doing in flowing first-person text.
+       Sentence updates live as steps complete.
+       ════════════════════════════════════════════════════════════ */
+    .ts-prose {
+      font-size: 14px; line-height: 22px; color: var(--text-tertiary);
+      font-style: italic;
+      min-height: 22px;
+    }
+    .ts-prose-cursor {
+      display: inline-block; width: 2px; height: 13px;
+      background: var(--brand-purple); margin-left: 1px;
+      vertical-align: middle;
+      animation: prose-blink .9s step-end infinite;
+    }
+    @keyframes prose-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT J — Terminal Stream
+       Monospace dark-bg log. Timestamps, tool names, results.
+       Collapses to a one-line summary.
+       ════════════════════════════════════════════════════════════ */
+    .ts-terminal-wrap { display: flex; flex-direction: column; gap: 0; }
+    .ts-terminal-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: color var(--transition); width: fit-content;
+    }
+    .ts-terminal-toggle:hover { color: var(--text-primary); }
+    .ts-terminal-toggle-icon {
+      width: 18px; height: 18px; border-radius: 4px;
+      background: hsl(222 15% 15%); display: flex; align-items: center; justify-content: center;
+    }
+    .ts-terminal-toggle-icon svg { width: 10px; height: 10px; color: hsl(142 70% 55%); transition: transform .2s; }
+    .ts-terminal-toggle.open .ts-terminal-toggle-icon svg { transform: rotate(180deg); }
+
+    .ts-terminal-body {
+      overflow: hidden; max-height: 0;
+      transition: max-height .3s ease, opacity .2s ease, margin .2s ease;
+      opacity: 0; margin-top: 0;
+    }
+    .ts-terminal-body.open { max-height: 400px; opacity: 1; margin-top: 8px; }
+    .ts-terminal-block {
+      background: hsl(222 15% 12%);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 12px; line-height: 20px;
+      overflow-y: auto; max-height: 280px;
+    }
+    .ts-terminal-block::-webkit-scrollbar { width: 4px; }
+    .ts-terminal-block::-webkit-scrollbar-thumb { background: hsl(222 15% 25%); border-radius: 2px; }
+    .ts-terminal-line { display: flex; gap: 10px; }
+    .ts-terminal-ts { color: hsl(222 15% 45%); flex-shrink: 0; }
+    .ts-terminal-cmd { color: hsl(210 80% 70%); }
+    .ts-terminal-ok  { color: hsl(142 60% 55%); }
+    .ts-terminal-err { color: hsl(0 70% 60%); }
+    .ts-terminal-val { color: hsl(35 80% 65%); }
+    .ts-terminal-cursor {
+      display: inline-block; width: 7px; height: 13px;
+      background: hsl(142 60% 55%); margin-left: 2px;
+      vertical-align: middle;
+      animation: prose-blink .9s step-end infinite;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT K — Breadcrumb Path
+       Horizontal step trail. Done = muted check. Active = purple.
+       Pending = grey. Scrolls if overflow.
+       ════════════════════════════════════════════════════════════ */
+    .ts-breadcrumb {
+      display: flex; align-items: center; gap: 0;
+      overflow-x: auto; padding-bottom: 2px;
+    }
+    .ts-breadcrumb::-webkit-scrollbar { height: 0; }
+    .ts-bc-step {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .ts-bc-step.done  { color: var(--text-tertiary); }
+    .ts-bc-step.active { color: var(--brand-purple); }
+    .ts-bc-step.pending { color: hsl(240 6% 82%); }
+    .ts-bc-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .ts-bc-step.active .ts-bc-dot { animation: rail-pulse 1.4s ease infinite; }
+    .ts-bc-check { width: 12px; height: 12px; flex-shrink: 0; color: hsl(142 70% 45%); }
+    .ts-bc-sep {
+      margin: 0 6px; color: var(--border-secondary);
+      font-size: 14px; flex-shrink: 0; user-select: none;
+    }
+    .ts-bc-label { font-size: 13px; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT L — Icon Cluster
+       Tool icons light up one-by-one in a compact grid.
+       Click cluster to expand labels.
+       ════════════════════════════════════════════════════════════ */
+    .ts-cluster-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .ts-cluster {
+      display: flex; align-items: center; gap: 4px;
+      cursor: pointer;
+    }
+    .ts-cluster-cell {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      transition: all .2s ease;
+      opacity: .3;
+      flex-shrink: 0;
+    }
+    .ts-cluster-cell.active {
+      opacity: 1;
+      border-color: var(--brand-purple);
+      background: var(--brand-purple-light);
+      animation: cell-pop .3s ease;
+    }
+    .ts-cluster-cell.done {
+      opacity: 1;
+      border-color: hsl(142 60% 75%);
+      background: hsl(142 60% 96%);
+    }
+    @keyframes cell-pop {
+      0%   { transform: scale(.85); }
+      60%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .ts-cluster-hint { font-size: 12px; color: var(--text-tertiary); }
+
+    .ts-cluster-detail {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 0;
+    }
+    .ts-cluster-detail.open { max-height: 300px; opacity: 1; }
+    .ts-cluster-detail-inner {
+      background: var(--bg-primary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .ts-cluster-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; border-bottom: 1px solid var(--border-secondary);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .ts-cluster-row:last-child { border-bottom: none; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT M — Skeleton → Reveal
+       Shimmer placeholder appears first. As each step completes,
+       a section resolves from skeleton to real text.
+       ════════════════════════════════════════════════════════════ */
+    .ts-skeleton-wrap { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .ts-skel-section { display: flex; flex-direction: column; gap: 5px; }
+    .ts-skel-line {
+      height: 14px; border-radius: 4px; background: #ebebec;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer { 0%,100%{opacity:.4} 50%{opacity:.9} }
+    .ts-skel-line.w-full  { width: 100%; }
+    .ts-skel-line.w-80    { width: 80%; }
+    .ts-skel-line.w-60    { width: 60%; }
+    .ts-skel-line.w-40    { width: 40%; }
+    .ts-skel-reveal {
+      font-size: 15px; line-height: 24px; color: var(--text-primary);
+      animation: msg-in .3s ease;
+    }
+    .ts-skel-section-wrap { position: relative; min-height: 48px; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT N — Inner Monologue
+       Nested micro-thread shows model's internal reasoning.
+       Small bubbles in a tinted nested container.
+       ════════════════════════════════════════════════════════════ */
+    .ts-monologue {
+      border-left: 2px solid hsl(252 100% 64% / .25);
+      padding: 8px 0 8px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .ts-mono-header {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; color: hsl(252 60% 60%);
+      margin-bottom: 2px;
+    }
+    .ts-mono-header-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: hsl(252 100% 64% / .5);
+      animation: dot-pulse 1.2s ease infinite;
+    }
+    .ts-mono-bubble {
+      display: inline-flex; align-items: flex-start; gap: 6px;
+      font-size: 13px; line-height: 19px; color: hsl(252 20% 40%);
+      animation: msg-in .2s ease;
+    }
+    .ts-mono-bubble-icon { font-size: 12px; flex-shrink: 0; margin-top: 2px; opacity: .7; }
+    .ts-mono-bubble-text { flex: 1; }
+    .ts-mono-bubble.done .ts-mono-bubble-text { color: hsl(252 10% 55%); }
+    .ts-mono-thinking { color: hsl(252 60% 60%); font-style: italic; }
+    .ts-mono-cursor {
+      display: inline-block; width: 6px; height: 12px;
+      background: hsl(252 100% 64% / .6); margin-left: 2px;
+      vertical-align: middle;
+      animation: prose-blink .9s step-end infinite;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT O — Floating HUD Badge
+       Small persistent badge fixed to top-right of chat area.
+       Shows current step. Disappears when reply is ready.
+       ════════════════════════════════════════════════════════════ */
+    .ts-hud {
+      position: absolute; top: 12px; right: 12px;
+      z-index: 100;
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 10px 5px 8px;
+      background: hsl(222 15% 12%);
+      border-radius: var(--radius-full);
+      font-size: 12px; font-weight: 500; color: #fff;
+      box-shadow: 0 4px 12px hsl(222 15% 5% / .3);
+      animation: hud-in .2s ease;
+      white-space: nowrap;
+    }
+    @keyframes hud-in { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+    .ts-hud-out { animation: hud-out .2s ease forwards; }
+    @keyframes hud-out { to{opacity:0;transform:translateY(-4px)} }
+    .ts-hud-spin {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: hsl(142 70% 55%);
+      animation: log-spin .7s linear infinite; flex-shrink: 0;
+    }
+    .ts-hud-step { color: rgba(255,255,255,.7); }
+    .ts-hud-label { color: #fff; }
+    .ts-hud-close {
+      width: 14px; height: 14px; border: none; background: rgba(255,255,255,.15);
+      border-radius: 50%; cursor: pointer; font-size: 9px; color: rgba(255,255,255,.8);
+      display: flex; align-items: center; justify-content: center;
+      margin-left: 2px;
+      transition: background var(--transition);
+    }
+    .ts-hud-close:hover { background: rgba(255,255,255,.25); }
+    /* The chat area needs position:relative for the HUD to anchor */
+    .main-area { position: relative; }
   </style>
 </head>
 <body>
@@ -729,6 +1037,14 @@
         <button class="variant-tab" onclick="switchVariant('e', this)">E — Timeline Rail</button>
         <button class="variant-tab" onclick="switchVariant('f', this)">F — Source Chips</button>
         <button class="variant-tab" onclick="switchVariant('g', this)">G — Receipt Card</button>
+        <button class="variant-tab" onclick="switchVariant('h', this)">H — Dot Counter</button>
+        <button class="variant-tab" onclick="switchVariant('i', this)">I — Prose Narration</button>
+        <button class="variant-tab" onclick="switchVariant('j', this)">J — Terminal</button>
+        <button class="variant-tab" onclick="switchVariant('k', this)">K — Breadcrumb</button>
+        <button class="variant-tab" onclick="switchVariant('l', this)">L — Icon Cluster</button>
+        <button class="variant-tab" onclick="switchVariant('m', this)">M — Skeleton Reveal</button>
+        <button class="variant-tab" onclick="switchVariant('n', this)">N — Inner Monologue</button>
+        <button class="variant-tab" onclick="switchVariant('o', this)">O — Floating HUD</button>
       </div>
       <div class="variant-divider"></div>
 
@@ -883,6 +1199,14 @@
     else if (currentVariant === 'e') startTimelineRail(sc);
     else if (currentVariant === 'f') startSourceChips(sc);
     else if (currentVariant === 'g') startReceiptCard(sc);
+    else if (currentVariant === 'h') startDotCounter(sc);
+    else if (currentVariant === 'i') startProseNarration(sc);
+    else if (currentVariant === 'j') startTerminal(sc);
+    else if (currentVariant === 'k') startBreadcrumb(sc);
+    else if (currentVariant === 'l') startIconCluster(sc);
+    else if (currentVariant === 'm') startSkeletonReveal(sc);
+    else if (currentVariant === 'n') startInnerMonologue(sc);
+    else if (currentVariant === 'o') startFloatingHUD(sc);
   }
 
   // ════════════════════════════════════
@@ -1458,6 +1782,560 @@
         scrollBottom();
       }, 350);
     }, Math.min(totalMs, 3200));
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT H — Dot Counter
+  // ════════════════════════════════════
+  function startDotCounter(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ts-dot-counter';
+    const dotEl = document.createElement('div');
+    dotEl.className = 'ts-dot-pulse';
+    const countEl = document.createElement('span');
+    countEl.textContent = `0 / ${sc.steps.length} steps`;
+    wrap.appendChild(dotEl);
+    wrap.appendChild(countEl);
+    aiRow.appendChild(wrap);
+
+    // Pre-build log
+    const logWrap = document.createElement('div');
+    logWrap.className = 'ts-dot-log';
+    const logInner = document.createElement('div');
+    logInner.className = 'ts-dot-log-inner';
+    sc.steps.forEach(step => {
+      const row = document.createElement('div');
+      row.className = 'ts-dot-log-row';
+      row.innerHTML = `<svg class="ts-dot-log-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span class="ts-dot-log-icon">${step.icon}</span><span class="ts-dot-log-label">${step.label}</span>${step.dur ? `<span class="ts-dot-log-dur">${step.dur}</span>` : ''}`;
+      logInner.appendChild(row);
+    });
+    logWrap.appendChild(logInner);
+    aiRow.appendChild(logWrap);
+    scrollBottom();
+
+    let i = 0;
+    function tick() {
+      i++;
+      countEl.textContent = `${i} / ${sc.steps.length} steps`;
+      if (i >= sc.steps.length) {
+        dotEl.className = 'ts-dot-done-icon';
+        const btn = document.createElement('button');
+        btn.className = 'ts-dot-summary-btn';
+        btn.textContent = `Done in ${totalDur(sc.steps)} ›`;
+        btn.onclick = () => logWrap.classList.toggle('open');
+        wrap.appendChild(btn);
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 350);
+        return;
+      }
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 300 : 1400;
+      setTimeout(tick, delay);
+    }
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 300 : 1400;
+    setTimeout(tick, firstDelay);
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT I — Prose Narration
+  // ════════════════════════════════════
+  function startProseNarration(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const proseEl = document.createElement('div');
+    proseEl.className = 'ts-prose';
+    const cursor = `<span class="ts-prose-cursor"></span>`;
+
+    const narrations = buildNarration(sc.steps);
+    let built = '';
+    let i = 0;
+
+    function updateProse() {
+      built += (built ? ', then ' : 'I ') + narrations[i];
+      proseEl.innerHTML = built + '…' + cursor;
+      scrollBottom();
+    }
+
+    aiRow.appendChild(proseEl);
+    updateProse();
+    scrollBottom();
+
+    function next() {
+      i++;
+      if (i >= narrations.length) {
+        proseEl.innerHTML = built + '.';
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      updateProse();
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1500;
+      setTimeout(next, delay);
+    }
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1500;
+    setTimeout(next, firstDelay);
+  }
+
+  function buildNarration(steps) {
+    return steps.map(s => {
+      if (s.icon === '🔍') return `searched the web for "${s.label.replace('Searched ','').replace(/"/g,'')}"`;
+      if (s.icon === '📄') return `read ${s.label.replace('Read ','').split('/').pop() || 'a source'}`;
+      if (s.icon === '🔑') return `authenticated with the API`;
+      if (s.icon === '📊') return `fetched your campaign data`;
+      if (s.icon === '💰') return `checked budget utilization`;
+      if (s.icon === '✍️') return `drafted the content`;
+      if (s.icon === '📝') return `wrote the recommendations`;
+      return `ran ${s.label.toLowerCase()}`;
+    });
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT J — Terminal Stream
+  // ════════════════════════════════════
+  function startTerminal(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const termWrap = document.createElement('div');
+    termWrap.className = 'ts-terminal-wrap';
+
+    const toggle = document.createElement('button');
+    toggle.className = 'ts-terminal-toggle open';
+    toggle.innerHTML = `<div class="ts-terminal-toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div><span id="ts-term-summary">Running…</span>`;
+
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'ts-terminal-body open';
+
+    const block = document.createElement('div');
+    block.className = 'ts-terminal-block';
+    block.id = 'ts-term-block';
+
+    bodyWrap.appendChild(block);
+    termWrap.appendChild(toggle);
+    termWrap.appendChild(bodyWrap);
+    aiRow.appendChild(termWrap);
+
+    toggle.onclick = () => { toggle.classList.toggle('open'); bodyWrap.classList.toggle('open'); };
+
+    let elapsed = 0;
+    let i = 0;
+
+    function addLine() {
+      if (i >= sc.steps.length) {
+        const cursorEl = block.querySelector('.ts-terminal-cursor');
+        if (cursorEl) cursorEl.remove();
+        document.getElementById('ts-term-summary').textContent = `Done · ${sc.steps.length} commands · ${totalDur(sc.steps)}`;
+        setTimeout(() => { toggle.classList.remove('open'); bodyWrap.classList.remove('open'); }, 600);
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 1000);
+        return;
+      }
+      const step = sc.steps[i];
+      const ts = elapsed.toFixed(1).padStart(5, '0');
+      elapsed += step.dur ? parseFloat(step.dur) : 1.0;
+
+      // Command line
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'ts-terminal-line';
+      cmdLine.innerHTML = `<span class="ts-terminal-ts">[${ts}]</span><span class="ts-terminal-cmd">› ${step.label}</span>`;
+      block.appendChild(cmdLine);
+
+      const delay = step.dur ? parseFloat(step.dur) * 900 + 400 : 1400;
+      setTimeout(() => {
+        // Result line
+        const resLine = document.createElement('div');
+        resLine.className = 'ts-terminal-line';
+        const resultText = step.detail.split('\n')[1] || step.detail.split('\n')[0];
+        resLine.innerHTML = `<span class="ts-terminal-ts">      </span><span class="ts-terminal-ok">✓</span> <span class="ts-terminal-val">${resultText}</span>`;
+        block.appendChild(resLine);
+        block.scrollTop = block.scrollHeight;
+        scrollBottom();
+        i++;
+        addLine();
+      }, delay);
+
+      // Cursor
+      const existing = block.querySelector('.ts-terminal-cursor');
+      if (existing) existing.remove();
+      const cur = document.createElement('span');
+      cur.className = 'ts-terminal-cursor';
+      block.appendChild(cur);
+      block.scrollTop = block.scrollHeight;
+      scrollBottom();
+    }
+    addLine();
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT K — Breadcrumb Path
+  // ════════════════════════════════════
+  function startBreadcrumb(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const bc = document.createElement('div');
+    bc.className = 'ts-breadcrumb';
+
+    const shortLabels = sc.steps.map(s => s.label.split(' ').slice(0, 2).join(' '));
+
+    shortLabels.forEach((label, idx) => {
+      if (idx > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'ts-bc-sep';
+        sep.textContent = '›';
+        bc.appendChild(sep);
+      }
+      const step = document.createElement('div');
+      step.className = 'ts-bc-step ' + (idx === 0 ? 'active' : 'pending');
+      step.id = `bc-step-${idx}`;
+      step.innerHTML = idx === 0
+        ? `<div class="ts-bc-dot"></div><span class="ts-bc-label">${label}</span>`
+        : `<div class="ts-bc-dot"></div><span class="ts-bc-label">${label}</span>`;
+      bc.appendChild(step);
+    });
+
+    aiRow.appendChild(bc);
+    scrollBottom();
+
+    let i = 0;
+    function advance() {
+      if (i >= sc.steps.length) {
+        // Mark all done
+        sc.steps.forEach((_, idx) => {
+          const el = document.getElementById(`bc-step-${idx}`);
+          if (el) {
+            el.className = 'ts-bc-step done';
+            el.innerHTML = `<svg class="ts-bc-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span class="ts-bc-label">${shortLabels[idx]}</span>`;
+          }
+        });
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      if (i > 0) {
+        const prev = document.getElementById(`bc-step-${i-1}`);
+        if (prev) {
+          prev.className = 'ts-bc-step done';
+          prev.innerHTML = `<svg class="ts-bc-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span class="ts-bc-label">${shortLabels[i-1]}</span>`;
+        }
+      }
+      const cur = document.getElementById(`bc-step-${i}`);
+      if (cur) {
+        cur.className = 'ts-bc-step active';
+        cur.innerHTML = `<div class="ts-bc-dot"></div><span class="ts-bc-label">${shortLabels[i]}</span>`;
+      }
+      i++;
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1600;
+      setTimeout(advance, delay);
+    }
+    advance();
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT L — Icon Cluster
+  // ════════════════════════════════════
+  function startIconCluster(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const clusterWrap = document.createElement('div');
+    clusterWrap.className = 'ts-cluster-wrap';
+
+    const cluster = document.createElement('div');
+    cluster.className = 'ts-cluster';
+    cluster.title = 'Click to see details';
+
+    const hint = document.createElement('div');
+    hint.className = 'ts-cluster-hint';
+    hint.id = 'ts-cluster-hint';
+    hint.textContent = 'Working…';
+
+    const detailWrap = document.createElement('div');
+    detailWrap.className = 'ts-cluster-detail';
+    const detailInner = document.createElement('div');
+    detailInner.className = 'ts-cluster-detail-inner';
+
+    sc.steps.forEach((step, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'ts-cluster-cell';
+      cell.id = `cluster-cell-${idx}`;
+      cell.textContent = step.icon;
+      cluster.appendChild(cell);
+
+      const row = document.createElement('div');
+      row.className = 'ts-cluster-row';
+      row.innerHTML = `<svg style="width:13px;height:13px;color:hsl(142 70% 40%);flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span style="font-size:13px;flex-shrink:0">${step.icon}</span><span style="font-size:13px;flex:1">${step.label}</span>${step.dur ? `<span style="font-size:12px;color:var(--text-tertiary)">${step.dur}</span>` : ''}`;
+      detailInner.appendChild(row);
+    });
+
+    detailWrap.appendChild(detailInner);
+    cluster.onclick = () => detailWrap.classList.toggle('open');
+    clusterWrap.appendChild(cluster);
+    clusterWrap.appendChild(hint);
+    clusterWrap.appendChild(detailWrap);
+    aiRow.appendChild(clusterWrap);
+    scrollBottom();
+
+    let i = 0;
+    function lightUp() {
+      if (i >= sc.steps.length) {
+        document.getElementById('ts-cluster-hint').textContent = `Done in ${totalDur(sc.steps)} · click to expand`;
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      if (i > 0) {
+        const prev = document.getElementById(`cluster-cell-${i-1}`);
+        if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+      }
+      const cur = document.getElementById(`cluster-cell-${i}`);
+      if (cur) cur.classList.add('active');
+      document.getElementById('ts-cluster-hint').textContent = sc.steps[i].label + '…';
+      scrollBottom();
+      i++;
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1500;
+      setTimeout(lightUp, delay);
+    }
+    lightUp();
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT M — Skeleton → Reveal
+  // ════════════════════════════════════
+  function startSkeletonReveal(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    // Split reply into as many sections as steps
+    const replyParts = splitIntoParts(sc.reply, sc.steps.length);
+
+    const skelWrap = document.createElement('div');
+    skelWrap.className = 'ts-skeleton-wrap';
+
+    replyParts.forEach((_, idx) => {
+      const section = document.createElement('div');
+      section.className = 'ts-skel-section-wrap';
+      section.id = `skel-section-${idx}`;
+
+      const skel = document.createElement('div');
+      skel.className = 'ts-skel-section';
+      skel.innerHTML = `
+        <div class="ts-skel-line w-full"></div>
+        <div class="ts-skel-line ${idx % 2 === 0 ? 'w-80' : 'w-60'}"></div>
+        ${idx < 1 ? '<div class="ts-skel-line w-40"></div>' : ''}`;
+      section.appendChild(skel);
+      skelWrap.appendChild(section);
+    });
+
+    aiRow.appendChild(skelWrap);
+    scrollBottom();
+
+    let i = 0;
+    function revealSection() {
+      if (i >= replyParts.length) return;
+      const section = document.getElementById(`skel-section-${i}`);
+      if (section) {
+        section.innerHTML = '';
+        const reveal = document.createElement('div');
+        reveal.className = 'ts-skel-reveal';
+        reveal.innerHTML = mdLite(replyParts[i]);
+        section.appendChild(reveal);
+      }
+      i++;
+      if (i >= replyParts.length) {
+        scrollBottom();
+        return;
+      }
+      const delay = sc.steps[i-1] ? (sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1400) : 800;
+      setTimeout(revealSection, delay);
+      scrollBottom();
+    }
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1400;
+    setTimeout(revealSection, firstDelay);
+  }
+
+  function splitIntoParts(text, n) {
+    const sentences = text.split(/(?<=\.)\s+|(?<=\n)/);
+    if (n <= 1 || sentences.length <= 1) return [text];
+    const perPart = Math.ceil(sentences.length / n);
+    const parts = [];
+    for (let i = 0; i < n; i++) {
+      const chunk = sentences.slice(i * perPart, (i + 1) * perPart).join(' ');
+      if (chunk.trim()) parts.push(chunk.trim());
+    }
+    return parts.length ? parts : [text];
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT N — Inner Monologue
+  // ════════════════════════════════════
+  function startInnerMonologue(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const mono = document.createElement('div');
+    mono.className = 'ts-monologue';
+    mono.innerHTML = `<div class="ts-mono-header"><div class="ts-mono-header-dot"></div>thinking</div>`;
+    aiRow.appendChild(mono);
+    scrollBottom();
+
+    const narrations = buildNarration(sc.steps);
+    let i = 0;
+    let curBubble = null;
+
+    function addBubble() {
+      if (i >= sc.steps.length) {
+        // Remove dot animation from header
+        const dot = mono.querySelector('.ts-mono-header-dot');
+        if (dot) dot.style.animation = 'none';
+        mono.querySelector('.ts-mono-header').innerHTML = '💡 inner monologue';
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      // Mark previous bubble as done
+      if (curBubble) curBubble.classList.add('done');
+
+      const thinking = [
+        'Let me check this…',
+        'Hmm, interesting…',
+        'Found something useful…',
+        'Cross-referencing…',
+        'Almost there…',
+        'Putting it together…',
+      ][i % 6];
+
+      curBubble = document.createElement('div');
+      curBubble.className = 'ts-mono-bubble animate-in';
+      curBubble.innerHTML = `<span class="ts-mono-bubble-icon">${sc.steps[i].icon}</span><span class="ts-mono-bubble-text ts-mono-thinking">${thinking} <span class="ts-mono-cursor"></span></span>`;
+      mono.appendChild(curBubble);
+      scrollBottom();
+
+      const delay = sc.steps[i].dur ? parseFloat(sc.steps[i].dur) * 900 + 500 : 1500;
+      setTimeout(() => {
+        if (curBubble) {
+          curBubble.innerHTML = `<span class="ts-mono-bubble-icon">${sc.steps[i].icon}</span><span class="ts-mono-bubble-text">${narrations[i]}</span>`;
+        }
+        i++;
+        const nextDelay = sc.steps[i-1].dur ? 200 : 300;
+        setTimeout(addBubble, nextDelay);
+      }, delay);
+    }
+    addBubble();
+  }
+
+
+  // ════════════════════════════════════
+  // VARIANT O — Floating HUD Badge
+  // ════════════════════════════════════
+  function startFloatingHUD(sc) {
+    const msgs = document.getElementById('chat-messages');
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    // Create HUD anchored to main-area
+    const mainArea = document.querySelector('.main-area');
+    const hud = document.createElement('div');
+    hud.className = 'ts-hud';
+    hud.id = 'ts-hud';
+    hud.innerHTML = `
+      <div class="ts-hud-spin"></div>
+      <span class="ts-hud-step" id="ts-hud-step">1/${sc.steps.length}</span>
+      <span class="ts-hud-label" id="ts-hud-label">${sc.steps[0].label.slice(0, 30)}…</span>
+      <button class="ts-hud-close" onclick="document.getElementById('ts-hud')?.remove()">✕</button>`;
+    mainArea.appendChild(hud);
+    scrollBottom();
+
+    let i = 0;
+    function advance() {
+      i++;
+      if (i >= sc.steps.length) {
+        const hudEl = document.getElementById('ts-hud');
+        if (hudEl) { hudEl.classList.add('ts-hud-out'); setTimeout(() => hudEl.remove(), 200); }
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 300);
+        return;
+      }
+      const stepEl = document.getElementById('ts-hud-step');
+      const labelEl = document.getElementById('ts-hud-label');
+      if (stepEl) stepEl.textContent = `${i+1}/${sc.steps.length}`;
+      if (labelEl) {
+        const lbl = sc.steps[i].label;
+        labelEl.textContent = (lbl.length > 30 ? lbl.slice(0, 30) + '…' : lbl);
+      }
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 400 : 1600;
+      setTimeout(advance, delay);
+    }
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1600;
+    setTimeout(advance, firstDelay);
   }
 
 
