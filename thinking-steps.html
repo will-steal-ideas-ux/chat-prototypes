@@ -506,7 +506,8 @@
       animation: arrow-nudge 2.8s ease infinite;
       flex-shrink: 0;
     }
-    .ts-status-arrow svg { width: 14px; height: 14px; }
+    .ts-status-arrow svg { width: 14px; height: 14px; transition: transform .2s ease; }
+    .ts-status-line.log-open .ts-status-arrow svg { transform: rotate(90deg); }
     @keyframes arrow-nudge {
       0%,100% { transform: translateX(0); opacity: .4; }
       50%      { transform: translateX(4px); opacity: .9; }
@@ -519,6 +520,8 @@
     }
     .ts-status-done { display: inline-flex; align-items: center; gap: 4px; }
     .ts-status-done:hover { color: var(--text-primary); }
+    .ts-status-done svg { transition: transform .2s ease; }
+    .ts-status-line.log-open .ts-status-done svg { transform: rotate(90deg); }
 
     .ts-status-log {
       overflow: hidden; max-height: 0;
@@ -1531,7 +1534,10 @@
     // Build log — accessible during processing and after
     const logWrap = document.createElement('div');
     logWrap.className = 'ts-status-log';
-    wrap.onclick = () => logWrap.classList.toggle('open');
+    wrap.onclick = () => {
+      logWrap.classList.toggle('open');
+      wrap.classList.toggle('log-open', logWrap.classList.contains('open'));
+    };
     const logInner = document.createElement('div');
     logInner.className = 'ts-status-log-inner';
     sc.steps.forEach(step => {
