@@ -476,7 +476,9 @@
       display: flex; align-items: center; gap: 6px;
       font-size: 13px;
       min-height: 22px;
+      width: fit-content;
     }
+    .ts-status-line:hover .ts-status-arrow { opacity: 1; }
     .ts-status-text {
       background: linear-gradient(
         90deg,
@@ -1511,12 +1513,14 @@
     arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
     wrap.appendChild(textEl);
     wrap.appendChild(arrowEl);
+    wrap.style.cursor = 'pointer';
     aiRow.appendChild(wrap);
     scrollBottom();
 
-    // Build log for later reveal
+    // Build log — accessible during processing and after
     const logWrap = document.createElement('div');
     logWrap.className = 'ts-status-log';
+    wrap.onclick = () => logWrap.classList.toggle('open');
     const logInner = document.createElement('div');
     logInner.className = 'ts-status-log-inner';
     const ghostPrefix = 'dlog-' + Date.now();
