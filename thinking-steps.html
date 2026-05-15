@@ -512,7 +512,7 @@
     .ts-status-log-inner { overflow: hidden; }
     .ts-status-log.open { max-height: 600px; }
 
-    /* ── Perplexity-style step rows ── */
+    /* ── Step rows (non-search) ── */
     .ts-detail-step { display: flex; flex-direction: column; }
 
     .ts-detail-step-row {
@@ -534,7 +534,6 @@
     }
     .ts-detail-step-row.open .ts-detail-step-chevron { transform: rotate(90deg); }
 
-    /* Expanded content */
     .ts-detail-expand {
       overflow: hidden; max-height: 0;
       transition: max-height .25s ease, opacity .2s ease;
@@ -543,15 +542,40 @@
     .ts-detail-expand.open { max-height: 400px; opacity: 1; }
     .ts-detail-expand-inner { display: flex; flex-direction: column; gap: 1px; padding: 4px 0 10px; }
 
-    /* Sub-query rows */
+    /* ── Figma-style search section ── */
+    .ts-search-section { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 12px; }
+    .ts-search-query-header {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; color: var(--text-tertiary);
+    }
+    .ts-search-query-header svg { width: 14px; height: 14px; flex-shrink: 0; opacity: .6; }
+    .ts-search-query-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-search-query-count { font-size: 12px; opacity: .5; flex-shrink: 0; }
+
+    .ts-search-results-box {
+      border: 1px solid hsl(240 4% 22%);
+      border-radius: 7px; overflow: hidden;
+    }
+    .ts-search-result-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; font-size: 12px; color: var(--text-tertiary);
+      border-bottom: 1px solid hsl(240 4% 18%);
+    }
+    .ts-search-result-row:last-child { border-bottom: none; }
+    .ts-search-result-favicon {
+      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
+      object-fit: contain;
+    }
+    .ts-search-result-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-search-result-domain { font-size: 11px; opacity: .45; flex-shrink: 0; margin-left: 6px; }
+
+    /* Sub-query rows (non-search steps) */
     .ts-sub-query {
       display: flex; align-items: center; gap: 8px;
       padding: 3px 0; font-size: 13px; color: var(--text-tertiary);
     }
     .ts-sub-query-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: .5; }
     .ts-sub-query-icon svg { width: 14px; height: 14px; }
-
-    /* Result rows */
     .ts-sub-result {
       display: flex; align-items: center; gap: 8px;
       padding: 3px 0; font-size: 13px; color: var(--text-tertiary);
@@ -1903,54 +1927,74 @@
   let detailStepIdx = 0;
 
   function makeDetailStep(step) {
-    const idx = detailStepIdx++;
+    detailStepIdx++;
     const el = document.createElement('div');
     el.className = 'ts-detail-step';
 
-    const row = document.createElement('div');
-    row.className = 'ts-detail-step-row';
-    row.innerHTML = `
-      <div class="ts-detail-step-icon">${stepSvgIcon(step)}</div>
-      <span class="ts-detail-step-label">${step.label}</span>
-      <svg class="ts-detail-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    if (step.icon === '🔍') {
+      // Figma-style: query header + bordered results box, auto-expanded
+      const query = extractQueries(step)[0] || step.label;
+      const results = generateResults(step);
+      const section = document.createElement('div');
+      section.className = 'ts-search-section';
 
-    const expand = document.createElement('div');
-    expand.className = 'ts-detail-expand';
-    const inner = document.createElement('div');
-    inner.className = 'ts-detail-expand-inner';
+      const header = document.createElement('div');
+      header.className = 'ts-search-query-header';
+      header.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="ts-search-query-text">${query}</span>
+        <span class="ts-search-query-count">${results.length} results</span>`;
 
-    const queries = extractQueries(step);
-    const results = generateResults(step);
+      const box = document.createElement('div');
+      box.className = 'ts-search-results-box';
 
-    queries.forEach(q => {
-      const qrow = document.createElement('div');
-      qrow.className = 'ts-sub-query';
-      qrow.innerHTML = `<div class="ts-sub-query-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>${q}`;
-      inner.appendChild(qrow);
-    });
+      results.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'ts-search-result-row';
+        row.innerHTML = `<img class="ts-search-result-favicon" src="https://www.google.com/s2/favicons?domain=${r.domain}&sz=32" alt="" /><span class="ts-search-result-title">${r.title}</span><span class="ts-search-result-domain">${r.domain}</span>`;
+        box.appendChild(row);
+      });
 
-    results.slice(0, 3).forEach(r => {
-      const rrow = document.createElement('div');
-      rrow.className = 'ts-sub-result';
-      rrow.innerHTML = `<div class="ts-sub-favicon" style="background:${r.color}">${r.letter}</div><span class="ts-sub-result-title">${r.title}</span><span class="ts-sub-result-domain">${r.domain}</span>`;
-      inner.appendChild(rrow);
-    });
+      section.appendChild(header);
+      section.appendChild(box);
+      el.appendChild(section);
+    } else {
+      // Non-search: clickable row with chevron expand
+      const row = document.createElement('div');
+      row.className = 'ts-detail-step-row';
+      row.innerHTML = `
+        <div class="ts-detail-step-icon">${stepSvgIcon(step)}</div>
+        <span class="ts-detail-step-label">${step.label}</span>
+        <svg class="ts-detail-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
 
-    if (results.length > 3) {
-      const more = document.createElement('div');
-      more.className = 'ts-sub-more';
-      more.textContent = `+${results.length - 3} more`;
-      inner.appendChild(more);
+      const expand = document.createElement('div');
+      expand.className = 'ts-detail-expand';
+      const inner = document.createElement('div');
+      inner.className = 'ts-detail-expand-inner';
+
+      const results = generateResults(step);
+      results.slice(0, 3).forEach(r => {
+        const rrow = document.createElement('div');
+        rrow.className = 'ts-sub-result';
+        rrow.innerHTML = `<div class="ts-sub-favicon" style="background:${r.color}">${r.letter}</div><span class="ts-sub-result-title">${r.title}</span><span class="ts-sub-result-domain">${r.domain}</span>`;
+        inner.appendChild(rrow);
+      });
+      if (results.length > 3) {
+        const more = document.createElement('div');
+        more.className = 'ts-sub-more';
+        more.textContent = `+${results.length - 3} more`;
+        inner.appendChild(more);
+      }
+
+      expand.appendChild(inner);
+      el.appendChild(row);
+      el.appendChild(expand);
+
+      row.onclick = () => {
+        const isOpen = expand.classList.toggle('open');
+        row.classList.toggle('open', isOpen);
+      };
     }
-
-    expand.appendChild(inner);
-    el.appendChild(row);
-    el.appendChild(expand);
-
-    row.onclick = () => {
-      const isOpen = expand.classList.toggle('open');
-      row.classList.toggle('open', isOpen);
-    };
 
     return el;
   }
@@ -1980,6 +2024,10 @@
       { title: 'Facebook Ad CTR Benchmarks by Industry', domain: 'wordstream.com', color: '#ff6900', letter: 'W' },
       { title: 'Q1 2025 Paid Social Report — Full Breakdown', domain: 'databox.com', color: '#6c5ce7', letter: 'D' },
       { title: 'Meta Advertising Cost & ROI Data 2025', domain: 'sproutsocial.com', color: '#59c36a', letter: 'S' },
+      { title: 'Average CPM on Facebook Ads — 2025 Study', domain: 'adespresso.com', color: '#0057e7', letter: 'A' },
+      { title: 'Facebook vs Google Ads: Which Drives Better ROI?', domain: 'searchengineland.com', color: '#ff4136', letter: 'S' },
+      { title: 'Top Meta Ad Formats for eCommerce in 2025', domain: 'shopify.com', color: '#96bf48', letter: 'S' },
+      { title: 'Meta Business Suite Ads Manager Update Guide', domain: 'business.facebook.com', color: '#1877f2', letter: 'M' },
     ],
     '📄': [
       { title: 'Full Article: Ad Format Breakdown by Vertical', domain: 'marketingland.com', color: '#1877f2', letter: 'M' },
