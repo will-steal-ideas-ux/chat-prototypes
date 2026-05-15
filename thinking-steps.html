@@ -487,8 +487,8 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: text-shimmer 1.8s linear infinite;
-      transition: opacity .18s ease;
+      animation: text-shimmer 3.2s linear infinite;
+      transition: opacity .35s ease;
     }
     @keyframes text-shimmer {
       0%   { background-position: 100% 0; }
@@ -498,13 +498,13 @@
     .ts-status-arrow {
       display: flex; align-items: center;
       color: hsl(240 4% 72%);
-      animation: arrow-nudge 1.8s ease infinite;
+      animation: arrow-nudge 2.8s ease infinite;
       flex-shrink: 0;
     }
     .ts-status-arrow svg { width: 14px; height: 14px; }
     @keyframes arrow-nudge {
-      0%,100% { transform: translateX(0); opacity: .5; }
-      50%      { transform: translateX(3px); opacity: 1; }
+      0%,100% { transform: translateX(0); opacity: .4; }
+      50%      { transform: translateX(4px); opacity: .9; }
     }
     .ts-status-done {
       display: inline-flex; align-items: center; gap: 5px;
@@ -1508,7 +1508,7 @@
     textEl.className = 'ts-status-text';
     const arrowEl = document.createElement('span');
     arrowEl.className = 'ts-status-arrow';
-    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
     wrap.appendChild(textEl);
     wrap.appendChild(arrowEl);
     aiRow.appendChild(wrap);
@@ -1538,7 +1538,7 @@
         textEl.textContent = newText;
         textEl.classList.remove('fade');
         if (cb) setTimeout(cb, 60);
-      }, 180);
+      }, 350);
     }
 
     let i = 0;
