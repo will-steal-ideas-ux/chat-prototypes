@@ -1050,10 +1050,10 @@
       <!-- Variant tabs -->
       <div class="variant-strip">
         <span class="variant-label">Variant:</span>
-        <button class="variant-tab active" onclick="switchVariant('a', this)">A — Pill Stream</button>
+        <button class="variant-tab active" onclick="switchVariant('d', this)">D — Status Line</button>
+        <button class="variant-tab" onclick="switchVariant('a', this)">A — Pill Stream</button>
         <button class="variant-tab" onclick="switchVariant('b', this)">B — Activity Log</button>
         <button class="variant-tab" onclick="switchVariant('c', this)">C — Ghost Cards</button>
-        <button class="variant-tab" onclick="switchVariant('d', this)">D — Status Line</button>
         <button class="variant-tab" onclick="switchVariant('e', this)">E — Timeline Rail</button>
         <button class="variant-tab" onclick="switchVariant('f', this)">F — Source Chips</button>
         <button class="variant-tab" onclick="switchVariant('g', this)">G — Receipt Card</button>
@@ -1128,7 +1128,7 @@
 
 <script>
   // ─── State ───────────────────────────────────────────────────
-  let currentVariant = 'a';
+  let currentVariant = 'd';
   let currentScenario = 'search';
 
   const SCENARIOS = {
@@ -1449,24 +1449,25 @@
     addCard();
   }
 
-  function makeGhostCard(step, idx) {
+  function makeGhostCard(step, idx, prefix) {
+    const pfx = prefix || 'ghost';
     const methodCls = step.method === 'GET' ? 'get' : step.method === 'POST' ? 'post' : 'tool';
     const dur = step.dur ? `<span class="ts-ghost-card-dur">${step.dur}</span>` : `<span class="ts-ghost-card-dur" style="color:var(--brand-purple)">running…</span>`;
 
     const card = document.createElement('div');
     card.className = 'ts-ghost-card animate-in';
-    card.id = `ghost-card-${idx}`;
+    card.id = `${pfx}-card-${idx}`;
     card.innerHTML = `
       <span class="ts-ghost-card-icon">${step.icon}</span>
       <span class="ts-ghost-card-label">${step.label}</span>
       ${dur}
       <span class="ts-ghost-card-method ${methodCls}">${step.method}</span>
       <svg class="ts-ghost-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    card.onclick = () => toggleGhost(idx);
+    card.onclick = () => toggleGhost(idx, pfx);
 
     const detail = document.createElement('div');
     detail.className = 'ts-ghost-detail';
-    detail.id = `ghost-detail-${idx}`;
+    detail.id = `${pfx}-detail-${idx}`;
     detail.innerHTML = `
       <div class="ts-ghost-detail-inner">
         <div class="ts-ghost-io-row">
@@ -1482,9 +1483,10 @@
     return { card, detail };
   }
 
-  function toggleGhost(idx) {
-    const card = document.getElementById(`ghost-card-${idx}`);
-    const detail = document.getElementById(`ghost-detail-${idx}`);
+  function toggleGhost(idx, prefix) {
+    const pfx = prefix || 'ghost';
+    const card = document.getElementById(`${pfx}-card-${idx}`);
+    const detail = document.getElementById(`${pfx}-detail-${idx}`);
     if (!card || !detail) return;
     const open = detail.classList.toggle('open');
     card.classList.toggle('expanded', open);
@@ -1517,15 +1519,11 @@
     logWrap.className = 'ts-status-log';
     const logInner = document.createElement('div');
     logInner.className = 'ts-status-log-inner';
-    sc.steps.forEach(step => {
-      const row = document.createElement('div');
-      row.className = 'ts-status-log-row';
-      row.innerHTML = `
-        <svg class="ts-status-log-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span class="ts-status-log-icon">${step.icon}</span>
-        <span class="ts-status-log-label">${step.label}</span>
-        ${step.dur ? `<span class="ts-status-log-dur">${step.dur}</span>` : ''}`;
-      logInner.appendChild(row);
+    const ghostPrefix = 'dlog-' + Date.now();
+    sc.steps.forEach((step, idx) => {
+      const { card, detail } = makeGhostCard(step, idx, ghostPrefix);
+      logInner.appendChild(card);
+      logInner.appendChild(detail);
     });
     logWrap.appendChild(logInner);
     aiRow.appendChild(logWrap);
