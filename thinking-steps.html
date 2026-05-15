@@ -559,14 +559,14 @@
     .ts-search-results-box::-webkit-scrollbar-track { background: transparent; }
     .ts-search-results-box::-webkit-scrollbar-thumb { background: hsl(240 4% 28%); border-radius: 2px; }
     .ts-search-result-row {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: flex-start; gap: 8px;
       padding: 10px 14px; font-size: 12px; color: var(--text-tertiary);
     }
     .ts-search-result-favicon {
       width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
       object-fit: contain;
     }
-    .ts-search-result-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-search-result-title { flex: 1; }
     .ts-search-result-domain { font-size: 11px; opacity: .45; flex-shrink: 0; margin-left: 6px; }
 
     /* Sub-query rows (non-search steps) */
