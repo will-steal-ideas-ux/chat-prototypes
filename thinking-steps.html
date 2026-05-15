@@ -512,35 +512,34 @@
     .ts-status-log-inner { overflow: hidden; }
     .ts-status-log.open { max-height: 600px; }
 
-    /* ── Step rows (non-search) ── */
-    .ts-detail-step { display: flex; flex-direction: column; }
-
-    .ts-detail-step-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 5px 0; cursor: pointer;
-      font-size: 13px; color: var(--text-tertiary);
-      user-select: none;
+    /* ── Step rows ── */
+    @keyframes step-fade-in {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .ts-detail-step-row:hover .ts-detail-step-label { color: var(--text-secondary); }
+    .ts-detail-step {
+      display: flex; flex-direction: column;
+      animation: step-fade-in .3s ease forwards;
+    }
+
+    .ts-detail-step-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 5px 0; font-size: 13px; color: var(--text-tertiary);
+    }
     .ts-detail-step-icon {
       width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; color: var(--text-tertiary); opacity: .7;
     }
     .ts-detail-step-icon svg { width: 14px; height: 14px; }
     .ts-detail-step-label { flex: 1; font-size: 13px; color: var(--text-tertiary); line-height: 20px; }
-    .ts-detail-step-chevron {
-      width: 14px; height: 14px; color: var(--text-tertiary); opacity: .5; flex-shrink: 0;
-      transition: transform .2s ease;
-    }
-    .ts-detail-step-row.open .ts-detail-step-chevron { transform: rotate(90deg); }
 
-    .ts-detail-expand {
-      overflow: hidden; max-height: 0;
-      transition: max-height .25s ease, opacity .2s ease;
-      opacity: 0; margin-left: 28px;
+    .ts-detail-step-body {
+      margin-left: 28px; padding: 1px 0 8px;
+      display: flex; flex-direction: column; gap: 2px;
     }
-    .ts-detail-expand.open { max-height: 400px; opacity: 1; }
-    .ts-detail-expand-inner { display: flex; flex-direction: column; gap: 1px; padding: 4px 0 10px; }
+    .ts-detail-step-body-line {
+      font-size: 12px; color: var(--text-tertiary); opacity: .55; line-height: 18px;
+    }
 
     /* ── Figma-style search section ── */
     .ts-search-section { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 12px; }
@@ -1535,9 +1534,6 @@
     };
     const logInner = document.createElement('div');
     logInner.className = 'ts-status-log-inner';
-    sc.steps.forEach(step => {
-      logInner.appendChild(makeDetailStep(step));
-    });
     logWrap.appendChild(logInner);
     aiRow.appendChild(logWrap);
 
@@ -1572,11 +1568,13 @@
         return;
       }
       const step = sc.steps[i];
+      logInner.appendChild(makeDetailStep(step));
       morphText(stepCategory(step), () => { scrollBottom(); });
       i++;
       const delay = step.dur ? parseFloat(step.dur) * 3000 + 2500 : 5000;
       setTimeout(runStep, delay);
     }
+    logInner.appendChild(makeDetailStep(sc.steps[0]));
     morphText(stepCategory(sc.steps[0]));
     i = 1;
     const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 3000 + 2500 : 5000;
@@ -1963,41 +1961,24 @@
       section.appendChild(box);
       el.appendChild(section);
     } else {
-      // Non-search: clickable row with chevron expand
-      const row = document.createElement('div');
-      row.className = 'ts-detail-step-row';
-      row.innerHTML = `
-        <div class="ts-detail-step-icon">${stepSvgIcon(step)}</div>
-        <span class="ts-detail-step-label">${step.label}</span>
-        <svg class="ts-detail-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+      // Non-search: flat header + body, no chevron
+      const header = document.createElement('div');
+      header.className = 'ts-detail-step-header';
+      header.innerHTML = `<div class="ts-detail-step-icon">${stepSvgIcon(step)}</div><span class="ts-detail-step-label">${step.label}</span>`;
+      el.appendChild(header);
 
-      const expand = document.createElement('div');
-      expand.className = 'ts-detail-expand';
-      const inner = document.createElement('div');
-      inner.className = 'ts-detail-expand-inner';
-
-      const results = generateResults(step);
-      results.slice(0, 3).forEach(r => {
-        const rrow = document.createElement('div');
-        rrow.className = 'ts-sub-result';
-        rrow.innerHTML = `<div class="ts-sub-favicon" style="background:${r.color}">${r.letter}</div><span class="ts-sub-result-title">${r.title}</span><span class="ts-sub-result-domain">${r.domain}</span>`;
-        inner.appendChild(rrow);
-      });
-      if (results.length > 3) {
-        const more = document.createElement('div');
-        more.className = 'ts-sub-more';
-        more.textContent = `+${results.length - 3} more`;
-        inner.appendChild(more);
+      if (step.detail) {
+        const body = document.createElement('div');
+        body.className = 'ts-detail-step-body';
+        step.detail.split('\n').forEach(line => {
+          if (!line.trim()) return;
+          const lineEl = document.createElement('div');
+          lineEl.className = 'ts-detail-step-body-line';
+          lineEl.textContent = line;
+          body.appendChild(lineEl);
+        });
+        el.appendChild(body);
       }
-
-      expand.appendChild(inner);
-      el.appendChild(row);
-      el.appendChild(expand);
-
-      row.onclick = () => {
-        const isOpen = expand.classList.toggle('open');
-        row.classList.toggle('open', isOpen);
-      };
     }
 
     return el;
