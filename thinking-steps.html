@@ -510,30 +510,64 @@
     }
     .ts-status-log.open { max-height: 300px; opacity: 1; margin-top: 8px; }
     .ts-status-log-inner { overflow: hidden; }
-    /* Detail step rows (inside D expanded log) */
-    .ts-detail-step {
-      padding: 8px 0;
-      display: flex; flex-direction: column; gap: 6px;
+    .ts-status-log.open { max-height: 600px; }
+
+    /* ── Perplexity-style step rows ── */
+    .ts-detail-step { display: flex; flex-direction: column; }
+
+    .ts-detail-step-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 5px 0; cursor: pointer;
+      font-size: 13px; color: var(--text-tertiary);
+      user-select: none;
     }
-    .ts-detail-reasoning {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 13px; line-height: 20px; color: var(--text-tertiary);
+    .ts-detail-step-row:hover .ts-detail-step-label { color: var(--text-secondary); }
+    .ts-detail-step-icon {
+      width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--text-tertiary); opacity: .7;
     }
-    .ts-detail-reasoning-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; opacity: .5; }
-    .ts-detail-query-row {
+    .ts-detail-step-icon svg { width: 14px; height: 14px; }
+    .ts-detail-step-label { flex: 1; font-size: 13px; color: var(--text-tertiary); line-height: 20px; }
+    .ts-detail-step-chevron {
+      width: 14px; height: 14px; color: var(--text-tertiary); opacity: .5; flex-shrink: 0;
+      transition: transform .2s ease;
+    }
+    .ts-detail-step-row.open .ts-detail-step-chevron { transform: rotate(90deg); }
+
+    /* Expanded content */
+    .ts-detail-expand {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 0; margin-left: 28px;
+    }
+    .ts-detail-expand.open { max-height: 400px; opacity: 1; }
+    .ts-detail-expand-inner { display: flex; flex-direction: column; gap: 1px; padding: 4px 0 10px; }
+
+    /* Sub-query rows */
+    .ts-sub-query {
       display: flex; align-items: center; gap: 8px;
-      margin-left: 23px;
+      padding: 3px 0; font-size: 13px; color: var(--text-tertiary);
     }
-    .ts-detail-query-icon { font-size: 13px; flex-shrink: 0; }
-    .ts-detail-query-label { flex: 1; font-size: 13px; font-weight: 400; color: var(--text-tertiary); }
-    .ts-detail-result-count { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; }
-    .ts-detail-results { margin-left: 23px; display: flex; flex-direction: column; gap: 3px; }
-    .ts-detail-result-row {
+    .ts-sub-query-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: .5; }
+    .ts-sub-query-icon svg { width: 14px; height: 14px; }
+
+    /* Result rows */
+    .ts-sub-result {
       display: flex; align-items: center; gap: 8px;
-      font-size: 12px; color: var(--text-tertiary); line-height: 18px;
+      padding: 3px 0; font-size: 13px; color: var(--text-tertiary);
     }
-    .ts-detail-result-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-tertiary); opacity: .4; flex-shrink: 0; }
-    .ts-detail-result-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-tertiary); }
+    .ts-sub-favicon {
+      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff; letter-spacing: 0;
+    }
+    .ts-sub-result-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-sub-result-domain { font-size: 12px; color: var(--text-tertiary); opacity: .6; flex-shrink: 0; }
+    .ts-sub-more {
+      font-size: 12px; color: var(--text-tertiary); opacity: .6;
+      padding: 4px 0 0; cursor: pointer;
+    }
+    .ts-sub-more:hover { opacity: 1; }
 
 
     /* ════════════════════════════════════════════════════════════
@@ -1866,43 +1900,116 @@
     setTimeout(next, firstDelay);
   }
 
+  let detailStepIdx = 0;
+
   function makeDetailStep(step) {
+    const idx = detailStepIdx++;
     const el = document.createElement('div');
     el.className = 'ts-detail-step';
 
-    // Reasoning line
-    const reasoning = stepReasoning(step);
-    const reasoningRow = document.createElement('div');
-    reasoningRow.className = 'ts-detail-reasoning';
-    reasoningRow.innerHTML = `<span class="ts-detail-reasoning-icon">↻</span>${reasoning}`;
-    el.appendChild(reasoningRow);
+    const row = document.createElement('div');
+    row.className = 'ts-detail-step-row';
+    row.innerHTML = `
+      <div class="ts-detail-step-icon">${stepSvgIcon(step)}</div>
+      <span class="ts-detail-step-label">${step.label}</span>
+      <svg class="ts-detail-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
 
-    // Query / tool row
-    const queryRow = document.createElement('div');
-    queryRow.className = 'ts-detail-query-row';
-    const resultCount = step.detail.match(/(\d+)\s+results?/i);
-    const count = resultCount ? resultCount[1] + ' results' : (step.dur || '');
-    queryRow.innerHTML = `
-      <span class="ts-detail-query-icon">${step.icon}</span>
-      <span class="ts-detail-query-label">${step.label}</span>
-      <span class="ts-detail-result-count">${count}</span>`;
-    el.appendChild(queryRow);
+    const expand = document.createElement('div');
+    expand.className = 'ts-detail-expand';
+    const inner = document.createElement('div');
+    inner.className = 'ts-detail-expand-inner';
 
-    // Result rows (parsed from detail)
-    const detailLines = step.detail.split('\n').filter(l => l.trim());
-    if (detailLines.length > 1) {
-      const resultsRow = document.createElement('div');
-      resultsRow.className = 'ts-detail-results';
-      detailLines.slice(1, 4).forEach(line => {
-        const row = document.createElement('div');
-        row.className = 'ts-detail-result-row';
-        row.innerHTML = `<div class="ts-detail-result-dot"></div><span class="ts-detail-result-title">${line}</span>`;
-        resultsRow.appendChild(row);
-      });
-      el.appendChild(resultsRow);
+    const queries = extractQueries(step);
+    const results = generateResults(step);
+
+    queries.forEach(q => {
+      const qrow = document.createElement('div');
+      qrow.className = 'ts-sub-query';
+      qrow.innerHTML = `<div class="ts-sub-query-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>${q}`;
+      inner.appendChild(qrow);
+    });
+
+    results.slice(0, 3).forEach(r => {
+      const rrow = document.createElement('div');
+      rrow.className = 'ts-sub-result';
+      rrow.innerHTML = `<div class="ts-sub-favicon" style="background:${r.color}">${r.letter}</div><span class="ts-sub-result-title">${r.title}</span><span class="ts-sub-result-domain">${r.domain}</span>`;
+      inner.appendChild(rrow);
+    });
+
+    if (results.length > 3) {
+      const more = document.createElement('div');
+      more.className = 'ts-sub-more';
+      more.textContent = `+${results.length - 3} more`;
+      inner.appendChild(more);
     }
 
+    expand.appendChild(inner);
+    el.appendChild(row);
+    el.appendChild(expand);
+
+    row.onclick = () => {
+      const isOpen = expand.classList.toggle('open');
+      row.classList.toggle('open', isOpen);
+    };
+
     return el;
+  }
+
+  function stepSvgIcon(step) {
+    if (step.icon === '🔍') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`;
+    if (step.icon === '📄') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    if (step.icon === '🔑') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`;
+    if (step.icon === '📊') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
+    if (step.icon === '💰') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
+    if (step.icon === '✍️' || step.icon === '📝') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>`;
+  }
+
+  function extractQueries(step) {
+    const matches = step.label.match(/"([^"]+)"/g);
+    if (matches) return matches.map(m => m.replace(/"/g, ''));
+    if (step.icon === '🔍') return [step.label.replace(/^Searched\s*/i, '').replace(/^"(.*)"$/, '$1')];
+    if (step.icon === '📄') return [step.label.replace(/^Read\s*/i, '')];
+    return [step.label];
+  }
+
+  const FAKE_RESULTS = {
+    '🔍': [
+      { title: 'Meta Ads Performance Benchmarks Q1 2025', domain: 'marketingland.com', color: '#1877f2', letter: 'M' },
+      { title: 'Reels vs Stories: Which Ad Format Wins in 2025?', domain: 'socialmediatoday.com', color: '#e4405f', letter: 'S' },
+      { title: 'Facebook Ad CTR Benchmarks by Industry', domain: 'wordstream.com', color: '#ff6900', letter: 'W' },
+      { title: 'Q1 2025 Paid Social Report — Full Breakdown', domain: 'databox.com', color: '#6c5ce7', letter: 'D' },
+      { title: 'Meta Advertising Cost & ROI Data 2025', domain: 'sproutsocial.com', color: '#59c36a', letter: 'S' },
+    ],
+    '📄': [
+      { title: 'Full Article: Ad Format Breakdown by Vertical', domain: 'marketingland.com', color: '#1877f2', letter: 'M' },
+      { title: 'Carousel vs Single Image: Conversion Data', domain: 'socialmediatoday.com', color: '#e4405f', letter: 'S' },
+    ],
+    '🔑': [
+      { title: 'OAuth2 token refreshed — scope: adwords.readonly', domain: 'accounts.google.com', color: '#4285f4', letter: 'G' },
+      { title: 'Meta Business token valid — expires in 59d', domain: 'graph.facebook.com', color: '#1877f2', letter: 'M' },
+    ],
+    '📊': [
+      { title: '14 campaigns returned across 3 accounts', domain: 'ads.google.com', color: '#4285f4', letter: 'G' },
+      { title: 'Performance data: 90-day window, all metrics', domain: 'ads.google.com', color: '#34a853', letter: 'G' },
+      { title: '142 active ads, 28 ad sets fetched', domain: 'ads.google.com', color: '#fbbc05', letter: 'G' },
+    ],
+    '💰': [
+      { title: 'Summer Sale — Search: $4,820 / $5,000 (96%)', domain: 'google ads', color: '#ea4335', letter: 'G' },
+      { title: 'Brand Keywords — EU: $2,100 / $2,200 (95%)', domain: 'google ads', color: '#ea4335', letter: 'G' },
+      { title: 'Retargeting — Mobile: $890 / $900 (99%)', domain: 'google ads', color: '#fbbc05', letter: 'G' },
+      { title: 'Display Prospecting: $1,200 / $3,000 (40%)', domain: 'google ads', color: '#34a853', letter: 'G' },
+    ],
+    '📝': [
+      { title: '18 recommendations drafted across 3 priority tiers', domain: 'nexos ai', color: '#7c3aed', letter: 'N' },
+    ],
+    '✍️': [
+      { title: 'Positioning brief: 4 sections drafted', domain: 'nexos ai', color: '#7c3aed', letter: 'N' },
+    ],
+  };
+
+  function generateResults(step) {
+    return FAKE_RESULTS[step.icon] || [];
   }
 
   function stepCategory(step) {
@@ -1913,16 +2020,6 @@
     if (step.icon === '💰') return 'Checking budgets';
     if (step.icon === '✍️' || step.icon === '📝') return 'Writing response';
     return 'Working';
-  }
-
-  function stepReasoning(step) {
-    if (step.icon === '🔍') return 'Let me search for this to find the most relevant and up-to-date information.';
-    if (step.icon === '📄') return 'Found a relevant article — let me read through it for the key details.';
-    if (step.icon === '🔑') return 'Connecting to the API to get access to your data.';
-    if (step.icon === '📊') return 'Fetching your campaign data from the platform.';
-    if (step.icon === '💰') return 'Checking current spend against your budget limits.';
-    if (step.icon === '✍️' || step.icon === '📝') return 'I have enough information — let me put this together now.';
-    return 'Processing this step.';
   }
 
   function buildDoneSummary(sc) {
