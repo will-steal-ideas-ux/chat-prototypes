@@ -523,7 +523,7 @@
     }
 
     .ts-detail-step-header {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: flex-start; gap: 10px;
       padding: 5px 0; font-size: 13px; color: var(--text-tertiary);
     }
     .ts-detail-step-icon {
@@ -544,11 +544,11 @@
     /* ── Figma-style search section ── */
     .ts-search-section { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 12px; }
     .ts-search-query-header {
-      display: flex; align-items: center; gap: 7px;
+      display: flex; align-items: flex-start; gap: 7px;
       font-size: 13px; color: var(--text-tertiary);
     }
     .ts-search-query-header svg { width: 14px; height: 14px; flex-shrink: 0; opacity: .6; }
-    .ts-search-query-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-search-query-text { flex: 1; }
     .ts-search-query-count { font-size: 12px; opacity: .5; flex-shrink: 0; }
 
     .ts-search-results-box {
