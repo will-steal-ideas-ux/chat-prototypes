@@ -540,6 +540,9 @@
     .ts-detail-step-body-line {
       font-size: 12px; color: var(--text-tertiary); opacity: .55; line-height: 18px;
     }
+    .ts-detail-step-body-sublabel {
+      opacity: .75; font-weight: 500; margin-top: 6px;
+    }
 
     /* ── Figma-style search section ── */
     .ts-search-section { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 12px; }
@@ -1588,13 +1591,13 @@
         return;
       }
       const step = sc.steps[i];
-      logInner.appendChild(makeDetailStep(step));
+      appendDetailStep(step, logInner);
       morphText(stepCategory(step), () => { scrollBottom(); });
       i++;
       const delay = step.dur ? parseFloat(step.dur) * 3000 + 2500 : 5000;
       setTimeout(runStep, delay);
     }
-    logInner.appendChild(makeDetailStep(sc.steps[0]));
+    appendDetailStep(sc.steps[0], logInner);
     morphText(stepCategory(sc.steps[0]));
     i = 1;
     const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 3000 + 2500 : 5000;
@@ -1948,10 +1951,41 @@
 
   let detailStepIdx = 0;
 
+  function appendDetailStep(step, logInner) {
+    // Group consecutive non-search steps with the same icon
+    if (step.icon !== '🔍') {
+      const last = logInner.lastElementChild;
+      if (last && last.dataset.icon === step.icon) {
+        let body = last.querySelector('.ts-detail-step-body');
+        if (!body) {
+          body = document.createElement('div');
+          body.className = 'ts-detail-step-body';
+          last.appendChild(body);
+        }
+        const sublabel = document.createElement('div');
+        sublabel.className = 'ts-detail-step-body-line ts-detail-step-body-sublabel';
+        sublabel.textContent = step.label;
+        body.appendChild(sublabel);
+        if (step.detail) {
+          step.detail.split('\n').forEach(line => {
+            if (!line.trim()) return;
+            const lineEl = document.createElement('div');
+            lineEl.className = 'ts-detail-step-body-line';
+            lineEl.textContent = line;
+            body.appendChild(lineEl);
+          });
+        }
+        return;
+      }
+    }
+    appendDetailStep(step, logInner);
+  }
+
   function makeDetailStep(step) {
     detailStepIdx++;
     const el = document.createElement('div');
     el.className = 'ts-detail-step';
+    el.dataset.icon = step.icon;
 
     if (step.icon === '🔍') {
       // Figma-style: query header + bordered results box, auto-expanded
