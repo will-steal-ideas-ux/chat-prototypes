@@ -125,14 +125,17 @@
     }
     .msg-row.ai { display: flex; flex-direction: column; gap: 8px; }
     .ai-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 400; color: #5a5a5b;
+      padding-bottom: 4px;
     }
     .ai-badge-icon {
-      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
+      width: 24px; height: 24px; border-radius: 9999px;
+      background: #f5f5f5;
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .ai-badge-icon svg { width: 11px; height: 11px; color: var(--text-tertiary); }
+    .ai-badge-icon svg { width: 13px; height: 13px; }
     .msg-bubble.ai { font-size: 15px; line-height: 24px; color: var(--text-primary); }
 
     /* ─── Prompt ─────────────────────────── */
@@ -2365,8 +2368,12 @@
   // ─── Shared helpers ───────────────────────────────────────────
   function badge() {
     return `<div class="ai-badge">
-      <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
-      Nexos AI · GPT-4o
+      <div class="ai-badge-icon">
+        <svg viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M37.532 16.87a9.963 9.963 0 0 0-.856-8.184 10.078 10.078 0 0 0-10.855-4.835 9.964 9.964 0 0 0-6.215-2.972 10.079 10.079 0 0 0-9.617 6.032 9.967 9.967 0 0 0-6.69 4.571 10.079 10.079 0 0 0 1.24 11.817 9.965 9.965 0 0 0 .856 8.185 10.079 10.079 0 0 0 10.855 4.835 9.965 9.965 0 0 0 6.215 2.971 10.078 10.078 0 0 0 9.617-6.032 9.967 9.967 0 0 0 6.69-4.570 10.079 10.079 0 0 0-1.24-11.818zm-14.233 19.94a7.474 7.474 0 0 1-4.801-1.73c.061-.033.168-.091.237-.134l7.964-4.6a1.294 1.294 0 0 0 .655-1.134V19.054l3.366 1.944a.12.12 0 0 1 .066.092v9.299a7.505 7.505 0 0 1-7.487 7.42zM6.392 31.006a7.471 7.471 0 0 1-.894-5.023c.06.036.162.099.237.141l7.964 4.6a1.297 1.297 0 0 0 1.308 0l9.724-5.614v3.888a.12.12 0 0 1-.048.103L16.54 33.8a7.505 7.505 0 0 1-10.148-2.794zm-2.255-16.494A7.471 7.471 0 0 1 8.03 10.96l-.001.27v9.212a1.294 1.294 0 0 0 .654 1.132l9.723 5.614-3.366 1.944a.12.12 0 0 1-.114.012L7.044 23.86a7.504 7.504 0 0 1-2.907-9.348zM31.955 20.5l-9.724-5.615 3.367-1.943a.121.121 0 0 1 .114-.012l7.882 4.546a7.5 7.5 0 0 1-1.158 13.528v-9.483a1.294 1.294 0 0 0-.481-1.02zm3.357-5.043c-.059-.037-.162-.099-.236-.141l-7.965-4.6a1.298 1.298 0 0 0-1.308 0l-9.723 5.614v-3.888a.12.12 0 0 1 .048-.103l7.943-4.586a7.504 7.504 0 0 1 11.24 7.703zm-21.063 6.929-3.367-1.944a.12.12 0 0 1-.065-.092v-9.299a7.504 7.504 0 0 1 12.303-5.756l-.236.134-7.965 4.6a1.294 1.294 0 0 0-.654 1.132l-.016 11.225zm1.829-3.943 4.33-2.501 4.332 2.5v4.999l-4.331 2.5-4.331-2.5V18.443z" fill="currentColor"/>
+        </svg>
+      </div>
+      GPT-4o mini Search Preview
     </div>`;
   }
 
