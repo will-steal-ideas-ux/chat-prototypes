@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — Thinking Steps</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 258 6% 15%;
+      --muted: 240 5% 97%;
+      --muted-foreground: 258 4% 45%;
+      --border: 240 6% 90%;
+      --primary: 252 100% 64%;
+      --accent: 252 100% 96%;
+      --radius: 0.5rem;
+
+      --bg-primary:         hsl(var(--muted));
+      --bg-secondary:       hsl(var(--background));
+      --bg-tertiary:        hsl(240 4% 50% / 0.10);
+      --border-secondary:   hsl(var(--border));
+      --text-primary:       hsl(var(--foreground));
+      --text-secondary:     hsl(300 1% 27%);
+      --text-tertiary:      hsl(var(--muted-foreground));
+      --text-placeholder:   hsl(var(--muted-foreground));
+      --brand-purple:       hsl(var(--primary));
+      --brand-purple-light: hsl(var(--accent));
+      --accent-color:       hsl(var(--primary));
+
+      --radius-xs:   calc(var(--radius) * 0.5);
+      --radius-sm:   var(--radius);
+      --radius-md:   calc(var(--radius) * 2);
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 3px hsl(252 100% 14% / 0.10), 0 1px 2px hsl(252 100% 14% / 0.05);
+      --shadow-lg: 0 8px 15px hsl(252 100% 14% / 0.06), 0 4px 7px hsl(252 100% 14% / 0.03);
+      --transition: .15s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Layout ────────────────────────── */
+    .body-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ─── Sidebar (minimal stub) ────────── */
+    .sidebar {
+      width: 264px; background: var(--bg-primary);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; overflow: hidden;
+      border-right: 1px solid var(--border-secondary);
+    }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; flex: 1;
+    }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-emblem svg { width: 14px; height: 14px; color: white; }
+    .logo-name {
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+    }
+    .logo-name sup { color: var(--accent-color); font-size: 11px; font-weight: 500; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: transparent; border: none;
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0; border-top: 1px solid var(--border-secondary);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--accent-color); cursor: pointer;
+    }
+    .sidebar-email { font-size: 13px; color: var(--text-secondary); }
+
+    /* ─── Main ───────────────────────────── */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-thread {
+      flex: 1; overflow-y: auto; padding: 40px 0 0;
+      display: flex; flex-direction: column;
+    }
+    .chat-thread::-webkit-scrollbar { width: 4px; }
+    .chat-thread::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
+    .chat-messages {
+      width: 100%; max-width: 760px; margin: 0 auto;
+      padding: 0 24px 32px; display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ─── Messages ───────────────────────── */
+    .msg-row.user { display: flex; justify-content: flex-end; }
+    .msg-bubble.user {
+      max-width: 68%; background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 16px 16px 4px 16px;
+      padding: 12px 16px; font-size: 15px; line-height: 24px;
+    }
+    .msg-row.ai { display: flex; flex-direction: column; gap: 8px; }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+    }
+    .ai-badge-icon {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-badge-icon svg { width: 11px; height: 11px; color: var(--text-tertiary); }
+    .msg-bubble.ai { font-size: 15px; line-height: 24px; color: var(--text-primary); }
+
+    /* ─── Prompt ─────────────────────────── */
+    .prompt-wrap {
+      width: 100%; max-width: 760px; padding: 0 24px 24px; margin: 0 auto;
+    }
+    .prompt-box {
+      position: relative; background: #fff;
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+    }
+    .prompt-textarea-row { padding: 14px 16px 0; }
+    .prompt-textarea {
+      width: 100%; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 15px; line-height: 24px;
+      color: var(--text-primary); background: transparent; max-height: 200px;
+    }
+    .prompt-textarea::placeholder { color: var(--text-placeholder); }
+    .prompt-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 12px;
+    }
+    .prompt-actions-left { display: flex; align-items: center; gap: 2px; }
+    .prompt-actions-right { display: flex; align-items: center; gap: 4px; }
+    .prompt-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .prompt-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .prompt-btn svg { width: 16px; height: 16px; }
+    .send-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      background: var(--brand-purple); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity var(--transition);
+    }
+    .send-btn:hover { opacity: .88; }
+    .send-btn svg { width: 16px; height: 16px; color: #fff; }
+
+    /* ─── Version switcher ─────────────────── */
+    .version-switcher {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 9999; font-family: 'Inter', sans-serif;
+    }
+    .version-trigger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(18,0,69,.08); cursor: pointer; user-select: none;
+    }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .version-trigger-desc { font-size: 12px; color: var(--text-tertiary); }
+    .version-trigger svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform var(--transition); }
+    .version-switcher.open .version-trigger svg { transform: rotate(180deg); }
+    .version-dropdown {
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 24px rgba(18,0,69,.10), 0 2px 8px rgba(18,0,69,.06);
+      padding: 4px; min-width: 200px; display: none;
+    }
+    .version-switcher.open .version-dropdown { display: block; }
+    .version-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: background var(--transition);
+    }
+    .version-option:hover { background: var(--bg-primary); }
+    .version-option.current { background: var(--bg-primary); }
+    .version-option-label { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 32px; }
+    .version-option-desc { font-size: 13px; color: var(--text-secondary); }
+    .version-option-check { margin-left: auto; width: 14px; height: 14px; color: var(--accent-color); opacity: 0; }
+    .version-option.current .version-option-check { opacity: 1; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT A — Pill Stream
+       Inspired by Perplexity. Horizontal chips, one at a time.
+       Done chips collapse; active chip pulses. Whole row
+       compresses to a single "Done" chip after completion.
+       ════════════════════════════════════════════════════════════ */
+    .ts-pill-stream {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      min-height: 32px;
+    }
+    .ts-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 28px; padding: 0 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      white-space: nowrap;
+      transition: all .25s ease;
+      overflow: hidden;
+    }
+    .ts-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .ts-pill.active {
+      background: var(--brand-purple-light);
+      border-color: hsl(252 100% 64% / .3);
+      color: var(--brand-purple);
+    }
+    .ts-pill.active .ts-pill-icon { animation: pill-spin 1.2s linear infinite; }
+    @keyframes pill-spin { to { transform: rotate(360deg); } }
+    .ts-pill.done {
+      background: var(--bg-primary);
+      border-color: var(--border-secondary);
+      color: var(--text-tertiary);
+    }
+    .ts-pill.done .ts-pill-label { display: none; }
+    .ts-pill.done { padding: 0 8px; }
+    .ts-pill.summary {
+      background: var(--bg-primary);
+      border-color: var(--border-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .ts-pill.summary:hover { border-color: var(--brand-purple); color: var(--text-primary); }
+    .ts-pill-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: hsl(142 70% 45%); flex-shrink: 0;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT B — Activity Log
+       Manus-style collapsible vertical log. Expanding reveals
+       steps with icon + label + duration. Collapses to one line.
+       ════════════════════════════════════════════════════════════ */
+    .ts-log-wrap { display: flex; flex-direction: column; gap: 0; }
+    .ts-log-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: color var(--transition); width: fit-content;
+    }
+    .ts-log-toggle:hover { color: var(--text-primary); }
+    .ts-log-toggle-icon {
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; background: var(--bg-tertiary); flex-shrink: 0;
+    }
+    .ts-log-toggle-icon svg { width: 12px; height: 12px; transition: transform .2s; }
+    .ts-log-toggle.open .ts-log-toggle-icon svg { transform: rotate(180deg); }
+    .ts-log-toggle-spinner {
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid hsl(252 100% 64% / .25);
+      border-top-color: var(--brand-purple);
+      animation: log-spin .8s linear infinite; flex-shrink: 0;
+    }
+    @keyframes log-spin { to { transform: rotate(360deg); } }
+
+    .ts-log-body {
+      overflow: hidden; max-height: 0;
+      transition: max-height .3s ease, opacity .2s ease, margin .2s ease;
+      opacity: 0; margin-top: 0;
+    }
+    .ts-log-body.open { max-height: 400px; opacity: 1; margin-top: 10px; }
+
+    .ts-log-inner {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .ts-step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-secondary);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .ts-step:last-child { border-bottom: none; }
+    .ts-step.active { background: hsl(252 100% 64% / .04); }
+    .ts-step-status { flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+    .ts-step-status-check svg { width: 14px; height: 14px; color: hsl(142 70% 45%); }
+    .ts-step-status-spin {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid hsl(252 100% 64% / .25);
+      border-top-color: var(--brand-purple);
+      animation: log-spin .8s linear infinite;
+    }
+    .ts-step-status-pending { width: 6px; height: 6px; border-radius: 50%; background: var(--border-secondary); margin: auto; }
+    .ts-step-icon { font-size: 14px; flex-shrink: 0; }
+    .ts-step-label { flex: 1; line-height: 20px; }
+    .ts-step.active .ts-step-label { color: var(--text-primary); font-weight: 500; }
+    .ts-step-dur { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; }
+    .ts-step-expand {
+      font-size: 11px; color: var(--text-tertiary); cursor: pointer;
+      padding: 2px 6px; border-radius: 4px; transition: background var(--transition), color var(--transition);
+      border: 1px solid var(--border-secondary); background: var(--bg-secondary);
+    }
+    .ts-step-expand:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+
+    .ts-step-detail {
+      overflow: hidden; max-height: 0;
+      transition: max-height .2s ease, opacity .15s ease;
+      opacity: 0;
+    }
+    .ts-step-detail.open { max-height: 120px; opacity: 1; }
+    .ts-step-detail-inner {
+      margin: 0 14px 10px 40px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: 'Inter', sans-serif; font-size: 12px;
+      color: var(--text-tertiary); line-height: 18px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT C — Ghost Cards (inline, low-weight)
+       Each tool call is a quiet separator card between messages.
+       Expands on click to show I/O.
+       ════════════════════════════════════════════════════════════ */
+    .ts-ghost {
+      width: 100%;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .ts-ghost-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed hsl(240 6% 88%);
+      background: transparent;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+      font-size: 13px; color: var(--text-tertiary);
+    }
+    .ts-ghost-card:hover {
+      background: hsl(240 4% 50% / .05);
+      border-color: hsl(240 6% 80%);
+      color: var(--text-secondary);
+    }
+    .ts-ghost-card.expanded {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      color: var(--text-secondary);
+    }
+    .ts-ghost-card-icon { font-size: 14px; flex-shrink: 0; }
+    .ts-ghost-card-label { flex: 1; font-weight: 500; }
+    .ts-ghost-card-method {
+      font-size: 11px; font-weight: 600; letter-spacing: .4px;
+      padding: 2px 6px; border-radius: 3px;
+      background: hsl(240 6% 92%); color: var(--text-tertiary);
+    }
+    .ts-ghost-card-method.get { background: hsl(142 60% 92%); color: hsl(142 60% 28%); }
+    .ts-ghost-card-method.post { background: hsl(210 80% 92%); color: hsl(210 80% 32%); }
+    .ts-ghost-card-method.tool { background: var(--brand-purple-light); color: var(--brand-purple); }
+    .ts-ghost-card-chevron { width: 14px; height: 14px; transition: transform .2s; flex-shrink: 0; }
+    .ts-ghost-card.expanded .ts-ghost-card-chevron { transform: rotate(180deg); }
+    .ts-ghost-card-dur { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; }
+
+    .ts-ghost-detail {
+      overflow: hidden; max-height: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 0;
+    }
+    .ts-ghost-detail.open { max-height: 220px; opacity: 1; }
+    .ts-ghost-detail-inner {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-secondary); border-top: none;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .ts-ghost-io-row { display: flex; flex-direction: column; gap: 4px; }
+    .ts-ghost-io-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-tertiary); }
+    .ts-ghost-io-val {
+      font-size: 12px; font-family: 'Inter', sans-serif; line-height: 18px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 6px; padding: 6px 8px;
+    }
+
+    /* Animated in */
+    @keyframes msg-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .animate-in { animation: msg-in .2s ease; }
+
+    /* Typing dots */
+    .typing-indicator { display: flex; align-items: center; gap: 4px; height: 24px; }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary);
+      animation: td .9s ease infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .15s; }
+    .typing-dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes td { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-4px);opacity:1} }
+
+    /* Scenario picker strip */
+    .scenario-strip {
+      width: 100%; max-width: 760px; margin: 0 auto;
+      padding: 0 24px 12px;
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .scenario-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; margin-right: 4px; }
+    .scenario-btn {
+      height: 28px; padding: 0 12px;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-full); background: var(--bg-secondary);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition); white-space: nowrap;
+    }
+    .scenario-btn:hover { border-color: var(--brand-purple); color: var(--brand-purple); }
+    .scenario-btn.active { background: var(--brand-purple-light); border-color: hsl(252 100% 64% / .4); color: var(--brand-purple); }
+
+    /* Variant toggle */
+    .variant-strip {
+      width: 100%; max-width: 760px; margin: 0 auto;
+      padding: 0 24px 4px;
+      display: flex; gap: 4px; align-items: center;
+    }
+    .variant-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; margin-right: 4px; }
+    .variant-tab {
+      height: 30px; padding: 0 12px;
+      border-radius: var(--radius-sm); border: none;
+      background: transparent;
+      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .variant-tab:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+    .variant-tab.active {
+      background: var(--brand-purple-light);
+      color: var(--brand-purple);
+    }
+    .variant-divider { height: 1px; background: var(--border-secondary); width: 100%; max-width: 760px; margin: 0 auto 16px; }
+  </style>
+</head>
+<body>
+<div class="body-layout">
+  <!-- Sidebar stub -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 19 8 19 16 12 22 5 16 5 8"/>
+          </svg>
+        </div>
+        <span class="logo-name">nexos<sup>AI</sup></span>
+      </a>
+      <button class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar">T</div>
+      <span class="sidebar-email">tomas@nexos.ai</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-area">
+    <div class="chat-thread" id="chat-thread">
+
+      <!-- Variant tabs -->
+      <div class="variant-strip">
+        <span class="variant-label">Variant:</span>
+        <button class="variant-tab active" onclick="switchVariant('a', this)">A — Pill Stream</button>
+        <button class="variant-tab" onclick="switchVariant('b', this)">B — Activity Log</button>
+        <button class="variant-tab" onclick="switchVariant('c', this)">C — Ghost Cards</button>
+      </div>
+      <div class="variant-divider"></div>
+
+      <!-- Scenario chips -->
+      <div class="scenario-strip">
+        <span class="scenario-label">Try a scenario:</span>
+        <button class="scenario-btn active" onclick="runScenario('search', this)">Web search</button>
+        <button class="scenario-btn" onclick="runScenario('api', this)">API call</button>
+        <button class="scenario-btn" onclick="runScenario('multi', this)">Multi-step plan</button>
+        <button class="scenario-btn" onclick="runScenario('long', this)">Long agent run</button>
+      </div>
+
+      <!-- Chat -->
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+
+    <!-- Prompt box -->
+    <div class="prompt-wrap">
+      <div class="prompt-box">
+        <div class="prompt-textarea-row">
+          <textarea class="prompt-textarea" id="prompt-input" rows="1" placeholder="Ask anything…" onkeydown="onKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <div class="prompt-actions">
+          <div class="prompt-actions-left">
+            <button class="prompt-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              History
+            </button>
+          </div>
+          <div class="prompt-actions-right">
+            <button class="send-btn" onclick="sendPrompt()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Version switcher -->
+<div class="version-switcher" id="version-switcher">
+  <div class="version-trigger" onclick="toggleVersions()">
+    <span class="version-trigger-label">Thinking Steps</span>
+    <span class="version-trigger-desc">Prototype</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+  </div>
+  <div class="version-dropdown">
+    <a class="version-option" href="v4.html">
+      <span class="version-option-label">V4</span>
+      <span class="version-option-desc">Follow-up cards</span>
+      <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </a>
+    <a class="version-option current" href="thinking-steps.html">
+      <span class="version-option-label">TS</span>
+      <span class="version-option-desc">Thinking steps</span>
+      <svg class="version-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </a>
+  </div>
+</div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────────
+  let currentVariant = 'a';
+  let currentScenario = 'search';
+
+  const SCENARIOS = {
+    search: {
+      query: 'What are the best performing ad formats on Meta in Q1 2025?',
+      steps: [
+        { icon: '🔍', label: 'Searched "Meta ad formats Q1 2025 performance"', dur: '0.4s', method: 'GET', detail: 'Query: Meta ad formats Q1 2025\nReturned 12 results from web index' },
+        { icon: '📄', label: 'Read marketingland.com/meta-ads-benchmarks', dur: '1.1s', method: 'GET', detail: 'Extracted: CTR benchmarks, CPM data, format breakdown by vertical' },
+        { icon: '📄', label: 'Read socialmediatoday.com/ad-formats-2025', dur: '0.8s', method: 'GET', detail: 'Extracted: Reels vs Stories performance comparison, carousel stats' },
+      ],
+      reply: 'Based on the latest benchmarks, **Reels ads** are outperforming static formats with an average CTR of 1.8% vs 0.9% for feed images. Carousel formats remain strong for e-commerce with a 2.3x higher conversion rate compared to single-image ads. Stories still deliver low CPMs for awareness campaigns.'
+    },
+    api: {
+      query: 'Pull my Google Ads campaigns and show me which ones are over budget',
+      steps: [
+        { icon: '🔑', label: 'Authenticated with Google Ads API', dur: '0.2s', method: 'POST', detail: 'OAuth2 token refreshed\nScope: adwords.readonly' },
+        { icon: '📊', label: 'google_ads.campaigns.list()', dur: '1.4s', method: 'TOOL', detail: 'customer_id: 123-456-7890\nReturned 14 campaigns' },
+        { icon: '💰', label: 'google_ads.budgets.get(campaign_ids)', dur: '0.9s', method: 'TOOL', detail: 'Fetched spend vs budget for all 14 campaigns\n3 campaigns flagged over 90% budget utilization' },
+      ],
+      reply: 'Found **3 campaigns over budget** (>90% utilized):\n\n1. **Summer Sale — Search** · $4,820 / $5,000 (96%)\n2. **Brand Keywords — EU** · $2,100 / $2,200 (95%)\n3. **Retargeting — Mobile** · $890 / $900 (99%)\n\nWant me to pause any of these or adjust daily caps?'
+    },
+    multi: {
+      query: 'Research competitors and write a positioning brief for our new SEO product',
+      steps: [
+        { icon: '🔍', label: 'Searched "SEO platform competitors 2025"', dur: '0.5s', method: 'GET', detail: 'Query: SEO platforms comparison 2025\nFound: Semrush, Ahrefs, Moz, Screaming Frog, Surfer SEO' },
+        { icon: '🔍', label: 'Searched "Semrush vs Ahrefs pricing features"', dur: '0.3s', method: 'GET', detail: 'Compared feature sets, pricing tiers, and market positioning' },
+        { icon: '📄', label: 'Read g2.com/categories/seo-software reviews', dur: '1.2s', method: 'GET', detail: 'Extracted top pain points from 340 reviews:\n— too expensive, steep learning curve, no AI automation' },
+        { icon: '✍️', label: 'Generating positioning brief…', dur: null, method: 'TOOL', detail: 'Writing 4-section brief: market overview, gaps, positioning, messaging' },
+      ],
+      reply: 'Here\'s your SEO positioning brief...\n\n**Market gap:** Existing tools are expensive and technical. No clear AI-native player owns the "SMB + AI" niche.\n\n**Positioning:** "The only SEO platform built for marketers, not SEOs" — emphasizes AI automation, plain-English insights, and affordable pricing starting at $29/mo.'
+    },
+    long: {
+      query: 'Audit our entire ad account and give me a full optimization plan',
+      steps: [
+        { icon: '🔑', label: 'Authenticated with Google Ads & Meta Ads', dur: '0.3s', method: 'POST', detail: 'Google Ads: OK\nMeta Business Suite: OK' },
+        { icon: '📊', label: 'Fetched 90-day performance data', dur: '2.1s', method: 'TOOL', detail: '6 campaigns, 28 ad sets, 142 ads\n90-day window, all metrics' },
+        { icon: '🔍', label: 'Analyzed keyword quality scores', dur: '1.4s', method: 'TOOL', detail: 'Average QS: 5.8 / 10\n12 keywords below QS 4 identified' },
+        { icon: '🔍', label: 'Checked audience overlap', dur: '0.9s', method: 'TOOL', detail: '3 ad set pairs with >70% audience overlap\nEstimated budget waste: $340/mo' },
+        { icon: '📝', label: 'Writing optimization recommendations', dur: '1.8s', method: 'TOOL', detail: 'Generating 18 prioritized recommendations across bidding, creative, targeting' },
+        { icon: '📄', label: 'Formatting final report', dur: '0.4s', method: 'TOOL', detail: 'Structured as: Quick wins, Medium-term, Strategic' },
+      ],
+      reply: 'Full audit complete. Found **$1,240/mo in recoverable waste** across 3 areas:\n\n**Quick wins (this week):** Pause 12 low-QS keywords, fix 3 ad sets with audience overlap.\n\n**Medium-term:** Restructure Shopping campaigns into Performance Max, refresh 8 stale creatives.\n\n**Strategic:** Test broad match + Smart Bidding on your top 3 campaigns.'
+    }
+  };
+
+  // ─── Scenario + Variant switching ────────────────────────────
+  function switchVariant(v, btn) {
+    currentVariant = v;
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    clearMessages();
+    runScenarioAuto();
+  }
+
+  function runScenario(s, btn) {
+    currentScenario = s;
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    clearMessages();
+    runScenarioAuto();
+  }
+
+  function clearMessages() {
+    document.getElementById('chat-messages').innerHTML = '';
+  }
+
+  function runScenarioAuto() {
+    const sc = SCENARIOS[currentScenario];
+    addUserMsg(sc.query);
+    setTimeout(() => startThinkingSequence(sc), 600);
+  }
+
+  function addUserMsg(text) {
+    const msgs = document.getElementById('chat-messages');
+    const el = document.createElement('div');
+    el.className = 'msg-row user animate-in';
+    el.innerHTML = `<div class="msg-bubble user">${escHtml(text)}</div>`;
+    msgs.appendChild(el);
+    scrollBottom();
+  }
+
+  // ─── Dispatch to variant builders ────────────────────────────
+  function startThinkingSequence(sc) {
+    if (currentVariant === 'a') startPillStream(sc);
+    else if (currentVariant === 'b') startActivityLog(sc);
+    else startGhostCards(sc);
+  }
+
+  // ════════════════════════════════════
+  // VARIANT A — Pill Stream
+  // ════════════════════════════════════
+  function startPillStream(sc) {
+    const msgs = document.getElementById('chat-messages');
+
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const streamWrap = document.createElement('div');
+    streamWrap.className = 'ts-pill-stream';
+    aiRow.appendChild(streamWrap);
+    scrollBottom();
+
+    let i = 0;
+    function nextPill() {
+      if (i >= sc.steps.length) {
+        // All done — collapse to summary
+        streamWrap.innerHTML = '';
+        const summary = makePill('summary', '✓', `${sc.steps.length} steps · ${totalDur(sc.steps)}`, false);
+        streamWrap.appendChild(summary);
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 300);
+        return;
+      }
+
+      const step = sc.steps[i];
+
+      // Mark previous as done (show just checkmark)
+      if (i > 0) {
+        const prev = streamWrap.querySelectorAll('.ts-pill')[i - 1];
+        if (prev) {
+          prev.classList.remove('active');
+          prev.classList.add('done');
+          prev.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="hsl(142 70% 40%)" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px"><path d="M20 6 9 17l-5-5"/></svg>`;
+        }
+      }
+
+      const pill = makePill('active', step.icon, step.label, true);
+      streamWrap.appendChild(pill);
+      scrollBottom();
+      i++;
+
+      const delay = step.dur ? parseFloat(step.dur) * 800 + 400 : 1600;
+      setTimeout(nextPill, delay);
+    }
+    nextPill();
+  }
+
+  function makePill(cls, icon, label, showLabel) {
+    const el = document.createElement('div');
+    el.className = `ts-pill ${cls}`;
+    el.innerHTML = `<span class="ts-pill-icon" style="font-size:13px;${cls==='active'?'display:inline-block':''}">${icon}</span>${showLabel ? `<span class="ts-pill-label">${label}</span>` : ''}`;
+    return el;
+  }
+
+  // ════════════════════════════════════
+  // VARIANT B — Activity Log
+  // ════════════════════════════════════
+  function startActivityLog(sc) {
+    const msgs = document.getElementById('chat-messages');
+
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    // Build the log scaffold (all steps shown upfront as pending)
+    const logWrap = document.createElement('div');
+    logWrap.className = 'ts-log-wrap';
+
+    const toggle = document.createElement('button');
+    toggle.className = 'ts-log-toggle open';
+    toggle.id = 'ts-log-toggle';
+    toggle.innerHTML = `
+      <div class="ts-log-toggle-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <span id="ts-log-summary">Working…</span>`;
+    toggle.onclick = () => {
+      toggle.classList.toggle('open');
+      body.classList.toggle('open');
+    };
+
+    const body = document.createElement('div');
+    body.className = 'ts-log-body open';
+    body.id = 'ts-log-body';
+
+    const inner = document.createElement('div');
+    inner.className = 'ts-log-inner';
+
+    sc.steps.forEach((step, idx) => {
+      const row = document.createElement('div');
+      row.className = 'ts-step';
+      row.id = `ts-step-${idx}`;
+      row.innerHTML = stepRow(step, idx === 0 ? 'active' : 'pending', idx);
+      inner.appendChild(row);
+
+      const detail = document.createElement('div');
+      detail.className = 'ts-step-detail';
+      detail.id = `ts-step-detail-${idx}`;
+      detail.innerHTML = `<div class="ts-step-detail-inner">${step.detail.replace(/\n/g,'<br>')}</div>`;
+      inner.appendChild(detail);
+    });
+
+    body.appendChild(inner);
+    logWrap.appendChild(toggle);
+    logWrap.appendChild(body);
+    aiRow.appendChild(logWrap);
+    scrollBottom();
+
+    // Animate steps
+    let i = 0;
+    function activateStep() {
+      if (i >= sc.steps.length) {
+        // Done
+        const summaryEl = document.getElementById('ts-log-summary');
+        if (summaryEl) summaryEl.textContent = `Done in ${totalDur(sc.steps)} — ${sc.steps.length} steps`;
+        // Auto-collapse after short pause
+        setTimeout(() => {
+          toggle.classList.remove('open');
+          body.classList.remove('open');
+        }, 800);
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 1200);
+        return;
+      }
+      // Mark previous done
+      if (i > 0) {
+        const prev = document.getElementById(`ts-step-${i-1}`);
+        if (prev) {
+          prev.classList.remove('active');
+          prev.innerHTML = stepRow(sc.steps[i-1], 'done', i-1);
+        }
+      }
+      // Activate current
+      const cur = document.getElementById(`ts-step-${i}`);
+      if (cur) {
+        cur.classList.add('active');
+        cur.innerHTML = stepRow(sc.steps[i], 'active', i);
+      }
+      scrollBottom();
+      i++;
+      const delay = sc.steps[i-1].dur ? parseFloat(sc.steps[i-1].dur) * 900 + 500 : 1600;
+      setTimeout(activateStep, delay);
+    }
+    activateStep();
+  }
+
+  function stepRow(step, state, idx) {
+    let statusHtml = '';
+    if (state === 'done') statusHtml = `<div class="ts-step-status ts-step-status-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>`;
+    else if (state === 'active') statusHtml = `<div class="ts-step-status"><div class="ts-step-status-spin"></div></div>`;
+    else statusHtml = `<div class="ts-step-status"><div class="ts-step-status-pending"></div></div>`;
+    const dur = step.dur ? `<span class="ts-step-dur">${step.dur}</span>` : '';
+    const expBtn = `<span class="ts-step-expand" onclick="toggleStepDetail(${idx})">details</span>`;
+    return `
+      ${statusHtml}
+      <span class="ts-step-icon">${step.icon}</span>
+      <span class="ts-step-label">${step.label}</span>
+      ${dur}
+      ${expBtn}`;
+  }
+
+  function toggleStepDetail(idx) {
+    const el = document.getElementById(`ts-step-detail-${idx}`);
+    if (el) el.classList.toggle('open');
+  }
+
+  // ════════════════════════════════════
+  // VARIANT C — Ghost Cards
+  // ════════════════════════════════════
+  function startGhostCards(sc) {
+    const msgs = document.getElementById('chat-messages');
+
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai animate-in';
+    aiRow.innerHTML = badge();
+    msgs.appendChild(aiRow);
+
+    const ghostWrap = document.createElement('div');
+    ghostWrap.className = 'ts-ghost';
+    aiRow.appendChild(ghostWrap);
+
+    let i = 0;
+    function addCard() {
+      if (i >= sc.steps.length) {
+        setTimeout(() => {
+          const msgBubble = document.createElement('div');
+          msgBubble.className = 'msg-bubble ai animate-in';
+          msgBubble.innerHTML = mdLite(sc.reply);
+          aiRow.appendChild(msgBubble);
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      const step = sc.steps[i];
+      const card = makeGhostCard(step, i);
+      ghostWrap.appendChild(card.card);
+      ghostWrap.appendChild(card.detail);
+      scrollBottom();
+      i++;
+      const delay = step.dur ? parseFloat(step.dur) * 800 + 300 : 1400;
+      setTimeout(addCard, delay);
+    }
+    addCard();
+  }
+
+  function makeGhostCard(step, idx) {
+    const methodCls = step.method === 'GET' ? 'get' : step.method === 'POST' ? 'post' : 'tool';
+    const dur = step.dur ? `<span class="ts-ghost-card-dur">${step.dur}</span>` : `<span class="ts-ghost-card-dur" style="color:var(--brand-purple)">running…</span>`;
+
+    const card = document.createElement('div');
+    card.className = 'ts-ghost-card animate-in';
+    card.id = `ghost-card-${idx}`;
+    card.innerHTML = `
+      <span class="ts-ghost-card-icon">${step.icon}</span>
+      <span class="ts-ghost-card-label">${step.label}</span>
+      ${dur}
+      <span class="ts-ghost-card-method ${methodCls}">${step.method}</span>
+      <svg class="ts-ghost-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    card.onclick = () => toggleGhost(idx);
+
+    const detail = document.createElement('div');
+    detail.className = 'ts-ghost-detail';
+    detail.id = `ghost-detail-${idx}`;
+    detail.innerHTML = `
+      <div class="ts-ghost-detail-inner">
+        <div class="ts-ghost-io-row">
+          <div class="ts-ghost-io-label">Input / Query</div>
+          <div class="ts-ghost-io-val">${step.detail.split('\n')[0]}</div>
+        </div>
+        <div class="ts-ghost-io-row">
+          <div class="ts-ghost-io-label">Result</div>
+          <div class="ts-ghost-io-val">${step.detail.split('\n').slice(1).join('<br>') || '—'}</div>
+        </div>
+      </div>`;
+
+    return { card, detail };
+  }
+
+  function toggleGhost(idx) {
+    const card = document.getElementById(`ghost-card-${idx}`);
+    const detail = document.getElementById(`ghost-detail-${idx}`);
+    if (!card || !detail) return;
+    const open = detail.classList.toggle('open');
+    card.classList.toggle('expanded', open);
+  }
+
+  // ─── Shared helpers ───────────────────────────────────────────
+  function badge() {
+    return `<div class="ai-badge">
+      <div class="ai-badge-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg></div>
+      Nexos AI · GPT-4o
+    </div>`;
+  }
+
+  function totalDur(steps) {
+    const sum = steps.reduce((acc, s) => acc + (s.dur ? parseFloat(s.dur) : 0), 0);
+    return sum.toFixed(1) + 's';
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function mdLite(s) {
+    return s
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function scrollBottom() {
+    const t = document.getElementById('chat-thread');
+    requestAnimationFrame(() => { t.scrollTop = t.scrollHeight; });
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function onKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPrompt(); }
+  }
+
+  function sendPrompt() {
+    const input = document.getElementById('prompt-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    clearMessages();
+    addUserMsg(text);
+    const sc = {
+      query: text,
+      steps: SCENARIOS[currentScenario].steps,
+      reply: SCENARIOS[currentScenario].reply
+    };
+    setTimeout(() => startThinkingSequence(sc), 600);
+  }
+
+  function toggleVersions() {
+    document.getElementById('version-switcher').classList.toggle('open');
+  }
+
+  // ─── Init — run default scenario ─────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    runScenarioAuto();
+  });
+</script>
+</body>
+</html>
