@@ -1525,9 +1525,10 @@
     aiRow.appendChild(wrap);
     scrollBottom();
 
-    // Build log — accessible during processing and after
+    // Build log — open by default, closes when done
     const logWrap = document.createElement('div');
-    logWrap.className = 'ts-status-log';
+    logWrap.className = 'ts-status-log open';
+    wrap.classList.add('log-open');
     wrap.onclick = () => {
       logWrap.classList.toggle('open');
       wrap.classList.toggle('log-open', logWrap.classList.contains('open'));
@@ -1559,6 +1560,8 @@
         doneBtn.className = 'ts-status-done';
         doneBtn.innerHTML = `${buildDoneSummary(sc)} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>`;
         wrap.appendChild(doneBtn);
+        logWrap.classList.remove('open');
+        wrap.classList.remove('log-open');
         setTimeout(() => {
           const msgBubble = document.createElement('div');
           msgBubble.className = 'msg-bubble ai animate-in';
