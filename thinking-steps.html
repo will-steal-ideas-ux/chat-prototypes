@@ -1566,12 +1566,12 @@
       const step = sc.steps[i];
       morphText(step.label + '…', () => { scrollBottom(); });
       i++;
-      const delay = step.dur ? parseFloat(step.dur) * 1800 + 1200 : 2800;
+      const delay = step.dur ? parseFloat(step.dur) * 3000 + 2500 : 5000;
       setTimeout(runStep, delay);
     }
     morphText(sc.steps[0].label + '…');
     i = 1;
-    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 1800 + 1200 : 2800;
+    const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 3000 + 2500 : 5000;
     setTimeout(runStep, firstDelay);
   }
 
