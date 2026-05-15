@@ -527,19 +527,39 @@
     }
     .ts-status-log.open { max-height: 300px; opacity: 1; margin-top: 8px; }
     .ts-status-log-inner {
-      background: var(--bg-primary); border: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
       border-radius: var(--radius-sm); overflow: hidden;
     }
-    .ts-status-log-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 12px; border-bottom: 1px solid var(--border-secondary);
-      font-size: 13px; color: var(--text-secondary);
+    /* Detail step rows (inside D expanded log) */
+    .ts-detail-step {
+      padding: 12px 16px 14px;
+      border-bottom: 1px solid var(--border-secondary);
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .ts-status-log-row:last-child { border-bottom: none; }
-    .ts-status-log-check { width: 13px; height: 13px; color: hsl(142 70% 40%); flex-shrink: 0; }
-    .ts-status-log-icon { font-size: 13px; flex-shrink: 0; }
-    .ts-status-log-label { flex: 1; }
-    .ts-status-log-dur { font-size: 12px; color: var(--text-tertiary); }
+    .ts-detail-step:last-child { border-bottom: none; }
+    .ts-detail-reasoning {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; line-height: 20px; color: var(--text-tertiary);
+    }
+    .ts-detail-reasoning-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; opacity: .6; }
+    .ts-detail-query-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-left: 24px;
+    }
+    .ts-detail-query-icon { font-size: 13px; flex-shrink: 0; }
+    .ts-detail-query-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+    .ts-detail-result-count { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; }
+    .ts-detail-results {
+      margin-left: 24px; display: flex; flex-direction: column; gap: 3px;
+    }
+    .ts-detail-result-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-tertiary); line-height: 18px;
+    }
+    .ts-detail-result-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-tertiary); opacity: .4; flex-shrink: 0; }
+    .ts-detail-result-domain { color: var(--text-tertiary); flex-shrink: 0; min-width: 120px; }
+    .ts-detail-result-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
 
 
     /* ════════════════════════════════════════════════════════════
@@ -1523,11 +1543,8 @@
     wrap.onclick = () => logWrap.classList.toggle('open');
     const logInner = document.createElement('div');
     logInner.className = 'ts-status-log-inner';
-    const ghostPrefix = 'dlog-' + Date.now();
-    sc.steps.forEach((step, idx) => {
-      const { card, detail } = makeGhostCard(step, idx, ghostPrefix);
-      logInner.appendChild(card);
-      logInner.appendChild(detail);
+    sc.steps.forEach(step => {
+      logInner.appendChild(makeDetailStep(step));
     });
     logWrap.appendChild(logInner);
     aiRow.appendChild(logWrap);
@@ -1561,12 +1578,12 @@
         return;
       }
       const step = sc.steps[i];
-      morphText(step.label + '…', () => { scrollBottom(); });
+      morphText(stepCategory(step), () => { scrollBottom(); });
       i++;
       const delay = step.dur ? parseFloat(step.dur) * 3000 + 2500 : 5000;
       setTimeout(runStep, delay);
     }
-    morphText(sc.steps[0].label + '…');
+    morphText(stepCategory(sc.steps[0]));
     i = 1;
     const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 3000 + 2500 : 5000;
     setTimeout(runStep, firstDelay);
@@ -1915,6 +1932,65 @@
     }
     const firstDelay = sc.steps[0].dur ? parseFloat(sc.steps[0].dur) * 900 + 400 : 1500;
     setTimeout(next, firstDelay);
+  }
+
+  function makeDetailStep(step) {
+    const el = document.createElement('div');
+    el.className = 'ts-detail-step';
+
+    // Reasoning line
+    const reasoning = stepReasoning(step);
+    const reasoningRow = document.createElement('div');
+    reasoningRow.className = 'ts-detail-reasoning';
+    reasoningRow.innerHTML = `<span class="ts-detail-reasoning-icon">↻</span>${reasoning}`;
+    el.appendChild(reasoningRow);
+
+    // Query / tool row
+    const queryRow = document.createElement('div');
+    queryRow.className = 'ts-detail-query-row';
+    const resultCount = step.detail.match(/(\d+)\s+results?/i);
+    const count = resultCount ? resultCount[1] + ' results' : (step.dur || '');
+    queryRow.innerHTML = `
+      <span class="ts-detail-query-icon">${step.icon}</span>
+      <span class="ts-detail-query-label">${step.label}</span>
+      <span class="ts-detail-result-count">${count}</span>`;
+    el.appendChild(queryRow);
+
+    // Result rows (parsed from detail)
+    const detailLines = step.detail.split('\n').filter(l => l.trim());
+    if (detailLines.length > 1) {
+      const resultsRow = document.createElement('div');
+      resultsRow.className = 'ts-detail-results';
+      detailLines.slice(1, 4).forEach(line => {
+        const row = document.createElement('div');
+        row.className = 'ts-detail-result-row';
+        row.innerHTML = `<div class="ts-detail-result-dot"></div><span class="ts-detail-result-title">${line}</span>`;
+        resultsRow.appendChild(row);
+      });
+      el.appendChild(resultsRow);
+    }
+
+    return el;
+  }
+
+  function stepCategory(step) {
+    if (step.icon === '🔍') return 'Searching the web';
+    if (step.icon === '📄') return 'Reading article';
+    if (step.icon === '🔑') return 'Authenticating';
+    if (step.icon === '📊') return 'Fetching data';
+    if (step.icon === '💰') return 'Checking budgets';
+    if (step.icon === '✍️' || step.icon === '📝') return 'Writing response';
+    return 'Working';
+  }
+
+  function stepReasoning(step) {
+    if (step.icon === '🔍') return 'Let me search for this to find the most relevant and up-to-date information.';
+    if (step.icon === '📄') return 'Found a relevant article — let me read through it for the key details.';
+    if (step.icon === '🔑') return 'Connecting to the API to get access to your data.';
+    if (step.icon === '📊') return 'Fetching your campaign data from the platform.';
+    if (step.icon === '💰') return 'Checking current spend against your budget limits.';
+    if (step.icon === '✍️' || step.icon === '📝') return 'I have enough information — let me put this together now.';
+    return 'Processing this step.';
   }
 
   function buildDoneSummary(sc) {
