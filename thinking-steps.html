@@ -510,7 +510,7 @@
     }
     .ts-status-log.open { max-height: 300px; opacity: 1; margin-top: 8px; }
     .ts-status-log-inner { overflow: hidden; }
-    .ts-status-log.open { max-height: 600px; }
+    .ts-status-log.open { max-height: 900px; }
 
     /* ── Step rows ── */
     @keyframes step-fade-in {
@@ -1168,40 +1168,60 @@
     search: {
       query: 'What are the best performing ad formats on Meta in Q1 2025?',
       steps: [
-        { icon: '🔍', label: 'Searched "Meta ad formats Q1 2025 performance"', dur: '0.4s', method: 'GET', detail: 'Query: Meta ad formats Q1 2025\nReturned 12 results from web index' },
-        { icon: '📄', label: 'Read marketingland.com/meta-ads-benchmarks', dur: '1.1s', method: 'GET', detail: 'Extracted: CTR benchmarks, CPM data, format breakdown by vertical' },
-        { icon: '📄', label: 'Read socialmediatoday.com/ad-formats-2025', dur: '0.8s', method: 'GET', detail: 'Extracted: Reels vs Stories performance comparison, carousel stats' },
+        { icon: '🔍', label: 'Searched "Meta ad formats Q1 2025 performance benchmarks"', dur: '0.4s', detail: 'Returned 14 results\nTop sources: marketingland.com, wordstream.com, databox.com' },
+        { icon: '📄', label: 'Read marketingland.com/meta-ads-benchmarks-2025', dur: '1.1s', detail: 'Extracted CTR by format: Reels 1.8%, Feed image 0.9%, Carousel 1.4%\nCPM data: Stories lowest at $4.20 avg' },
+        { icon: '🔍', label: 'Searched "Reels vs Stories ad performance ecommerce 2025"', dur: '0.3s', detail: 'Narrowing to ecommerce vertical\nReturned 9 results' },
+        { icon: '📄', label: 'Read socialmediatoday.com/reels-vs-stories-ads', dur: '0.8s', detail: 'Reels: +42% higher view-through rate vs Stories\nStories still strongest for low-funnel retargeting' },
+        { icon: '🔍', label: 'Searched "Meta carousel ads conversion rate benchmark Q1 2025"', dur: '0.3s', detail: 'Checking carousel-specific data\nReturned 7 results' },
+        { icon: '📄', label: 'Read wordstream.com/facebook-ad-benchmarks', dur: '0.9s', detail: 'Carousel conversion rate: 2.3x higher than single-image\nBest verticals: fashion, home goods, electronics' },
+        { icon: '📄', label: 'Read sproutsocial.com/insights/facebook-ad-specs', dur: '0.6s', detail: 'Format spec changes in Q1: Reels now supports 90s video\nNew placement: Facebook Search ads gaining traction' },
+        { icon: '✍️', label: 'Synthesizing findings across 4 sources…', dur: null, detail: 'Ranking formats by CTR, CVR, CPM efficiency\nBuilding recommendation by campaign objective' },
       ],
       reply: 'Based on the latest benchmarks, **Reels ads** are outperforming static formats with an average CTR of 1.8% vs 0.9% for feed images. Carousel formats remain strong for e-commerce with a 2.3x higher conversion rate compared to single-image ads. Stories still deliver low CPMs for awareness campaigns.'
     },
     api: {
       query: 'Pull my Google Ads campaigns and show me which ones are over budget',
       steps: [
-        { icon: '🔑', label: 'Authenticated with Google Ads API', dur: '0.2s', method: 'POST', detail: 'OAuth2 token refreshed\nScope: adwords.readonly' },
-        { icon: '📊', label: 'google_ads.campaigns.list()', dur: '1.4s', method: 'TOOL', detail: 'customer_id: 123-456-7890\nReturned 14 campaigns' },
-        { icon: '💰', label: 'google_ads.budgets.get(campaign_ids)', dur: '0.9s', method: 'TOOL', detail: 'Fetched spend vs budget for all 14 campaigns\n3 campaigns flagged over 90% budget utilization' },
+        { icon: '🔑', label: 'Authenticated with Google Ads API', dur: '0.2s', detail: 'OAuth2 token refreshed\nScope: adwords.readonly\nAccount: MCC 123-456-7890' },
+        { icon: '📊', label: 'google_ads.customers.list()', dur: '0.6s', detail: 'Found 3 linked sub-accounts\nActive: 2 · Paused: 1' },
+        { icon: '📊', label: 'google_ads.campaigns.list(customer_ids)', dur: '1.4s', detail: 'Fetched campaigns across both active accounts\nTotal: 14 campaigns · 9 active, 5 paused' },
+        { icon: '📊', label: 'google_ads.budgets.get(campaign_ids)', dur: '0.9s', detail: 'Retrieving shared and individual budget allocations\nFetched daily caps and current period spend for all 14' },
+        { icon: '💰', label: 'Calculating budget utilization rates', dur: '0.4s', detail: 'Daily spend vs monthly cap — prorated to current date\n3 campaigns above 90% · 2 campaigns above 75%' },
+        { icon: '📊', label: 'google_ads.campaigns.performance(flagged_ids)', dur: '0.7s', detail: 'Pulling ROAS, CPA, impression share for at-risk campaigns\nChecking if overspend correlates with strong performance' },
+        { icon: '✍️', label: 'Generating budget summary report…', dur: null, detail: 'Flagging campaigns with poor ROAS despite overspend\nSuggesting pause vs cap-increase based on performance' },
       ],
       reply: 'Found **3 campaigns over budget** (>90% utilized):\n\n1. **Summer Sale — Search** · $4,820 / $5,000 (96%)\n2. **Brand Keywords — EU** · $2,100 / $2,200 (95%)\n3. **Retargeting — Mobile** · $890 / $900 (99%)\n\nWant me to pause any of these or adjust daily caps?'
     },
     multi: {
       query: 'Research competitors and write a positioning brief for our new SEO product',
       steps: [
-        { icon: '🔍', label: 'Searched "SEO platform competitors 2025"', dur: '0.5s', method: 'GET', detail: 'Query: SEO platforms comparison 2025\nFound: Semrush, Ahrefs, Moz, Screaming Frog, Surfer SEO' },
-        { icon: '🔍', label: 'Searched "Semrush vs Ahrefs pricing features"', dur: '0.3s', method: 'GET', detail: 'Compared feature sets, pricing tiers, and market positioning' },
-        { icon: '📄', label: 'Read g2.com/categories/seo-software reviews', dur: '1.2s', method: 'GET', detail: 'Extracted top pain points from 340 reviews:\n— too expensive, steep learning curve, no AI automation' },
-        { icon: '✍️', label: 'Generating positioning brief…', dur: null, method: 'TOOL', detail: 'Writing 4-section brief: market overview, gaps, positioning, messaging' },
+        { icon: '🔍', label: 'Searched "SEO platform competitors market share 2025"', dur: '0.5s', detail: 'Returned 11 results\nIdentified key players: Semrush, Ahrefs, Moz, Surfer SEO, Screaming Frog' },
+        { icon: '📄', label: 'Read semrush.com/pricing', dur: '0.6s', detail: 'Plans: Pro $129/mo, Guru $249/mo, Business $499/mo\nCore features: keyword research, site audit, backlink analysis' },
+        { icon: '📄', label: 'Read ahrefs.com/pricing', dur: '0.5s', detail: 'Plans: Lite $99/mo, Standard $199/mo, Advanced $399/mo\nStrength: backlink index, content explorer' },
+        { icon: '🔍', label: 'Searched "SEO tools pain points small business 2025"', dur: '0.3s', detail: 'Looking for underserved segments\nReturned 8 results' },
+        { icon: '📄', label: 'Read g2.com/categories/seo-software reviews', dur: '1.2s', detail: 'Analyzed 340 reviews across top 5 tools\nTop complaints: too expensive, overwhelming UI, no plain-English insights, no AI automation' },
+        { icon: '🔍', label: 'Searched "AI SEO tools 2025 startups funding"', dur: '0.4s', detail: 'Mapping emerging AI-native competitors\nReturned 10 results · 3 relevant startups identified' },
+        { icon: '📄', label: 'Read techcrunch.com/2025/03/ai-seo-landscape', dur: '0.7s', detail: 'No dominant AI-native SEO tool for SMBs yet\nGap: affordable + AI-driven + marketer-friendly' },
+        { icon: '📊', label: 'Mapping competitor positioning matrix', dur: '0.8s', detail: 'Axes: price vs complexity\nAll major players cluster in high-price / high-complexity quadrant' },
+        { icon: '✍️', label: 'Writing positioning brief…', dur: null, detail: 'Drafting 4 sections: market overview, whitespace, positioning statement, messaging pillars' },
       ],
       reply: 'Here\'s your SEO positioning brief...\n\n**Market gap:** Existing tools are expensive and technical. No clear AI-native player owns the "SMB + AI" niche.\n\n**Positioning:** "The only SEO platform built for marketers, not SEOs" — emphasizes AI automation, plain-English insights, and affordable pricing starting at $29/mo.'
     },
     long: {
       query: 'Audit our entire ad account and give me a full optimization plan',
       steps: [
-        { icon: '🔑', label: 'Authenticated with Google Ads & Meta Ads', dur: '0.3s', method: 'POST', detail: 'Google Ads: OK\nMeta Business Suite: OK' },
-        { icon: '📊', label: 'Fetched 90-day performance data', dur: '2.1s', method: 'TOOL', detail: '6 campaigns, 28 ad sets, 142 ads\n90-day window, all metrics' },
-        { icon: '🔍', label: 'Analyzed keyword quality scores', dur: '1.4s', method: 'TOOL', detail: 'Average QS: 5.8 / 10\n12 keywords below QS 4 identified' },
-        { icon: '🔍', label: 'Checked audience overlap', dur: '0.9s', method: 'TOOL', detail: '3 ad set pairs with >70% audience overlap\nEstimated budget waste: $340/mo' },
-        { icon: '📝', label: 'Writing optimization recommendations', dur: '1.8s', method: 'TOOL', detail: 'Generating 18 prioritized recommendations across bidding, creative, targeting' },
-        { icon: '📄', label: 'Formatting final report', dur: '0.4s', method: 'TOOL', detail: 'Structured as: Quick wins, Medium-term, Strategic' },
+        { icon: '🔑', label: 'Authenticated with Google Ads API', dur: '0.2s', detail: 'OAuth2 flow completed\nScopes: campaigns.read, keywords.read, budgets.read' },
+        { icon: '🔑', label: 'Authenticated with Meta Business API', dur: '0.2s', detail: 'Access token valid — expires in 58 days\nScopes: ads_read, insights, business_management' },
+        { icon: '📊', label: 'Fetched all Google campaigns (90-day window)', dur: '2.1s', detail: '6 campaigns · 28 ad groups · 847 keywords\nMetrics: impressions, clicks, CTR, CPC, conversions, ROAS' },
+        { icon: '📊', label: 'Fetched all Meta campaigns (90-day window)', dur: '1.8s', detail: '4 campaigns · 18 ad sets · 142 ads\nMetrics: reach, CPM, CTR, CPA, purchase ROAS' },
+        { icon: '📊', label: 'Analyzing Google keyword quality scores', dur: '1.4s', detail: 'Average QS: 5.8 / 10\n12 keywords below QS 4 — dragging up CPCs by est. 34%' },
+        { icon: '📊', label: 'Detecting audience overlap across Meta ad sets', dur: '0.9s', detail: '3 ad set pairs with >70% audience overlap\nConservative waste estimate: $340/mo' },
+        { icon: '🔍', label: 'Searched "Google Ads ROAS benchmarks ecommerce 2025"', dur: '0.4s', detail: 'Pulling industry benchmarks to contextualize your performance\nReturned 8 results' },
+        { icon: '📄', label: 'Read wordstream.com/google-ads-benchmarks-2025', dur: '0.7s', detail: 'Ecommerce avg ROAS: 4.2x · Your account: 3.1x\nIdentified campaigns underperforming by >25%' },
+        { icon: '🔍', label: 'Searched "Performance Max vs Shopping campaign strategy 2025"', dur: '0.3s', detail: 'Evaluating restructuring opportunity for Shopping campaigns' },
+        { icon: '📄', label: 'Read searchengineland.com/pmax-strategy-guide-2025', dur: '0.6s', detail: 'PMax showing 18% lower CPA vs standard Shopping in comparable accounts\nRecommended migration path for 3 of your campaigns' },
+        { icon: '📊', label: 'Identifying underperforming creatives on Meta', dur: '1.1s', detail: '8 ads with CTR below 0.4% running for 30+ days\nCreative fatigue detected on 3 top-spend ad sets' },
+        { icon: '📝', label: 'Writing optimization recommendations…', dur: null, detail: 'Generating 18 prioritized actions across bidding, creative, targeting, structure\nGrouped by impact and implementation effort' },
       ],
       reply: 'Full audit complete. Found **$1,240/mo in recoverable waste** across 3 areas:\n\n**Quick wins (this week):** Pause 12 low-QS keywords, fix 3 ad sets with audience overlap.\n\n**Medium-term:** Restructure Shopping campaigns into Performance Max, refresh 8 stale creatives.\n\n**Strategic:** Test broad match + Smart Bidding on your top 3 campaigns.'
     }
@@ -2017,6 +2037,9 @@
     '📄': [
       { title: 'Full Article: Ad Format Breakdown by Vertical', domain: 'marketingland.com', color: '#1877f2', letter: 'M' },
       { title: 'Carousel vs Single Image: Conversion Data', domain: 'socialmediatoday.com', color: '#e4405f', letter: 'S' },
+      { title: 'SEO Tools Pricing Comparison — 2025 Guide', domain: 'g2.com', color: '#ff492c', letter: 'G' },
+      { title: 'Google Ads Benchmark Report Q1 2025', domain: 'wordstream.com', color: '#ff6900', letter: 'W' },
+      { title: 'Performance Max vs Shopping: Full Breakdown', domain: 'searchengineland.com', color: '#ff4136', letter: 'S' },
     ],
     '🔑': [
       { title: 'OAuth2 token refreshed — scope: adwords.readonly', domain: 'accounts.google.com', color: '#4285f4', letter: 'G' },
