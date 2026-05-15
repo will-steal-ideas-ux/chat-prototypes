@@ -1554,7 +1554,7 @@
         doneBtn.className = 'ts-status-done';
         doneBtn.innerHTML = `
           <div class="ts-status-done-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-          ${buildDoneSummary(sc.steps)} ›`;
+          ${buildDoneSummary(sc)} ›`;
         doneBtn.onclick = () => logWrap.classList.toggle('open');
         wrap.appendChild(doneBtn);
         setTimeout(() => {
@@ -1923,25 +1923,27 @@
     setTimeout(next, firstDelay);
   }
 
-  function buildDoneSummary(steps) {
-    const searches  = steps.filter(s => s.icon === '🔍').length;
-    const reads     = steps.filter(s => s.icon === '📄').length;
-    const apiCalls  = steps.filter(s => ['📊','💰','🔑'].includes(s.icon)).length;
-    const writing   = steps.filter(s => ['✍️','📝'].includes(s.icon)).length;
+  function buildDoneSummary(sc) {
+    // Try to extract the topic from a search query first (text inside quotes)
+    for (const step of sc.steps) {
+      const match = step.label.match(/"([^"]+)"/);
+      if (match) {
+        return toTopicTitle(match[1]);
+      }
+    }
+    // Fall back to deriving a title from the query itself
+    if (sc.query) return toTopicTitle(sc.query);
+    return 'Research completed';
+  }
 
-    const parts = [];
-    if (searches)  parts.push(`searched ${searches} ${searches === 1 ? 'source' : 'sources'}`);
-    if (reads)     parts.push(`read ${reads} ${reads === 1 ? 'article' : 'articles'}`);
-    if (apiCalls)  parts.push(`called ${apiCalls} ${apiCalls === 1 ? 'API' : 'APIs'}`);
-    if (writing)   parts.push(`drafted the content`);
-
-    if (!parts.length) return `Completed ${steps.length} steps`;
-
-    const list = parts.length === 1
-      ? parts[0]
-      : parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
-
-    return list.charAt(0).toUpperCase() + list.slice(1);
+  function toTopicTitle(text) {
+    // Strip question words and trailing punctuation, trim to ~40 chars
+    const cleaned = text
+      .replace(/^(what are|what is|how do i|show me|pull my|give me|research|audit|find|get)\s+/i, '')
+      .replace(/[?!.]$/, '')
+      .trim();
+    const capped = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    return capped.length > 42 ? capped.slice(0, 40).trimEnd() + '…' : capped;
   }
 
   function buildNarration(steps) {
