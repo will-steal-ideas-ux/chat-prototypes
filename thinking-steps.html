@@ -1550,7 +1550,6 @@
         const doneBtn = document.createElement('button');
         doneBtn.className = 'ts-status-done';
         doneBtn.innerHTML = `${buildDoneSummary(sc)} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>`;
-        doneBtn.onclick = () => logWrap.classList.toggle('open');
         wrap.appendChild(doneBtn);
         setTimeout(() => {
           const msgBubble = document.createElement('div');
