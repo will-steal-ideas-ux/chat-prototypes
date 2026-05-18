@@ -512,6 +512,12 @@
     .ts-status-log-inner { overflow: hidden; }
     .ts-status-log.open { max-height: 900px; }
 
+    /* ── Iterative interim reasoning text ── */
+    .ts-interim-text {
+      font-size: 14px; line-height: 1.6; color: var(--text-secondary);
+      padding: 8px 0 4px; max-width: 520px;
+    }
+
     /* ── Step rows ── */
     @keyframes step-fade-in {
       from { opacity: 0; transform: translateY(5px); }
@@ -1127,6 +1133,7 @@
         <button class="scenario-btn" onclick="runScenario('multi', this)">Multi-step plan</button>
         <button class="scenario-btn" onclick="runScenario('long', this)">Long agent run</button>
         <button class="scenario-btn" onclick="runScenario('tools', this)">Tool calling</button>
+        <button class="scenario-btn" onclick="runScenario('iterative', this)">Re-thinking</button>
       </div>
 
       <!-- Chat -->
@@ -1260,6 +1267,38 @@
         { icon: '📝', label: 'Drafting launch status summary…', dur: null, detail: 'Writing structured summary: blockers list, owners, risk level\nPreparing Slack message for #q2-launch channel' },
       ],
       reply: 'Found **4 active blockers** across Jira, Slack, and your inbox:\n\n1. **API rate limiting** (ENG-412) — no resolution after 9-reply thread. Owner: @dan. Stale 5 days.\n2. **Design sign-off missing** (DES-88) — 2 screens awaiting approval. Owner: @marta.\n3. **Auth edge case** (ENG-419) — in progress, PR open but no review yet.\n4. **CTO email** flagged launch date at risk — wants update by EOD.\n\nI\'ve drafted a summary message for #q2-launch. Want me to send it?'
+    },
+    iterative: {
+      query: 'EU customers see prices in USD at checkout. Find the bug and fix it.',
+      rounds: [
+        {
+          steps: [
+            { icon: '🔍', label: 'Searched "currency formatting locale checkout bug javascript"', dur: '0.3s', detail: 'Looking for common patterns\nReturned 9 results' },
+            { icon: '📄', label: 'Read src/checkout/PricingDisplay.jsx', dur: '0.8s', detail: 'Found: Intl.NumberFormat called without locale param\nLine 84: new Intl.NumberFormat(undefined, { currency })' },
+            { icon: '📄', label: 'Read src/utils/formatCurrency.js', dur: '0.6s', detail: '14 call sites · formatCurrency(amount, currency) — locale not passed\nOnly USD path tested in existing test suite' },
+            { icon: '📊', label: 'Traced formatCurrency call sites across codebase', dur: '0.7s', detail: '14 usages found\nCheckout, cart summary, invoice preview all affected' },
+          ],
+          interim: 'Found the issue — `formatCurrency` never receives a locale, so `Intl.NumberFormat` defaults to the server\'s system locale (en-US). Fixing the util and updating call sites.'
+        },
+        {
+          steps: [
+            { icon: '📄', label: 'Read src/utils/formatCurrency.js', dur: '0.4s', detail: 'Re-reading before editing\nCurrent signature: formatCurrency(amount, currency)' },
+            { icon: '📝', label: 'Patched formatCurrency to accept locale param', dur: '0.6s', detail: 'New signature: formatCurrency(amount, currency, locale)\nDefault: navigator.language ?? "en-US"' },
+            { icon: '📝', label: 'Updated 14 call sites to pass user locale', dur: '1.1s', detail: 'Pulled locale from user session context\nUpdated: checkout, cart, invoice, email templates' },
+            { icon: '📊', label: 'Ran test suite — npm test', dur: '1.4s', detail: '47 tests · 44 passed · 3 failed\nFailed: EUR→GBP cross-currency, CHF formatting, negative amounts' },
+          ],
+          interim: 'Three tests failing — the CHF and cross-currency cases expose a deeper issue: the formatter also needs a `currencyDisplay` option and CHF has special rounding rules. Rethinking the approach.'
+        },
+        {
+          steps: [
+            { icon: '🔍', label: 'Searched "Intl.NumberFormat CHF currencyDisplay narrowSymbol"', dur: '0.3s', detail: 'Checking correct options for Swiss franc and cross-currency display\nReturned 6 results' },
+            { icon: '📝', label: 'Updated formatCurrency with currencyDisplay and rounding options', dur: '0.8s', detail: 'Added: currencyDisplay: "narrowSymbol"\nAdded: maximumFractionDigits per currency map (CHF: 2, JPY: 0)\nHandled negative amounts via signDisplay option' },
+            { icon: '📊', label: 'Ran test suite again — npm test', dur: '1.2s', detail: '47 tests · 47 passed · 0 failed\nAll currency paths green including CHF, EUR→GBP, negative amounts' },
+            { icon: '📄', label: 'Verified fix in local dev — EU checkout flow', dur: '0.5s', detail: 'EU prices now display as €49,00 not $49.00\nInvoice preview, cart summary both correct' },
+          ],
+          reply: 'Fixed. The root cause was `formatCurrency` never passing a locale to `Intl.NumberFormat`, causing the server\'s system locale (en-US) to format all prices.\n\n**Changes made:**\n- `formatCurrency(amount, currency, locale)` — locale now required\n- `currencyDisplay: "narrowSymbol"` for compact symbols (€ not EUR)\n- Currency-specific rounding map (CHF, JPY edge cases)\n- 14 call sites updated to pass `user.locale` from session\n\nAll 47 tests passing. Ready to ship.'
+        }
+      ]
     }
   };
 
@@ -1291,7 +1330,102 @@
   }
 
   function startThinkingSequence(sc) {
-    startStatusLine(sc);
+    if (sc.rounds) {
+      const msgs = document.getElementById('chat-messages');
+      const aiRow = document.createElement('div');
+      aiRow.className = 'msg-row ai animate-in';
+      aiRow.innerHTML = badge();
+      msgs.appendChild(aiRow);
+      scrollBottom();
+      runRound(sc.rounds, aiRow, 0);
+    } else {
+      startStatusLine(sc);
+    }
+  }
+
+  function runRound(rounds, aiRow, idx) {
+    const round = rounds[idx];
+    const isLast = idx === rounds.length - 1;
+    const fakeSc = { steps: round.steps, query: round.interim || round.reply || '' };
+
+    const wrap = document.createElement('div');
+    wrap.className = 'ts-status-line';
+    const textEl = document.createElement('span');
+    textEl.className = 'ts-status-text';
+    const arrowEl = document.createElement('span');
+    arrowEl.className = 'ts-status-arrow';
+    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    wrap.appendChild(textEl);
+    wrap.appendChild(arrowEl);
+    wrap.style.cursor = 'pointer';
+    aiRow.appendChild(wrap);
+
+    const logWrap = document.createElement('div');
+    logWrap.className = 'ts-status-log open';
+    wrap.classList.add('log-open');
+    wrap.onclick = () => {
+      logWrap.classList.toggle('open');
+      wrap.classList.toggle('log-open', logWrap.classList.contains('open'));
+    };
+    const logInner = document.createElement('div');
+    logInner.className = 'ts-status-log-inner';
+    logWrap.appendChild(logInner);
+    aiRow.appendChild(logWrap);
+    scrollBottom();
+
+    function morphText(newText, cb) {
+      textEl.classList.add('fade');
+      setTimeout(() => { textEl.textContent = newText; textEl.classList.remove('fade'); if (cb) setTimeout(cb, 60); }, 350);
+    }
+
+    let i = 0;
+    function runStep() {
+      if (i >= round.steps.length) {
+        textEl.style.display = 'none';
+        arrowEl.style.display = 'none';
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'ts-status-done';
+        doneBtn.innerHTML = `${buildRoundSummary(round.steps)} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>`;
+        wrap.appendChild(doneBtn);
+        logWrap.classList.remove('open');
+        wrap.classList.remove('log-open');
+
+        setTimeout(() => {
+          if (isLast) {
+            const msgBubble = document.createElement('div');
+            msgBubble.className = 'msg-bubble ai animate-in';
+            msgBubble.innerHTML = mdLite(round.reply);
+            aiRow.appendChild(msgBubble);
+          } else {
+            const interim = document.createElement('div');
+            interim.className = 'ts-interim-text animate-in';
+            interim.textContent = round.interim;
+            aiRow.appendChild(interim);
+            setTimeout(() => runRound(rounds, aiRow, idx + 1), 900);
+          }
+          scrollBottom();
+        }, 400);
+        return;
+      }
+      const step = round.steps[i];
+      appendDetailStep(step, logInner);
+      morphText(stepCategory(step), () => { scrollBottom(); });
+      i++;
+      const delay = step.dur ? parseFloat(step.dur) * 3000 + 2500 : 5000;
+      setTimeout(runStep, delay);
+    }
+    appendDetailStep(round.steps[0], logInner);
+    morphText(stepCategory(round.steps[0]));
+    i = 1;
+    const firstDelay = round.steps[0].dur ? parseFloat(round.steps[0].dur) * 3000 + 2500 : 5000;
+    setTimeout(runStep, firstDelay);
+  }
+
+  function buildRoundSummary(steps) {
+    const labels = { '🔍': 'Searched', '📄': 'Read', '📊': 'Analyzed', '📝': 'Edited', '✍️': 'Wrote', '🔑': 'Authenticated', '💰': 'Checked budgets', '🎫': 'Queried Jira', '💬': 'Read Slack', '📧': 'Checked Gmail' };
+    const counts = {};
+    steps.forEach(s => { const l = labels[s.icon] || 'Ran step'; counts[l] = (counts[l] || 0) + 1; });
+    return Object.entries(counts).map(([k, v]) => v > 1 ? `${k} ×${v}` : k).join(' · ');
   }
 
   // ════════════════════════════════════
