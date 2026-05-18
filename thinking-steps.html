@@ -549,6 +549,15 @@
     }
     .ts-detail-step-body-sublabel::before { content: none; }
 
+    /* Auth service rows */
+    .ts-auth-service-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 2px 0; font-size: 12px; color: var(--text-tertiary); opacity: .7;
+    }
+    .ts-auth-service-row::before { content: none; }
+    .ts-auth-service-icon { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .ts-auth-service-status { margin-left: auto; font-size: 11px; opacity: .5; }
+
     /* ── Figma-style search section ── */
     .ts-search-section { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 12px; }
     .ts-search-query-header {
@@ -1975,8 +1984,33 @@
 
   let detailStepIdx = 0;
 
+  const SERVICE_DOMAINS = {
+    'slack': 'slack.com', 'jira': 'atlassian.com', 'gmail': 'gmail.com',
+    'google ads': 'ads.google.com', 'google': 'google.com',
+    'meta ads': 'facebook.com', 'meta business': 'business.facebook.com', 'meta': 'facebook.com',
+    'notion': 'notion.so', 'hubspot': 'hubspot.com', 'salesforce': 'salesforce.com',
+    'github': 'github.com', 'linear': 'linear.app', 'asana': 'asana.com',
+  };
+
+  function extractServiceNames(label) {
+    return label
+      .replace(/^Authenticated with\s+/i, '')
+      .split(/\s*[&,]\s*/)
+      .map(s => s.replace(/\s*\(.*\)$/, '').replace(/\s+API$/i, '').trim())
+      .filter(Boolean);
+  }
+
+  function makeAuthServiceRow(name) {
+    const domain = SERVICE_DOMAINS[name.toLowerCase()] || '';
+    const row = document.createElement('div');
+    row.className = 'ts-auth-service-row';
+    row.innerHTML = domain
+      ? `<img class="ts-auth-service-icon" src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="" /><span>${name}</span><span class="ts-auth-service-status">Connected</span>`
+      : `<span>${name}</span><span class="ts-auth-service-status">Connected</span>`;
+    return row;
+  }
+
   function appendDetailStep(step, logInner) {
-    // Group consecutive non-search steps with the same icon
     if (step.icon !== '🔍') {
       const last = logInner.lastElementChild;
       if (last && last.dataset.icon === step.icon) {
@@ -1986,18 +2020,23 @@
           body.className = 'ts-detail-step-body';
           last.appendChild(body);
         }
-        const sublabel = document.createElement('div');
-        sublabel.className = 'ts-detail-step-body-line ts-detail-step-body-sublabel';
-        sublabel.textContent = step.label;
-        body.appendChild(sublabel);
-        if (step.detail) {
-          step.detail.split('\n').forEach(line => {
-            if (!line.trim()) return;
-            const lineEl = document.createElement('div');
-            lineEl.className = 'ts-detail-step-body-line';
-            lineEl.textContent = line;
-            body.appendChild(lineEl);
-          });
+        if (step.icon === '🔑') {
+          // Add service rows only
+          extractServiceNames(step.label).forEach(name => body.appendChild(makeAuthServiceRow(name)));
+        } else {
+          const sublabel = document.createElement('div');
+          sublabel.className = 'ts-detail-step-body-line ts-detail-step-body-sublabel';
+          sublabel.textContent = step.label;
+          body.appendChild(sublabel);
+          if (step.detail) {
+            step.detail.split('\n').forEach(line => {
+              if (!line.trim()) return;
+              const lineEl = document.createElement('div');
+              lineEl.className = 'ts-detail-step-body-line';
+              lineEl.textContent = line;
+              body.appendChild(lineEl);
+            });
+          }
         }
         return;
       }
@@ -2038,6 +2077,16 @@
       section.appendChild(header);
       section.appendChild(box);
       el.appendChild(section);
+    } else if (step.icon === '🔑') {
+      // Auth: generic "Authenticating" header + service icon rows
+      const header = document.createElement('div');
+      header.className = 'ts-detail-step-header';
+      header.innerHTML = `<div class="ts-detail-step-icon">${stepSvgIcon(step)}</div><span class="ts-detail-step-label">Authenticating</span>`;
+      el.appendChild(header);
+      const body = document.createElement('div');
+      body.className = 'ts-detail-step-body';
+      extractServiceNames(step.label).forEach(name => body.appendChild(makeAuthServiceRow(name)));
+      el.appendChild(body);
     } else {
       // Non-search: flat header + body, no chevron
       const header = document.createElement('div');
