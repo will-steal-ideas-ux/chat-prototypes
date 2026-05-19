@@ -454,11 +454,9 @@
        ════════════════════════════════════════════════════════════ */
     .ts-status-line {
       display: flex; align-items: center; gap: 6px;
-      font-size: 13px;
-      min-height: 22px;
-      width: fit-content;
+      font-size: 13px; min-height: 22px; width: fit-content;
+      cursor: pointer;
     }
-    .ts-status-line:hover .ts-status-arrow { opacity: 1; }
     .ts-status-text {
       background: linear-gradient(
         90deg,
@@ -482,26 +480,50 @@
     .ts-status-text.fade { opacity: 0; }
     .ts-status-arrow {
       display: flex; align-items: center;
-      color: hsl(240 4% 72%);
-      animation: arrow-nudge 2.8s ease infinite;
-      flex-shrink: 0;
+      color: hsl(240 4% 60%); opacity: .7; flex-shrink: 0;
     }
-    .ts-status-arrow svg { width: 14px; height: 14px; transition: transform .2s ease; }
-    .ts-status-line.log-open .ts-status-arrow svg { transform: rotate(90deg); }
-    @keyframes arrow-nudge {
-      0%,100% { transform: translateX(0); opacity: .4; }
-      50%      { transform: translateX(4px); opacity: .9; }
-    }
+    .ts-status-arrow svg { width: 14px; height: 14px; transition: transform .25s ease; }
+    /* Default: chevron-down (log is open). Collapsed: rotate -90deg = chevron-right */
+    .ts-status-line:not(.log-open) .ts-status-arrow svg { transform: rotate(-90deg); }
+
     .ts-status-done {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
+      font-size: 13px; font-weight: 500;
+      color: hsl(220 9% 46%);
       cursor: pointer; border: none; background: none; padding: 0;
-      transition: color var(--transition);
+      transition: color .15s ease;
     }
-    .ts-status-done { display: inline-flex; align-items: center; gap: 4px; }
     .ts-status-done:hover { color: var(--text-primary); }
-    .ts-status-done svg { transition: transform .2s ease; }
+    .ts-status-done svg { transition: transform .25s ease; opacity: .6; }
     .ts-status-line.log-open .ts-status-done svg { transform: rotate(90deg); }
+
+    /* Sources row */
+    .ts-sources-row {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 12px; font-size: 12px; color: var(--text-tertiary);
+    }
+    .ts-sources-favicons { display: flex; align-items: center; }
+    .ts-sources-favicon {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+      margin-right: -5px; overflow: hidden; flex-shrink: 0;
+    }
+    .ts-sources-favicon img { width: 100%; height: 100%; object-fit: cover; }
+    .ts-sources-label { margin-left: 10px; opacity: .6; }
+
+    /* Action row */
+    .ts-action-row {
+      display: flex; align-items: center; gap: 2px; margin-top: 10px;
+    }
+    .ts-action-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary); opacity: .55;
+      transition: opacity .15s ease, background .15s ease;
+    }
+    .ts-action-btn:hover { opacity: 1; background: var(--bg-secondary); }
+    .ts-action-btn svg { width: 15px; height: 15px; }
 
     .ts-status-log {
       overflow: hidden; max-height: 0;
@@ -548,7 +570,7 @@
       display: flex; align-items: baseline; gap: 5px;
     }
     .ts-detail-step-body-line::before {
-      content: '·'; flex-shrink: 0; opacity: .6;
+      content: '–'; flex-shrink: 0; opacity: .5;
     }
     .ts-detail-step-body-sublabel {
       opacity: .75; font-weight: 500; margin-top: 6px;
@@ -1354,7 +1376,7 @@
     textEl.className = 'ts-status-text';
     const arrowEl = document.createElement('span');
     arrowEl.className = 'ts-status-arrow';
-    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
     wrap.appendChild(textEl);
     wrap.appendChild(arrowEl);
     wrap.style.cursor = 'pointer';
@@ -1392,10 +1414,7 @@
 
         setTimeout(() => {
           if (isLast) {
-            const msgBubble = document.createElement('div');
-            msgBubble.className = 'msg-bubble ai animate-in';
-            msgBubble.innerHTML = mdLite(round.reply);
-            aiRow.appendChild(msgBubble);
+            aiRow.appendChild(makeResponseBlock(round.reply, { steps: round.steps }));
           } else {
             const interim = document.createElement('div');
             interim.className = 'ts-interim-text animate-in';
@@ -1694,6 +1713,59 @@
   // ════════════════════════════════════
   // VARIANT D — Morphing Status Line
   // ════════════════════════════════════
+  function makeResponseBlock(reply, sc) {
+    const wrap = document.createElement('div');
+    wrap.className = 'animate-in';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble ai';
+    bubble.innerHTML = mdLite(reply);
+    wrap.appendChild(bubble);
+
+    // Sources row — pull domains from search steps
+    const searchSteps = (sc.steps || []).filter(s => s.icon === '🔍');
+    const domains = [...new Set(
+      (FAKE_RESULTS['🔍'] || []).slice(0, 4).map(r => r.domain)
+    )];
+    if (searchSteps.length && domains.length) {
+      const srcRow = document.createElement('div');
+      srcRow.className = 'ts-sources-row';
+      const favWrap = document.createElement('div');
+      favWrap.className = 'ts-sources-favicons';
+      domains.forEach(d => {
+        const circle = document.createElement('div');
+        circle.className = 'ts-sources-favicon';
+        circle.innerHTML = `<img src="https://www.google.com/s2/favicons?domain=${d}&sz=32" alt="" />`;
+        favWrap.appendChild(circle);
+      });
+      const label = document.createElement('span');
+      label.className = 'ts-sources-label';
+      label.textContent = 'Sources';
+      srcRow.appendChild(favWrap);
+      srcRow.appendChild(label);
+      wrap.appendChild(srcRow);
+    }
+
+    // Action row
+    const actions = document.createElement('div');
+    actions.className = 'ts-action-row';
+    const icons = [
+      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`,
+      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`,
+      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`,
+    ];
+    icons.forEach(svg => {
+      const btn = document.createElement('button');
+      btn.className = 'ts-action-btn';
+      btn.innerHTML = svg;
+      actions.appendChild(btn);
+    });
+    wrap.appendChild(actions);
+
+    return wrap;
+  }
+
   function startStatusLine(sc) {
     const msgs = document.getElementById('chat-messages');
     const aiRow = document.createElement('div');
@@ -1707,7 +1779,7 @@
     textEl.className = 'ts-status-text';
     const arrowEl = document.createElement('span');
     arrowEl.className = 'ts-status-arrow';
-    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
+    arrowEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
     wrap.appendChild(textEl);
     wrap.appendChild(arrowEl);
     wrap.style.cursor = 'pointer';
@@ -1749,10 +1821,7 @@
         logWrap.classList.remove('open');
         wrap.classList.remove('log-open');
         setTimeout(() => {
-          const msgBubble = document.createElement('div');
-          msgBubble.className = 'msg-bubble ai animate-in';
-          msgBubble.innerHTML = mdLite(sc.reply);
-          aiRow.appendChild(msgBubble);
+          aiRow.appendChild(makeResponseBlock(sc.reply, sc));
           scrollBottom();
         }, 350);
         return;
@@ -1824,10 +1893,7 @@
     function advance() {
       if (i >= sc.steps.length) {
         setTimeout(() => {
-          const msgBubble = document.createElement('div');
-          msgBubble.className = 'msg-bubble ai animate-in';
-          msgBubble.innerHTML = mdLite(sc.reply);
-          aiRow.appendChild(msgBubble);
+          aiRow.appendChild(makeResponseBlock(sc.reply, sc));
           scrollBottom();
         }, 400);
         return;
