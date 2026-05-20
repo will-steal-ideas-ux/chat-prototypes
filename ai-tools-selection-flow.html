@@ -6,7 +6,7 @@
   <title>nexos.ai — AI Tools Flow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Figma icon assets via localhost:3845 -->
   <script>
@@ -26,6 +26,10 @@
     const IC_SALESFORCE= "http://localhost:3845/assets/965317e76549b0d160778c8fdbb67e0dcf05dfb2.svg";
     const IC_GCAL      = "http://localhost:3845/assets/c332f058ac33ac71d37cfc771168a81fa15ed16d.svg";
     const IC_KNOW_ITEM = "http://localhost:3845/assets/bb4b1d78c5c29a52363b730fda35df125104a21c.svg";
+    const IC_PLUS     = "http://localhost:3845/assets/1b9ca604e7caa3f8c937990d5f817404f667d6c4.svg";
+    const IC_WAND     = "http://localhost:3845/assets/e82aa53df4f0b9a1a072de4e904887ea282324e3.svg";
+    const IC_CHEVDOWN = "http://localhost:3845/assets/2857ccc25ffb89eb60f9bd09ea1bfab06ffd10de.svg";
+    const IC_MIC      = "http://localhost:3845/assets/48563b1ec62aac45e9b84b585af8f651147c41b4.svg";
   </script>
 
   <style>
@@ -213,11 +217,13 @@
       background: #fff;
     }
     .welcome {
-      font-size: 28px;
-      font-weight: 400;
-      color: #b8b8b8;
-      margin-bottom: 22px;
-      letter-spacing: -0.02em;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 32px;
+      font-weight: 600;
+      color: #6f6e78;
+      margin-bottom: 24px;
+      letter-spacing: -0.25px;
+      line-height: 44px;
     }
 
     /* ───────────────────────────────────
@@ -230,76 +236,106 @@
     }
     .prompt-box {
       background: #fff;
-      border: 1.5px solid #e8e8e8;
-      border-radius: 14px;
-      padding: 14px 16px 10px;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+      border: 1px solid rgba(124,123,132,0.25);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 8px 7.5px rgba(18,0,69,0.06), 0 4px 3.5px rgba(18,0,69,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     textarea.prompt-text {
       width: 100%;
       border: none;
       outline: none;
       resize: none;
-      font-size: 15px;
-      color: #333;
-      line-height: 1.6;
+      font-size: 16px;
+      color: #252429;
+      line-height: 24px;
       background: transparent;
-      height: 42px;
+      height: 28px;
       font-family: inherit;
       display: block;
+      padding: 4px 8px 0;
     }
-    textarea.prompt-text::placeholder { color: #ccc; }
+    textarea.prompt-text::placeholder { color: #6f6e78; }
 
     .prompt-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(124,123,132,0.1);
+      height: 42px;
     }
-    .bar-left { display: flex; align-items: center; gap: 6px; }
-    .bar-right { display: flex; align-items: center; gap: 4px; }
+    .bar-left { display: flex; align-items: center; gap: 12px; }
+    .bar-right { display: flex; align-items: center; gap: 8px; }
 
-    .round-btn {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: rgba(124,123,132,0.08);
+    /* + button: square 42×42, 8px radius, no background */
+    .plus-btn {
+      width: 42px; height: 42px;
+      border-radius: 8px;
+      background: none;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #888;
-      transition: background 0.15s, color 0.15s;
+      padding: 8px;
+      transition: background 0.15s;
     }
-    .round-btn:hover, .round-btn.active {
-      background: rgba(140,117,255,0.15);
-      color: #7c5cfc;
-    }
+    .plus-btn img { width: 24px; height: 24px; display: block; opacity: 0.55; }
+    .plus-btn:hover { background: rgba(124,123,132,0.08); }
+    .plus-btn.active { background: rgba(140,117,255,0.12); }
+    .plus-btn.active img { opacity: 1; }
 
+    /* Model selector (Auto) */
     .auto-btn {
       display: flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 20px;
-      background: rgba(124,123,132,0.08);
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-      color: #666;
-      font-family: inherit;
-      transition: background 0.15s, color 0.15s;
-    }
-    .auto-btn:hover { background: rgba(140,117,255,0.15); color: #7c5cfc; }
-
-    .mic-btn {
+      gap: 4px;
+      padding: 0 8px;
+      min-width: 120px;
+      height: 42px;
+      border-radius: 8px;
       background: none;
       border: none;
       cursor: pointer;
-      color: #ccc;
-      padding: 5px;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .auto-btn:hover { background: rgba(124,123,132,0.08); }
+    .auto-logo {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid rgba(124,123,132,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .auto-logo img { width: 16px; height: 16px; display: block; }
+    .auto-label { font-size: 14px; font-weight: 500; color: #252429; padding-left: 4px; }
+    .auto-chev { display: flex; align-items: center; justify-content: center; padding: 4px; }
+    .auto-chev img { width: 16px; height: 16px; display: block; opacity: 0.5; }
+
+    /* Mic button: square 42×42, 8px radius, no background */
+    .mic-btn {
+      width: 42px; height: 42px;
+      border-radius: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      transition: background 0.15s;
+    }
+    .mic-btn img { width: 24px; height: 24px; display: block; opacity: 0.45; }
+    .mic-btn:hover { background: rgba(124,123,132,0.08); }
+    /* legacy (unused but kept for safety) */
+    .round-btn {
+      display: none;
       display: flex;
       border-radius: 6px;
       transition: color 0.15s;
@@ -677,7 +713,7 @@
             <!-- ╔═══════════════════════════════╗
                  ║  AI TOOLS MENU SYSTEM         ║
                  ╚═══════════════════════════════╝ -->
-            <div class="menu-anchor">
+            <div class="menu-anchor" id="menuAnchor">
 
               <div class="menu-container" id="menuContainer">
                 <div class="menu-panel" id="menuPanel">
@@ -812,10 +848,8 @@
               </div><!-- end .menu-container -->
 
               <!-- + button -->
-              <button class="round-btn" id="plusBtn" title="AI Tools">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <button class="plus-btn" id="plusBtn" title="AI Tools">
+                <img id="ic-plus" alt="">
               </button>
             </div>
             <!-- end menu-anchor -->
@@ -823,20 +857,12 @@
           </div>
           <div class="bar-right">
             <button class="auto-btn">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1l1.3 3.7H11L8 7l1 3.5L6 8.5 3 10.5 4 7 1 4.7h3.7L6 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-              </svg>
-              Auto
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                <path d="M2 4l3.5 3.5L9 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              <div class="auto-logo"><img id="ic-wand" alt=""></div>
+              <span class="auto-label">Auto</span>
+              <div class="auto-chev"><img id="ic-chevdown" alt=""></div>
             </button>
             <button class="mic-btn">
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <rect x="5" y="1.5" width="5" height="7" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M2.5 8a5 5 0 0010 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="7.5" y1="13" x2="7.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
+              <img id="ic-mic" alt="">
             </button>
           </div>
         </div>
@@ -863,6 +889,10 @@
     document.getElementById('ic-sf').src       = IC_SALESFORCE;
     document.getElementById('ic-gcal').src     = IC_GCAL;
     document.getElementById('ic-know').src     = IC_KNOW_ITEM;
+    document.getElementById('ic-plus').src     = IC_PLUS;
+    document.getElementById('ic-wand').src     = IC_WAND;
+    document.getElementById('ic-chevdown').src = IC_CHEVDOWN;
+    document.getElementById('ic-mic').src      = IC_MIC;
 
     /* ── Menu logic ── */
     const plusBtn      = document.getElementById('plusBtn');
@@ -884,12 +914,14 @@
       menuOpen = true;
       menuCont.classList.add('open');
       plusBtn.classList.add('active');
+      plusBtn.querySelector('img').style.opacity = '1';
     }
 
     function closeMenu() {
       menuOpen = false;
       menuCont.classList.remove('open');
       plusBtn.classList.remove('active');
+      plusBtn.querySelector('img').style.opacity = '';
       hideSub();
     }
 
