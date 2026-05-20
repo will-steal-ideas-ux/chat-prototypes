@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>nexos.ai — AI Tools Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Figma icon assets via localhost:3845 -->
   <script>
@@ -42,7 +45,7 @@
        SIDEBAR
     ─────────────────────────────────── */
     .sidebar {
-      width: 260px;
+      width: 320px;
       flex-shrink: 0;
       height: 100vh;
       background: #fff;
@@ -221,8 +224,8 @@
        PROMPT BOX
     ─────────────────────────────────── */
     .prompt-outer {
-      width: 660px;
-      max-width: calc(100vw - 260px - 80px);
+      width: 760px;
+      max-width: calc(100vw - 320px - 80px);
       position: relative;
     }
     .prompt-box {
@@ -331,13 +334,14 @@
       border-radius: 8px;
       box-shadow: 0 8px 7.5px rgba(18,0,69,0.06), 0 4px 3.5px rgba(18,0,69,0.03);
       display: flex;
-      align-items: flex-start;
+      align-items: stretch;
       overflow: hidden;
+      height: 197px;
+      transition: height 0.18s ease;
     }
-    /* Expanded: fixed 260px height, stretch both columns */
+    /* Expanded: grows to 260px */
     .menu-panel.has-sub {
       height: 260px;
-      align-items: stretch;
     }
 
     /* Left column
@@ -361,10 +365,9 @@
     .menu-panel.has-sub .m-nav   { padding: 0 6px 0 5px; }
     .menu-panel:not(.has-sub) .m-nav { padding: 0; }
 
-    /* Bottom area (divider + Attach)
-       In expanded mode, pushed to the bottom */
-    .m-bot { margin-top: 4px; }
-    .menu-panel.has-sub .m-bot { margin-top: auto; padding: 0 6px 0 5px; }
+    /* Bottom area (divider + Attach) — always pushed to bottom */
+    .m-bot { margin-top: auto; }
+    .menu-panel.has-sub .m-bot { padding: 0 6px 0 5px; }
 
     /* Horizontal separator */
     .m-hdivider { height: 1px; background: rgba(124,123,132,0.15); margin: 4px 0; }
@@ -425,6 +428,8 @@
     /* Submenus */
     .submenu { display: none; flex-direction: column; }
     .submenu.active { display: flex; }
+    #sub-capabilities { padding-top: 12px; }
+    #sub-knowledge    { padding-top: 5px; }
 
     /* ── Capabilities submenu ── */
     .cap-item {
