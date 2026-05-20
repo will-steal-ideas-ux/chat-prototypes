@@ -4,36 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>nexos.ai — AI Tools Flow</title>
+
+  <!-- Figma icon assets via localhost:3845 -->
+  <script>
+    const IC_BRAIN     = "http://localhost:3845/assets/3f5dac42b5dbcfddfd7a07ca1d62d8f7848a2a5f.svg";
+    const IC_PUZZLE    = "http://localhost:3845/assets/6c2353aa49fa218aa0630a72feb1e2d7a2bcc30c.svg";
+    const IC_WRENCH    = "http://localhost:3845/assets/af4ed3a69a7b908f18aeaddb53df2fcc66bb0796.svg";
+    const IC_UPLOAD    = "http://localhost:3845/assets/6939cd0b81294a8f02ec1992838de172425aca5b.svg";
+    const IC_CHEVRON   = "http://localhost:3845/assets/76c027cc0804c2c5cd22a4a85a30408ac4115eb8.svg";
+    const IC_BOOKS     = "http://localhost:3845/assets/570c80b7c7a3dcb817a13dfc18cf08d3bedeaea3.svg";
+    const IC_GLOBE     = "http://localhost:3845/assets/c0af60e4062ef68c5510735a1171178f7759e82b.svg";
+    const IC_BULB      = "http://localhost:3845/assets/364622bf7bace4e41ba054e86213f1da3977a95b.svg";
+    const IC_MINUS_SM  = "http://localhost:3845/assets/5798af9fdcdbee1d2bff6ed8651b8ee5d79092a4.svg";
+    const IC_SEARCH    = "http://localhost:3845/assets/01534d6e38d8f5dd07bdcc4843caa66682bf9954.svg";
+    const IC_SHAREPOINT= "http://localhost:3845/assets/9d95b3b39248430031b2a775c8fd1d61d6ece1f0.svg";
+    const IC_SLACK     = "http://localhost:3845/assets/9585acb8a9e5d59ecffb83bca3e1cde54039486e.svg";
+    const IC_GWORKSPACE= "http://localhost:3845/assets/f77c1ff7ee84bf978e72905ba17f715329e6379f.svg";
+    const IC_SALESFORCE= "http://localhost:3845/assets/965317e76549b0d160778c8fdbb67e0dcf05dfb2.svg";
+    const IC_GCAL      = "http://localhost:3845/assets/c332f058ac33ac71d37cfc771168a81fa15ed16d.svg";
+    const IC_KNOW_ITEM = "http://localhost:3845/assets/bb4b1d78c5c29a52363b730fda35df125104a21c.svg";
+  </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #fff;
       height: 100vh;
       display: flex;
       overflow: hidden;
-      color: #111;
-      font-size: 14px;
+      color: #252429;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─────────────────────────────────────────
+    /* ───────────────────────────────────
        SIDEBAR
-    ───────────────────────────────────────── */
+    ─────────────────────────────────── */
     .sidebar {
       width: 260px;
       flex-shrink: 0;
       height: 100vh;
       background: #fff;
-      border-right: 1px solid #ececec;
+      border-right: 1px solid rgba(124,123,132,0.15);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      overflow-x: hidden;
     }
     .sidebar::-webkit-scrollbar { width: 3px; }
-    .sidebar::-webkit-scrollbar-thumb { background: #e8e8e8; border-radius: 2px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(124,123,132,0.2); border-radius: 2px; }
 
     .sidebar-top {
       display: flex;
@@ -41,18 +60,16 @@
       justify-content: space-between;
       padding: 14px 14px 10px;
     }
-
     .logo {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 15px;
       font-weight: 600;
-      color: #111;
+      color: #252429;
       text-decoration: none;
       letter-spacing: -0.02em;
     }
-
     .icon-btn {
       background: none;
       border: none;
@@ -61,13 +78,11 @@
       padding: 5px;
       border-radius: 6px;
       display: flex;
-      align-items: center;
       transition: color 0.15s, background 0.15s;
     }
-    .icon-btn:hover { color: #777; background: #f5f5f5; }
+    .icon-btn:hover { color: #888; background: rgba(124,123,132,0.08); }
 
     .sidebar-nav { padding: 2px 8px 6px; }
-
     .nav-item {
       display: flex;
       align-items: center;
@@ -77,21 +92,19 @@
       cursor: pointer;
       color: #555;
       font-size: 13.5px;
-      transition: background 0.12s, color 0.12s;
+      transition: background 0.12s;
       user-select: none;
     }
-    .nav-item:hover { background: #f5f5f5; color: #111; }
+    .nav-item:hover { background: rgba(124,123,132,0.08); color: #252429; }
     .nav-item .ni { color: #bbb; flex-shrink: 0; }
 
     .sidebar-section { padding: 0 8px 2px; }
-
     .section-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 10px 3px;
     }
-
     .section-label {
       font-size: 10px;
       font-weight: 700;
@@ -99,7 +112,6 @@
       text-transform: uppercase;
       color: #c5c5c5;
     }
-
     .section-add {
       background: none;
       border: none;
@@ -108,7 +120,6 @@
       padding: 2px;
       border-radius: 4px;
       display: flex;
-      align-items: center;
       transition: color 0.12s;
     }
     .section-add:hover { color: #888; }
@@ -125,7 +136,7 @@
       cursor: pointer;
       transition: background 0.12s;
     }
-    .agent-item:hover { background: #f8f5ff; }
+    .agent-item:hover { background: rgba(140,117,255,0.06); }
 
     .folder-item {
       display: flex;
@@ -138,8 +149,8 @@
       cursor: pointer;
       transition: background 0.12s;
     }
-    .folder-item:hover { background: #f5f5f5; }
-    .folder-item .ni { color: #d0d0d0; flex-shrink: 0; }
+    .folder-item:hover { background: rgba(124,123,132,0.08); }
+    .folder-item .ni { color: #d0d0d0; }
 
     .show-all-link {
       display: block;
@@ -158,25 +169,23 @@
       font-size: 13px;
       color: #555;
       cursor: pointer;
-      transition: background 0.12s;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      transition: background 0.12s;
     }
-    .chat-item:hover { background: #f5f5f5; color: #111; }
+    .chat-item:hover { background: rgba(124,123,132,0.08); color: #252429; }
 
     .sidebar-footer {
       margin-top: auto;
       padding: 12px 14px;
-      border-top: 1px solid #f2f2f2;
+      border-top: 1px solid rgba(124,123,132,0.1);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .avatar {
-      width: 26px;
-      height: 26px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       background: linear-gradient(135deg, #7c5cfc, #b794f4);
       display: flex;
@@ -187,22 +196,19 @@
       color: #fff;
       flex-shrink: 0;
     }
-
     .user-email { font-size: 12.5px; color: #888; }
 
-    /* ─────────────────────────────────────────
-       MAIN AREA
-    ───────────────────────────────────────── */
+    /* ───────────────────────────────────
+       MAIN
+    ─────────────────────────────────── */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
       background: #fff;
     }
-
     .welcome {
       font-size: 28px;
       font-weight: 400;
@@ -211,29 +217,27 @@
       letter-spacing: -0.02em;
     }
 
-    /* ─────────────────────────────────────────
+    /* ───────────────────────────────────
        PROMPT BOX
-    ───────────────────────────────────────── */
+    ─────────────────────────────────── */
     .prompt-outer {
       width: 660px;
       max-width: calc(100vw - 260px - 80px);
       position: relative;
     }
-
     .prompt-box {
       background: #fff;
       border: 1.5px solid #e8e8e8;
       border-radius: 14px;
       padding: 14px 16px 10px;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.04);
     }
-
     textarea.prompt-text {
       width: 100%;
       border: none;
       outline: none;
       resize: none;
-      font-size: 14.5px;
+      font-size: 15px;
       color: #333;
       line-height: 1.6;
       background: transparent;
@@ -249,17 +253,15 @@
       justify-content: space-between;
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid #f2f2f2;
+      border-top: 1px solid rgba(124,123,132,0.1);
     }
-
     .bar-left { display: flex; align-items: center; gap: 6px; }
     .bar-right { display: flex; align-items: center; gap: 4px; }
 
     .round-btn {
-      width: 30px;
-      height: 30px;
+      width: 30px; height: 30px;
       border-radius: 50%;
-      background: #f4f4f4;
+      background: rgba(124,123,132,0.08);
       border: none;
       cursor: pointer;
       display: flex;
@@ -267,11 +269,11 @@
       justify-content: center;
       color: #888;
       transition: background 0.15s, color 0.15s;
-      flex-shrink: 0;
-      position: relative;
     }
-    .round-btn:hover { background: #ede8ff; color: #7c5cfc; }
-    .round-btn.active { background: #ede8ff; color: #7c5cfc; }
+    .round-btn:hover, .round-btn.active {
+      background: rgba(140,117,255,0.15);
+      color: #7c5cfc;
+    }
 
     .auto-btn {
       display: flex;
@@ -279,7 +281,7 @@
       gap: 5px;
       padding: 5px 10px;
       border-radius: 20px;
-      background: #f4f4f4;
+      background: rgba(124,123,132,0.08);
       border: none;
       cursor: pointer;
       font-size: 13px;
@@ -287,7 +289,7 @@
       font-family: inherit;
       transition: background 0.15s, color 0.15s;
     }
-    .auto-btn:hover { background: #ede8ff; color: #7c5cfc; }
+    .auto-btn:hover { background: rgba(140,117,255,0.15); color: #7c5cfc; }
 
     .mic-btn {
       background: none;
@@ -296,20 +298,16 @@
       color: #ccc;
       padding: 5px;
       display: flex;
-      align-items: center;
       border-radius: 6px;
       transition: color 0.15s;
     }
     .mic-btn:hover { color: #7c5cfc; }
 
-    /* ─────────────────────────────────────────
-       MENU SYSTEM
-    ───────────────────────────────────────── */
-    .menu-anchor {
-      position: relative;
-    }
+    /* ───────────────────────────────────
+       AI TOOLS MENU  (matches Figma 1:1)
+    ─────────────────────────────────── */
+    .menu-anchor { position: relative; }
 
-    /* The whole menu container sits above the + button */
     .menu-container {
       position: absolute;
       bottom: calc(100% + 10px);
@@ -318,7 +316,7 @@
       pointer-events: none;
       opacity: 0;
       transform: translateY(6px);
-      transition: opacity 0.16s ease, transform 0.16s ease;
+      transition: opacity 0.15s ease, transform 0.15s ease;
     }
     .menu-container.open {
       pointer-events: all;
@@ -326,217 +324,251 @@
       transform: translateY(0);
     }
 
-    /* The panel itself is a flex row (left nav + optional right section) */
+    /* Panel — flex row, matches Figma panel shape */
     .menu-panel {
-      display: flex;
       background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 11px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.05);
+      border: 1px solid rgba(124,123,132,0.15);
+      border-radius: 8px;
+      box-shadow: 0 8px 7.5px rgba(18,0,69,0.06), 0 4px 3.5px rgba(18,0,69,0.03);
+      display: flex;
+      align-items: flex-start;
       overflow: hidden;
     }
-
-    /* LEFT COLUMN */
-    .menu-left {
-      width: 210px;
-      flex-shrink: 0;
-      padding: 6px;
-      display: flex;
-      flex-direction: column;
+    /* Expanded: fixed 260px height, stretch both columns */
+    .menu-panel.has-sub {
+      height: 260px;
+      align-items: stretch;
     }
 
-    .menu-nav { flex: 1; }
+    /* Left column
+       Simple:  280px wide, 6px padding, natural height
+       Expanded: 202px wide, specific padding, fills 260px */
+    .menu-left {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 6px;
+      transition: width 0.18s ease;
+    }
+    .menu-panel.has-sub .menu-left {
+      width: 202px;
+      padding: 11px 0 9px 0;
+    }
 
+    /* Nav items area */
+    .m-nav { display: flex; flex-direction: column; gap: 4px; }
+    .menu-panel.has-sub .m-nav   { padding: 0 6px 0 5px; }
+    .menu-panel:not(.has-sub) .m-nav { padding: 0; }
+
+    /* Bottom area (divider + Attach)
+       In expanded mode, pushed to the bottom */
+    .m-bot { margin-top: 4px; }
+    .menu-panel.has-sub .m-bot { margin-top: auto; padding: 0 6px 0 5px; }
+
+    /* Horizontal separator */
+    .m-hdivider { height: 1px; background: rgba(124,123,132,0.15); margin: 4px 0; }
+
+    /* Individual menu item — Knowledge / Integrations / Capabilities / Attach */
     .m-item {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 9px 10px;
-      border-radius: 8px;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 6px 0 12px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 13.5px;
-      color: #333;
-      transition: background 0.1s;
       user-select: none;
-      white-space: nowrap;
+      transition: background 0.1s;
     }
-    .m-item:hover { background: #f5f0fe; }
-    .m-item.active { background: #f0e9ff; }
-    .m-item .mi { color: #999; flex-shrink: 0; }
-    .m-item .ml { flex: 1; }
-    .m-item .mc { color: #d5d5d5; transition: color 0.1s; }
-    .m-item.active .mc { color: #7c5cfc; }
+    .m-item:hover  { background: rgba(140,117,255,0.08); }
+    .m-item.active { background: linear-gradient(rgba(140,117,255,0.1), rgba(140,117,255,0.1)), #fff; }
 
-    .menu-sep {
-      height: 1px;
-      background: #f2f2f2;
-      margin: 4px 4px;
-    }
+    .m-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .m-icon img { width: 24px; height: 24px; display: block; }
 
-    /* VERTICAL DIVIDER between left/right */
-    .menu-vline {
-      width: 1px;
-      background: #f0f0f0;
+    .m-label { flex: 1; font-size: 16px; font-weight: 400; color: #252429; line-height: 24px; white-space: nowrap; }
+
+    .m-chevron { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .m-chevron img { width: 20px; height: 20px; display: block; opacity: 0.28; }
+    .m-item:hover  .m-chevron img { opacity: 0.5; }
+    .m-item.active .m-chevron img { opacity: 0.85; }
+
+    /* Vertical separator between left/right col */
+    .menu-vsep {
+      width: 0;
       flex-shrink: 0;
-      display: none;
+      background: rgba(124,123,132,0.15);
+      align-self: stretch;
+      transition: width 0.18s ease;
     }
-    .menu-vline.show { display: block; }
+    .menu-panel.has-sub .menu-vsep { width: 1px; }
 
-    /* RIGHT COLUMN — expands when submenu is active */
+    /* Right column — expands when submenu active */
     .menu-right {
       width: 0;
       overflow: hidden;
-      transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       flex-shrink: 0;
+      transition: width 0.2s ease;
     }
-    .menu-right.open { width: 370px; }
+    .menu-panel.has-sub .menu-right { width: 409px; }
 
     .menu-right-inner {
-      width: 370px;
-      min-width: 370px;
-      padding: 10px;
+      width: 409px;
+      min-width: 409px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    /* Individual submenus */
-    .submenu { display: none; }
-    .submenu.active { display: block; }
+    /* Submenus */
+    .submenu { display: none; flex-direction: column; }
+    .submenu.active { display: flex; }
 
-    /* ── Capabilities ── */
-    .cap-row {
+    /* ── Capabilities submenu ── */
+    .cap-item {
       display: flex;
-      align-items: flex-start;
-      gap: 11px;
-      padding: 10px 8px;
-      border-radius: 9px;
+      align-items: center;
+      gap: 8px;
+      min-height: 53px;       /* matches Figma: 53px per row */
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: default;
       transition: background 0.1s;
     }
-    .cap-row:hover { background: #fafafa; }
+    .cap-item:hover { background: rgba(124,123,132,0.04); }
+    .cap-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; }
+    .cap-icon img { width: 24px; height: 24px; display: block; }
+    .cap-text { flex: 1; min-width: 0; }
+    .cap-name { font-size: 16px; font-weight: 400; color: #252429; line-height: 24px; }
+    .cap-desc { font-size: 14px; color: #6f6e78; line-height: 21px; }
 
-    .cap-icon {
-      width: 28px;
-      height: 28px;
+    /* Toggle — small size (32×18px) as per Figma design system */
+    .tog {
+      width: 32px;
+      height: 18px;
+      background: #cacace;
+      border-radius: 9999px;
+      padding: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .tog.on { background: #7c5cfc; }
+    .tog-knob {
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 1px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #aaa;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .cap-text { flex: 1; }
-    .cap-name { font-size: 13.5px; font-weight: 500; color: #1a1a1a; }
-    .cap-desc { font-size: 12px; color: #b0b0b0; margin-top: 2px; }
-
-    /* Toggle */
-    .tog {
-      position: relative;
-      width: 36px;
-      height: 20px;
-      flex-shrink: 0;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    .tog input { display: none; }
-    .tog-track {
-      position: absolute;
-      inset: 0;
-      background: #e0e0e0;
-      border-radius: 10px;
-      transition: background 0.2s;
-    }
-    .tog-thumb {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      top: 2px;
-      left: 2px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.22);
       transition: transform 0.2s;
+      flex-shrink: 0;
     }
-    .tog.on .tog-track { background: #7c5cfc; }
-    .tog.on .tog-thumb { transform: translateX(16px); }
+    .tog-knob img { width: 12px; height: 12px; display: block; }
+    .tog.on .tog-knob { transform: translateX(14px); }
 
-    /* ── Integrations ── */
-    .int-search-wrap {
+    /* ── Integrations submenu ── */
+    .int-search {
       display: flex;
       align-items: center;
-      gap: 7px;
-      padding: 7px 10px;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      margin-bottom: 6px;
+      gap: 8px;
+      height: 42px;
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(124,123,132,0.25);
+      flex-shrink: 0;
     }
-    .int-search-wrap svg { color: #d0d0d0; flex-shrink: 0; }
-    .int-search-wrap input {
+    .int-search-icon { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; }
+    .int-search-icon img { width: 16px; height: 16px; opacity: 0.5; }
+    .int-search input {
+      flex: 1;
       border: none;
       outline: none;
-      font-size: 13px;
-      color: #333;
+      font-size: 16px;
+      color: #252429;
       background: transparent;
       font-family: inherit;
-      flex: 1;
+      line-height: 24px;
     }
-    .int-search-wrap input::placeholder { color: #ccc; }
+    .int-search input::placeholder { color: #6f6e78; }
 
-    .int-row {
+    .int-list { display: flex; flex-direction: column; padding-top: 8px; }
+
+    .int-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 8px;
-      border-radius: 8px;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 4px;
       transition: background 0.1s;
     }
-    .int-row:hover { background: #fafafa; }
+    .int-item:hover { background: rgba(124,123,132,0.04); }
 
-    .int-logo {
+    /* Integration badge: 24px circle, rgba(124,123,132,0.1) bg */
+    .int-badge {
       width: 24px;
       height: 24px;
-      border-radius: 5px;
-      flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(124,123,132,0.1);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      flex-shrink: 0;
     }
+    .int-badge img { width: 16px; height: 16px; display: block; }
 
-    .int-name { flex: 1; font-size: 13.5px; color: #333; }
+    .int-name { flex: 1; font-size: 16px; font-weight: 400; color: #252429; line-height: 24px; }
 
+    /* Connect button: 12px Semi Bold, #4700cf */
     .connect-btn {
       font-size: 12px;
       font-weight: 600;
-      color: #7c5cfc;
+      color: #4700cf;
       background: none;
       border: none;
       cursor: pointer;
-      padding: 3px 6px;
-      border-radius: 5px;
-      transition: background 0.12s;
+      padding: 0;
       font-family: inherit;
+      line-height: 18px;
+      white-space: nowrap;
     }
-    .connect-btn:hover { background: #f0e9ff; }
 
-    /* ── Knowledge ── */
-    .know-row {
+    /* ── Knowledge submenu ── */
+    .know-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 8px;
-      border-radius: 8px;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 4px;
       cursor: pointer;
       transition: background 0.1s;
     }
-    .know-row:hover { background: #fafafa; }
-    .know-row svg { color: #bbb; flex-shrink: 0; }
-    .know-name { font-size: 13.5px; color: #333; }
+    .know-item:hover { background: rgba(124,123,132,0.04); }
+    .know-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(124,123,132,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .know-badge img { width: 16px; height: 16px; }
+    .know-name { font-size: 16px; font-weight: 400; color: #252429; line-height: 24px; }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════
-       SIDEBAR
-  ═══════════════════════════════════════ -->
+  <!-- ═══ SIDEBAR ═══ -->
   <nav class="sidebar">
     <div class="sidebar-top">
       <a href="#" class="logo">
@@ -545,7 +577,7 @@
         </svg>
         nexos.ai
       </a>
-      <button class="icon-btn" title="Collapse sidebar">
+      <button class="icon-btn">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
           <line x1="5.5" y1="1.5" x2="5.5" y2="14.5" stroke="currentColor" stroke-width="1.5"/>
@@ -556,8 +588,8 @@
     <div class="sidebar-nav">
       <div class="nav-item">
         <svg class="ni" width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <path d="M2 13l4-4 2.5 2.5L13 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 2h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12l3.5-3.5M6.5 2H13v6.5M13 2L7 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="2" y="7" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
         </svg>
         New chat
       </div>
@@ -586,9 +618,7 @@
     <div class="sidebar-section">
       <div class="section-head">
         <span class="section-label">Recent Agents</span>
-        <button class="section-add">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
+        <button class="section-add"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
       </div>
       <div class="agent-item">Sprint Architect</div>
       <div class="agent-item">Sentiment Strategist</div>
@@ -597,9 +627,7 @@
     <div class="sidebar-section">
       <div class="section-head">
         <span class="section-label">Chat Groups</span>
-        <button class="section-add">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
+        <button class="section-add"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
       </div>
       <div class="folder-item">
         <svg class="ni" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 4.5h3l1-2h6V11H1.5V4.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
@@ -617,9 +645,7 @@
     </div>
 
     <div class="sidebar-section">
-      <div class="section-head">
-        <span class="section-label">Recent Chats</span>
-      </div>
+      <div class="section-head"><span class="section-label">Recent Chats</span></div>
       <div class="chat-item">Cybersecurity market trends for 2026</div>
       <div class="chat-item">EV Market Trends Analysis</div>
       <div class="chat-item">Generate an image bursting out of the pa...</div>
@@ -632,9 +658,7 @@
     </div>
   </nav>
 
-  <!-- ═══════════════════════════════════════
-       MAIN
-  ═══════════════════════════════════════ -->
+  <!-- ═══ MAIN ═══ -->
   <main class="main">
     <h1 class="welcome">What's on your mind today?</h1>
 
@@ -644,236 +668,154 @@
 
         <div class="prompt-bar">
           <div class="bar-left">
-            <!-- Plus button + menu -->
+
+            <!-- ╔═══════════════════════════════╗
+                 ║  AI TOOLS MENU SYSTEM         ║
+                 ╚═══════════════════════════════╝ -->
             <div class="menu-anchor">
 
-              <!-- ── Menu container (opens upward) ── -->
               <div class="menu-container" id="menuContainer">
-                <div class="menu-panel">
+                <div class="menu-panel" id="menuPanel">
 
-                  <!-- Left nav column -->
-                  <div class="menu-left">
-                    <div class="menu-nav">
-                      <div class="m-item" data-sub="sub-knowledge">
-                        <!-- Knowledge icon: book/pages -->
-                        <svg class="mi" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                          <path d="M3.5 13V4a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0111.5 4v9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                          <path d="M1.5 13h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                          <path d="M6 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                        </svg>
-                        <span class="ml">Knowledge</span>
-                        <svg class="mc" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <!-- ── LEFT COLUMN ── -->
+                  <div class="menu-left" id="menuLeft">
+
+                    <!-- Nav items (Knowledge / Integrations / Capabilities) -->
+                    <div class="m-nav" id="mNav">
+                      <div class="m-item" id="mi-knowledge" data-sub="sub-knowledge">
+                        <div class="m-icon"><img id="ic-brain" alt=""></div>
+                        <span class="m-label">Knowledge</span>
+                        <div class="m-chevron"><img id="ic-chev-k" alt=""></div>
                       </div>
-                      <div class="m-item" data-sub="sub-integrations">
-                        <!-- Integrations icon: grid/puzzle -->
-                        <svg class="mi" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                          <rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/>
-                          <rect x="8.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/>
-                          <rect x="1.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/>
-                          <rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/>
-                        </svg>
-                        <span class="ml">Integrations</span>
-                        <svg class="mc" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <div class="m-item" id="mi-integrations" data-sub="sub-integrations">
+                        <div class="m-icon"><img id="ic-puzzle" alt=""></div>
+                        <span class="m-label">Integrations</span>
+                        <div class="m-chevron"><img id="ic-chev-i" alt=""></div>
                       </div>
-                      <div class="m-item" data-sub="sub-capabilities">
-                        <!-- Capabilities icon: lightning/bolt -->
-                        <svg class="mi" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                          <path d="M9 1.5L4.5 8.5H7.5L6 13.5L11.5 6.5H8.5L9 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                        </svg>
-                        <span class="ml">Capabilities</span>
-                        <svg class="mc" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <div class="m-item" id="mi-capabilities" data-sub="sub-capabilities">
+                        <div class="m-icon"><img id="ic-wrench" alt=""></div>
+                        <span class="m-label">Capabilities</span>
+                        <div class="m-chevron"><img id="ic-chev-c" alt=""></div>
                       </div>
                     </div>
-                    <div class="menu-sep"></div>
-                    <div class="m-item" id="mi-attach">
-                      <!-- Attach icon: paperclip -->
-                      <svg class="mi" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                        <path d="M12.5 7L7 12.5a4 4 0 01-5.66-5.66l6.5-6.5a2.5 2.5 0 013.54 3.54L5 10.25a1 1 0 01-1.42-1.42L9.5 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                      <span class="ml">Attach</span>
+
+                    <!-- Bottom: divider + Attach (pushed to bottom in expanded state) -->
+                    <div class="m-bot">
+                      <div class="m-hdivider"></div>
+                      <div class="m-item" id="mi-attach">
+                        <div class="m-icon"><img id="ic-upload" alt=""></div>
+                        <span class="m-label">Attach</span>
+                      </div>
                     </div>
                   </div>
 
-                  <!-- Vertical divider (shown when submenu open) -->
-                  <div class="menu-vline" id="menuVline"></div>
+                  <!-- ── VERTICAL SEPARATOR ── -->
+                  <div class="menu-vsep" id="menuVsep"></div>
 
-                  <!-- Right content column -->
+                  <!-- ── RIGHT COLUMN ── -->
                   <div class="menu-right" id="menuRight">
                     <div class="menu-right-inner">
 
-                      <!-- ── Capabilities ── -->
+                      <!-- CAPABILITIES -->
                       <div class="submenu" id="sub-capabilities">
-                        <div class="cap-row">
-                          <div class="cap-icon">
-                            <!-- Deep research: book + magnifier -->
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                              <path d="M3 16V6a2 2 0 012-2h6l3 3v9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                              <path d="M8 11a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.3"/>
-                              <path d="M11 13l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                            </svg>
-                          </div>
+                        <div class="cap-item">
+                          <div class="cap-icon"><img id="ic-books" alt=""></div>
                           <div class="cap-text">
                             <div class="cap-name">Deep research</div>
                             <div class="cap-desc">Perform advanced research</div>
                           </div>
-                          <label class="tog" title="Toggle Deep research">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
-                        </div>
-                        <div class="cap-row">
-                          <div class="cap-icon">
-                            <!-- Web research: globe -->
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                              <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.4"/>
-                              <path d="M9 2c-2 2.5-3 4-3 7s1 4.5 3 7" stroke="currentColor" stroke-width="1.3"/>
-                              <path d="M9 2c2 2.5 3 4 3 7s-1 4.5-3 7" stroke="currentColor" stroke-width="1.3"/>
-                              <path d="M2 9h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                            </svg>
+                          <div class="tog" onclick="this.classList.toggle('on')">
+                            <div class="tog-knob"><img id="ic-minus-1" alt=""></div>
                           </div>
+                        </div>
+                        <div class="cap-item">
+                          <div class="cap-icon"><img id="ic-globe" alt=""></div>
                           <div class="cap-text">
                             <div class="cap-name">Web research</div>
                             <div class="cap-desc">Find information online</div>
                           </div>
-                          <label class="tog" title="Toggle Web research">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
-                        </div>
-                        <div class="cap-row">
-                          <div class="cap-icon">
-                            <!-- Extended thinking: lightbulb -->
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                              <path d="M9 2a5 5 0 00-2 9.58V13h4v-1.42A5 5 0 009 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                              <path d="M7 13h4M7.5 15h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                            </svg>
+                          <div class="tog" onclick="this.classList.toggle('on')">
+                            <div class="tog-knob"><img id="ic-minus-2" alt=""></div>
                           </div>
+                        </div>
+                        <div class="cap-item">
+                          <div class="cap-icon"><img id="ic-bulb" alt=""></div>
                           <div class="cap-text">
                             <div class="cap-name">Extended thinking</div>
                             <div class="cap-desc">Things longer for complex tasks</div>
                           </div>
-                          <label class="tog" title="Toggle Extended thinking">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
+                          <div class="tog" onclick="this.classList.toggle('on')">
+                            <div class="tog-knob"><img id="ic-minus-3" alt=""></div>
+                          </div>
                         </div>
                       </div>
 
-                      <!-- ── Integrations ── -->
+                      <!-- INTEGRATIONS -->
                       <div class="submenu" id="sub-integrations">
-                        <div class="int-search-wrap">
-                          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                            <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4"/>
-                            <line x1="8.5" y1="8.5" x2="12" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                          </svg>
+                        <div class="int-search">
+                          <div class="int-search-icon"><img id="ic-search" alt=""></div>
                           <input type="text" placeholder="Search for integrations">
                         </div>
-
-                        <div class="int-row">
-                          <div class="int-logo" style="background:#0078d4;">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M2 2h4.5v4.5H2zM7.5 2H12v4.5H7.5zM2 7.5h4.5V12H2zM7.5 7.5H12V12H7.5z" fill="rgba(255,255,255,0.85)"/>
-                            </svg>
+                        <div class="int-list">
+                          <div class="int-item">
+                            <div class="int-badge"><img id="ic-sp" alt=""></div>
+                            <span class="int-name">Microsoft Sharepoint</span>
+                            <div class="tog" onclick="this.classList.toggle('on')">
+                              <div class="tog-knob"><img id="ic-minus-4" alt=""></div>
+                            </div>
                           </div>
-                          <span class="int-name">Microsoft Sharepoint</span>
-                          <label class="tog" title="Toggle Sharepoint">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
-                        </div>
-
-                        <div class="int-row">
-                          <div class="int-logo" style="background:#4a154b;">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M3.5 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#e01e5a"/>
-                              <path d="M3.5 10.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#36c5f0"/>
-                              <path d="M7 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#2eb67d"/>
-                              <path d="M10.5 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#ecb22e"/>
-                            </svg>
+                          <div class="int-item">
+                            <div class="int-badge"><img id="ic-slack" alt=""></div>
+                            <span class="int-name">Slack</span>
+                            <div class="tog" onclick="this.classList.toggle('on')">
+                              <div class="tog-knob"><img id="ic-minus-5" alt=""></div>
+                            </div>
                           </div>
-                          <span class="int-name">Slack</span>
-                          <label class="tog" title="Toggle Slack">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
-                        </div>
-
-                        <div class="int-row">
-                          <div class="int-logo" style="background:#fff; border: 1px solid #e8e8e8;">
-                            <svg width="13" height="13" viewBox="0 0 13 13">
-                              <path d="M12.3 6.7c0-.5-.1-.9-.2-1.3H6.5v2.5h3.3a2.8 2.8 0 01-1.2 1.8v1.5h2c1.2-1.1 1.7-2.7 1.7-4.5z" fill="#4285f4"/>
-                              <path d="M6.5 13c1.6 0 3-.5 4-1.4l-2-1.5c-.5.4-1.2.6-2 .6-1.6 0-2.9-1-3.4-2.5H1v1.6A6 6 0 006.5 13z" fill="#34a853"/>
-                              <path d="M3.1 8.2A3.5 3.5 0 013.1 6H1V7.6a6 6 0 000 2.2l2.1-1.6z" fill="#fbbc05"/>
-                              <path d="M6.5 2.8c.9 0 1.7.3 2.3.9L10.5 2A6 6 0 001 5.8l2 1.6c.6-1.5 2-2.6 3.5-2.6z" fill="#ea4335"/>
-                            </svg>
+                          <div class="int-item">
+                            <div class="int-badge"><img id="ic-gws" alt=""></div>
+                            <span class="int-name">Google Workspace</span>
+                            <div class="tog" onclick="this.classList.toggle('on')">
+                              <div class="tog-knob"><img id="ic-minus-6" alt=""></div>
+                            </div>
                           </div>
-                          <span class="int-name">Google Workspace</span>
-                          <label class="tog" title="Toggle Google Workspace">
-                            <input type="checkbox">
-                            <span class="tog-track"></span>
-                            <span class="tog-thumb"></span>
-                          </label>
-                        </div>
-
-                        <div class="int-row">
-                          <div class="int-logo" style="background:#00a1e0;">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M7 1.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.8)" stroke-width="1.2"/>
-                              <path d="M4.5 7h5M7 4.5v5" stroke="rgba(255,255,255,0.9)" stroke-width="1.2" stroke-linecap="round"/>
-                            </svg>
+                          <div class="int-item">
+                            <div class="int-badge"><img id="ic-sf" alt=""></div>
+                            <span class="int-name">Salesforce</span>
+                            <button class="connect-btn" onclick="connectToggle(this)">Connect</button>
                           </div>
-                          <span class="int-name">Salesforce</span>
-                          <button class="connect-btn">Connect</button>
-                        </div>
-
-                        <div class="int-row">
-                          <div class="int-logo" style="background:#fff; border: 1px solid #e8e8e8;">
-                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                              <rect x="1" y="2.5" width="11" height="9" rx="1.5" stroke="#4285f4" stroke-width="1.2"/>
-                              <line x1="1" y1="5.5" x2="12" y2="5.5" stroke="#4285f4" stroke-width="1.1"/>
-                              <line x1="4" y1="2.5" x2="4" y2="1" stroke="#ea4335" stroke-width="1.2" stroke-linecap="round"/>
-                              <line x1="9" y1="2.5" x2="9" y2="1" stroke="#ea4335" stroke-width="1.2" stroke-linecap="round"/>
-                              <rect x="3.5" y="7.5" width="2" height="2" rx="0.3" fill="#4285f4"/>
-                              <rect x="7.5" y="7.5" width="2" height="2" rx="0.3" fill="#4285f4"/>
-                            </svg>
+                          <div class="int-item">
+                            <div class="int-badge"><img id="ic-gcal" alt=""></div>
+                            <span class="int-name">Google Calendar</span>
+                            <button class="connect-btn" onclick="connectToggle(this)">Connect</button>
                           </div>
-                          <span class="int-name">Google Calendar</span>
-                          <button class="connect-btn">Connect</button>
                         </div>
                       </div>
 
-                      <!-- ── Knowledge ── -->
+                      <!-- KNOWLEDGE -->
                       <div class="submenu" id="sub-knowledge">
-                        <div class="know-row">
-                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                            <path d="M3 12V5a2 2 0 012-2h5a2 2 0 012 2v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                            <path d="M1.5 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                          </svg>
+                        <div class="know-item">
+                          <div class="know-badge"><img id="ic-know" alt=""></div>
                           <span class="know-name">Memory of Ad targeting</span>
                         </div>
                       </div>
 
                     </div>
                   </div>
+                  <!-- end right column -->
 
-                </div>
-              </div>
+                </div><!-- end .menu-panel -->
+              </div><!-- end .menu-container -->
 
-              <!-- The + button -->
+              <!-- + button -->
               <button class="round-btn" id="plusBtn" title="AI Tools">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                   <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
               </button>
             </div>
-          </div>
+            <!-- end menu-anchor -->
 
-          <!-- Right: Auto selector + mic -->
+          </div>
           <div class="bar-right">
             <button class="auto-btn">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -884,7 +826,7 @@
                 <path d="M2 4l3.5 3.5L9 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <button class="mic-btn" title="Voice input">
+            <button class="mic-btn">
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                 <rect x="5" y="1.5" width="5" height="7" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M2.5 8a5 5 0 0010 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -898,20 +840,36 @@
   </main>
 
   <script>
-    const plusBtn     = document.getElementById('plusBtn');
-    const menuCont    = document.getElementById('menuContainer');
-    const menuRight   = document.getElementById('menuRight');
-    const menuVline   = document.getElementById('menuVline');
+    /* ── Set Figma icon assets ── */
+    document.getElementById('ic-brain').src    = IC_BRAIN;
+    document.getElementById('ic-puzzle').src   = IC_PUZZLE;
+    document.getElementById('ic-wrench').src   = IC_WRENCH;
+    document.getElementById('ic-upload').src   = IC_UPLOAD;
+    ['ic-chev-k','ic-chev-i','ic-chev-c'].forEach(id => document.getElementById(id).src = IC_CHEVRON);
+    document.getElementById('ic-books').src    = IC_BOOKS;
+    document.getElementById('ic-globe').src    = IC_GLOBE;
+    document.getElementById('ic-bulb').src     = IC_BULB;
+    ['ic-minus-1','ic-minus-2','ic-minus-3',
+     'ic-minus-4','ic-minus-5','ic-minus-6'].forEach(id => document.getElementById(id).src = IC_MINUS_SM);
+    document.getElementById('ic-search').src   = IC_SEARCH;
+    document.getElementById('ic-sp').src       = IC_SHAREPOINT;
+    document.getElementById('ic-slack').src    = IC_SLACK;
+    document.getElementById('ic-gws').src      = IC_GWORKSPACE;
+    document.getElementById('ic-sf').src       = IC_SALESFORCE;
+    document.getElementById('ic-gcal').src     = IC_GCAL;
+    document.getElementById('ic-know').src     = IC_KNOW_ITEM;
 
-    // All submenu-triggering items
-    const menuItems   = document.querySelectorAll('.m-item[data-sub]');
-    // Attach (no submenu)
-    const attachItem  = document.getElementById('mi-attach');
+    /* ── Menu logic ── */
+    const plusBtn      = document.getElementById('plusBtn');
+    const menuCont     = document.getElementById('menuContainer');
+    const menuPanel    = document.getElementById('menuPanel');
 
-    let menuOpen    = false;
-    let activeSub   = null;
+    const navItems     = document.querySelectorAll('.m-item[data-sub]');
+    const attachItem   = document.getElementById('mi-attach');
 
-    /* ── Open / Close menu ── */
+    let menuOpen  = false;
+    let activeSub = null;
+
     plusBtn.addEventListener('click', e => {
       e.stopPropagation();
       menuOpen ? closeMenu() : openMenu();
@@ -927,68 +885,47 @@
       menuOpen = false;
       menuCont.classList.remove('open');
       plusBtn.classList.remove('active');
-      hideSubmenu();
+      hideSub();
     }
 
-    /* ── Show / Hide submenu ── */
-    function showSubmenu(id) {
+    function showSub(id) {
       if (activeSub === id) return;
-
-      // Deactivate previous
       if (activeSub) {
         document.getElementById(activeSub)?.classList.remove('active');
         document.querySelector(`.m-item[data-sub="${activeSub}"]`)?.classList.remove('active');
       }
-
       activeSub = id;
       document.getElementById(id)?.classList.add('active');
       document.querySelector(`.m-item[data-sub="${id}"]`)?.classList.add('active');
-      menuVline.classList.add('show');
-      menuRight.classList.add('open');
+      menuPanel.classList.add('has-sub');
     }
 
-    function hideSubmenu() {
+    function hideSub() {
       if (activeSub) {
         document.getElementById(activeSub)?.classList.remove('active');
         document.querySelector(`.m-item[data-sub="${activeSub}"]`)?.classList.remove('active');
         activeSub = null;
       }
-      menuVline.classList.remove('show');
-      menuRight.classList.remove('open');
+      menuPanel.classList.remove('has-sub');
     }
 
-    /* ── Hover interactions ── */
-    menuItems.forEach(item => {
-      item.addEventListener('mouseenter', () => showSubmenu(item.dataset.sub));
+    navItems.forEach(item => {
+      item.addEventListener('mouseenter', () => showSub(item.dataset.sub));
     });
+    attachItem.addEventListener('mouseenter', hideSub);
 
-    attachItem.addEventListener('mouseenter', () => hideSubmenu());
-
-    /* ── Close on outside click ── */
     document.addEventListener('click', e => {
-      if (!menuCont.contains(e.target) && !plusBtn.contains(e.target)) {
-        closeMenu();
-      }
+      if (!menuCont.contains(e.target) && !plusBtn.contains(e.target)) closeMenu();
     });
-
     menuCont.addEventListener('click', e => e.stopPropagation());
 
-    /* ── Toggle switches ── */
-    document.querySelectorAll('.tog').forEach(tog => {
-      tog.addEventListener('click', () => {
-        tog.classList.toggle('on');
-        tog.querySelector('input').checked = tog.classList.contains('on');
-      });
-    });
-
-    /* ── Prevent connect buttons from closing menu ── */
-    document.querySelectorAll('.connect-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        btn.textContent = btn.textContent === 'Connect' ? 'Connected ✓' : 'Connect';
-        btn.style.color = btn.textContent.includes('✓') ? '#22c55e' : '';
-      });
-    });
+    /* ── Connect button toggle ── */
+    function connectToggle(btn) {
+      const connected = btn.dataset.connected === '1';
+      btn.dataset.connected = connected ? '0' : '1';
+      btn.textContent = connected ? 'Connect' : 'Connected';
+      btn.style.color = connected ? '' : '#22c55e';
+    }
   </script>
 </body>
 </html>
