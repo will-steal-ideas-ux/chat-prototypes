@@ -736,6 +736,13 @@
       color: var(--brand);
       background: #f3f0ff;
     }
+    .demo-btn.prd-match,
+    .demo-btn.prd-match.active-state {
+      border-color: rgba(22,163,74,.35);
+      color: #15803d;
+      background: var(--bg-secondary);
+    }
+    .demo-btn.prd-match:hover { background: #f0fdf4; }
 
     /* ── State indicator (top-right of main) ─────────── */
     .state-indicator {
@@ -1720,10 +1727,10 @@
 <!-- ── Demo Controls ─────────────────────────────── -->
 <div class="demo-bar">
   <span class="demo-label">Prototype states</span>
-  <button class="demo-btn active-state" id="btnFullAccess" onclick="setStateFullAccess()">① Full access (normal)</button>
+  <button class="demo-btn prd-match active-state" id="btnFullAccess" onclick="setStateFullAccess()">① Full access (normal)</button>
   <button class="demo-btn" id="btnWarn" onclick="setStateWarn()">② 90% quota warning</button>
-  <button class="demo-btn" id="btnQuotaHit" onclick="setStateQuotaHit()">③ Quota hit mid-conversation</button>
-  <button class="demo-btn" id="btnUpgraded" onclick="setStateRestored()">④ Credits purchased → restored</button>
+  <button class="demo-btn prd-match" id="btnQuotaHit" onclick="setStateQuotaHit()">③ Quota hit mid-conversation</button>
+  <button class="demo-btn prd-match" id="btnUpgraded" onclick="setStateRestored()">④ Credits purchased → restored</button>
   <button class="demo-btn" id="btnModelsAgents" onclick="setStateModelsAgents()">⑤ Basic model — models &amp; agents</button>
   <button class="demo-btn" id="btnPurchaseOnly" onclick="setStatePurchaseOnly()">⑥ Purchase only</button>
   <button class="demo-btn" id="btnPickerDisabled" onclick="setStatePickerDisabled()">⑦ Picker disabled</button>
