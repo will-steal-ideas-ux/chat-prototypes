@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — Quota Fallback UX Prototype</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-primary:       #f5f5f5;
+      --bg-secondary:     #ffffff;
+      --bg-tertiary:      #f2f2f3;
+      --text-primary:     #252429;
+      --text-secondary:   #44434b;
+      --text-tertiary:    #6b6a72;
+      --text-disabled:    #949399;
+      --border:           rgba(124,123,132,0.25);
+      --brand:            #693bff;
+      --brand-hover:      #4700cf;
+      --radius-xs:  4px;
+      --radius-sm:  8px;
+      --radius-md:  12px;
+      --radius-full: 9999px;
+
+      /* 90% warning banner palette */
+      --warn-bg:          #fffbf0;
+      --warn-border:      rgba(180,130,0,0.2);
+      --warn-text:        #6b4a00;
+      --warn-icon:        #c99000;
+
+      /* Quota banner palette */
+      --quota-bg:         #fff9f0;
+      --quota-border:     rgba(180,100,0,0.2);
+      --quota-text:       #7a4200;
+      --quota-icon:       #c97000;
+      --quota-link:       #c97000;
+
+      /* Restored state */
+      --restore-bg:       #f0faf5;
+      --restore-text:     #1a6640;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────── */
+    .sidebar {
+      width: 248px;
+      min-width: 248px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      transition: width .2s ease, min-width .2s ease;
+    }
+    .sidebar.collapsed { width: 0; min-width: 0; }
+
+    .sidebar-header {
+      padding: 16px 16px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+    .logo-icon {
+      width: 24px; height: 24px;
+    }
+    .sidebar-toggle {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary);
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .sidebar-toggle:hover { background: rgba(124,123,132,.12); }
+
+    .sidebar-actions {
+      padding: 0 12px 12px;
+      display: flex; flex-direction: column; gap: 2px;
+      flex-shrink: 0;
+    }
+    .sidebar-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 8px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      font-size: 13.5px; font-weight: 500;
+      color: var(--text-secondary);
+      text-align: left; width: 100%;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .sidebar-btn:hover { background: rgba(124,123,132,.12); }
+    .sidebar-btn svg { flex-shrink: 0; opacity: .7; }
+
+    .sidebar-section {
+      flex: 1; overflow-y: auto; padding: 0 12px;
+    }
+    .sidebar-section::-webkit-scrollbar { width: 0; }
+
+    .section-label {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 8px 6px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-disabled);
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-size: 13.5px; font-weight: 400;
+      color: var(--text-secondary);
+      transition: background .15s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .nav-item:hover { background: rgba(124,123,132,.12); }
+    .nav-item.active { background: #8c75ff1a; color: var(--text-primary); font-weight: 500; }
+
+    .agent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    .user-avatar-sm {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #693bff 0%, #9b6dff 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: white; flex-shrink: 0;
+    }
+    .user-email { font-size: 12.5px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Quota pill in sidebar footer ── */
+    .quota-pill {
+      margin-left: auto;
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: #fef3e2;
+      color: #92500a;
+      border: 1px solid rgba(180,100,0,.2);
+      white-space: nowrap;
+      transition: all .3s;
+      flex-shrink: 0;
+    }
+    .quota-pill.exceeded {
+      background: #fef3e2;
+      color: #92500a;
+    }
+    .quota-pill.normal {
+      background: var(--bg-tertiary);
+      color: var(--text-disabled);
+      border-color: var(--border);
+    }
+    .quota-pill.restored {
+      background: #e9f9f0;
+      color: #1a6640;
+      border-color: rgba(26,102,64,.2);
+    }
+
+    /* ── Main ───────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex; flex-direction: column;
+      height: 100vh; overflow: hidden;
+      position: relative;
+    }
+
+    .topbar {
+      height: 48px; min-height: 48px;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary);
+      transition: background .15s, color .15s;
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+    /* ── Messages ─────────────────────────────────── */
+    .messages {
+      flex: 1; overflow-y: auto;
+      padding: 32px 0;
+      display: flex; flex-direction: column; gap: 0;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .msg-wrapper {
+      max-width: 760px; width: 100%;
+      margin: 0 auto; padding: 0 32px;
+    }
+
+    .msg-user {
+      display: flex; justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+    .msg-user-bubble {
+      background: var(--bg-tertiary);
+      border-radius: 16px 16px 4px 16px;
+      padding: 12px 16px;
+      max-width: 560px;
+      font-size: 14px; line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .msg-ai { margin-bottom: 8px; }
+
+    .msg-ai-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .ai-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--bg-tertiary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    /* Fallback model icon gets a subtle amber tint */
+    .ai-icon.fallback { background: #fef3e2; }
+
+    .ai-model-label {
+      font-size: 12px; font-weight: 500;
+      color: var(--text-secondary);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .model-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 1px 7px;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .model-badge.basic {
+      background: #fef3e2;
+      border-color: rgba(180,100,0,.2);
+      color: #92500a;
+    }
+    .model-badge.premium {
+      background: #f3f0ff;
+      border-color: rgba(105,59,255,.2);
+      color: #4b2ec4;
+    }
+
+    .msg-ai-body {
+      font-size: 14px; line-height: 1.65;
+      color: var(--text-primary);
+    }
+    .msg-ai-body p { margin-bottom: 10px; }
+    .msg-ai-body p:last-child { margin-bottom: 0; }
+    .msg-ai-body h3 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; }
+    .msg-ai-body h3:first-child { margin-top: 0; }
+    .msg-ai-body ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .msg-ai-body li { color: var(--text-secondary); }
+    .msg-ai-body li strong { color: var(--text-primary); }
+
+    /* Quality drop visual hint */
+    .quality-note {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--text-disabled);
+      margin-top: 8px;
+    }
+
+    .reaction-bar {
+      display: flex; align-items: center; gap: 2px;
+      margin-top: 8px;
+    }
+    .reaction-btn {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-disabled);
+      transition: background .15s, color .15s;
+    }
+    .reaction-btn:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+    /* ── Divider for mid-conversation switch ── */
+    .model-switch-divider {
+      display: flex; align-items: center; gap: 12px;
+      padding: 20px 0;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .model-switch-divider.visible { opacity: 1; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label {
+      font-size: 11.5px; font-weight: 500;
+      color: var(--text-disabled);
+      white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Chatbox area ─────────────────────────────── */
+    .chatbox-area { position: relative; flex-shrink: 0; }
+
+    .chatbox-gradient {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 64px;
+      background: linear-gradient(to bottom, transparent, var(--bg-secondary));
+      pointer-events: none; z-index: 1;
+    }
+
+    .chatbox-inner {
+      position: relative; z-index: 2;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 0 16px;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── 90% Warning Banner (dismissible) ── */
+    .warn-banner {
+      margin-bottom: -16px;
+      overflow: hidden;
+      animation: bannerIn .22s ease;
+      display: none;
+    }
+    .warn-banner.visible { display: block; }
+
+    .warn-banner-inner {
+      border-radius: 16px 16px 0 0;
+      padding: 12px 16px 26px;
+      background: var(--warn-bg);
+      border-top: 1px solid var(--warn-border);
+      border-left: 1px solid var(--warn-border);
+      border-right: 1px solid var(--warn-border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .warn-banner-icon { flex-shrink: 0; color: var(--warn-icon); margin-top: 1px; }
+    .warn-banner-content { flex: 1; min-width: 0; }
+    .warn-banner-title {
+      font-size: 13.5px; font-weight: 600;
+      color: var(--warn-text);
+      margin-bottom: 3px;
+    }
+    .warn-banner-sub {
+      font-size: 12.5px; color: #8a6200;
+      line-height: 1.5;
+    }
+    .warn-banner-actions {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px;
+    }
+    .warn-cta-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(180,130,0,.35);
+      background: transparent;
+      color: #7a5300;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .warn-cta-btn:hover { background: rgba(180,130,0,.08); }
+    .warn-banner-dismiss {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border: none; background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #8a6200;
+      opacity: .5;
+      border-radius: var(--radius-xs);
+      transition: opacity .15s, background .15s;
+      margin-top: 1px;
+    }
+    .warn-banner-dismiss:hover { opacity: 1; background: rgba(180,130,0,.1); }
+
+    /* ── Quota Banner (permanent, not dismissible) ── */
+    @keyframes bannerIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .quota-banner {
+      margin-bottom: -16px;
+      overflow: hidden;
+      animation: bannerIn .22s ease;
+      display: none;
+    }
+    .quota-banner.visible { display: block; }
+
+    .quota-banner-inner {
+      border-radius: 16px 16px 0 0;
+      padding: 12px 16px 26px;
+      background: var(--quota-bg);
+      border-top: 1px solid var(--quota-border);
+      border-left: 1px solid var(--quota-border);
+      border-right: 1px solid var(--quota-border);
+    }
+
+    /* Restored state banner */
+    .quota-banner-inner.restored {
+      background: var(--restore-bg);
+      border-color: rgba(26,102,64,.2);
+    }
+
+    .quota-banner-top {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .quota-banner-icon { flex-shrink: 0; color: var(--quota-icon); margin-top: 1px; }
+    .quota-banner-icon.restored { color: #1a6640; }
+
+    .quota-banner-content { flex: 1; min-width: 0; }
+    .quota-banner-title {
+      font-size: 13.5px; font-weight: 600;
+      color: var(--quota-text);
+      margin-bottom: 3px;
+    }
+    .quota-banner-title.restored { color: var(--restore-text); }
+    .quota-banner-sub {
+      font-size: 12.5px; color: #a06b30;
+      line-height: 1.5;
+    }
+    .quota-banner-sub.restored { color: #2e8055; }
+
+    .quota-banner-dismiss {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border: none; background: transparent;
+      cursor: pointer;
+      display: none;
+      align-items: center; justify-content: center;
+      color: #2e8055;
+      opacity: .5;
+      border-radius: var(--radius-xs);
+      transition: opacity .15s, background .15s;
+      margin-top: 1px;
+    }
+    .quota-banner-dismiss.visible { display: flex; }
+    .quota-banner-dismiss:hover { opacity: 1; background: rgba(26,102,64,.1); }
+
+    /* Collapse chevron for quota banner */
+    .quota-banner-chevron {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border: none; background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center; justify-content: center;
+      color: var(--quota-icon);
+      opacity: .55;
+      border-radius: var(--radius-xs);
+      transition: opacity .15s, background .15s;
+      margin-top: 1px;
+    }
+    .quota-banner-chevron:hover { opacity: 1; background: rgba(180,100,0,.1); }
+    .quota-banner-chevron svg { transition: transform .2s ease; }
+    .quota-banner-chevron.collapsed svg { transform: rotate(-180deg); }
+
+    /* Collapsible body of quota banner */
+    .quota-banner-body {
+      overflow: hidden;
+      max-height: 120px;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 1;
+    }
+    .quota-banner-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .quota-banner-actions {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px;
+    }
+    .quota-cta-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      border: none;
+      background: #c97000;
+      color: white;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .quota-cta-btn:hover { background: #a85c00; }
+    .quota-reset-text {
+      font-size: 12px; color: #a06b30;
+    }
+
+    /* ── Prompt Input Card ──────────────────────────── */
+    .prompt-input-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 15px 0 rgba(18,0,69,.06), 0 4px 7px 0 rgba(18,0,69,.03);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; z-index: 2;
+    }
+
+    /* Quota mode: input card gets a very subtle warm tint on its top border */
+    .prompt-input-card.quota-mode {
+      border-color: rgba(180,100,0,.25);
+    }
+
+    .input-field {
+      width: 100%; padding: 4px 8px 0;
+      background: transparent; border: none; outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 24px;
+      color: var(--text-primary);
+      resize: none; min-height: 32px; max-height: 160px;
+    }
+    .input-field::placeholder { color: #6f6e78; }
+
+    .input-toolbar {
+      display: flex; align-items: center; height: 42px; gap: 0;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 4px; }
+    .toolbar-btn {
+      display: flex; align-items: center; gap: 4px;
+      height: 42px; padding: 0 8px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--text-primary);
+      transition: background .15s;
+    }
+    .toolbar-btn:hover { background: var(--bg-primary); }
+
+    .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+
+    /* Model selector button */
+    .model-selector {
+      display: flex; align-items: center; gap: 6px;
+      height: 42px; padding: 0 8px;
+      border-radius: var(--radius-xs);
+      border: none; background: transparent;
+      cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--text-primary);
+      transition: background .15s;
+      position: relative;
+    }
+    .model-selector:hover { background: var(--bg-primary); }
+
+    .model-logo {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: border-color .2s, background .2s;
+    }
+    .model-logo.fallback-mode {
+      background: #fff5e6;
+      border-color: rgba(180,100,0,.25);
+    }
+
+    .model-selector-text { white-space: nowrap; }
+
+    /* ── Model Picker Dropdown ──────────────────────── */
+    .model-dropdown {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      width: 280px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 24px rgba(18,0,69,.1), 0 4px 8px rgba(18,0,69,.06);
+      overflow: hidden;
+      display: none;
+      z-index: 100;
+      animation: dropdownIn .15s ease;
+    }
+    .model-dropdown.open { display: block; }
+
+    @keyframes dropdownIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-section-label {
+      padding: 10px 12px 4px;
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--text-disabled);
+    }
+
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .dropdown-item:hover { background: var(--bg-primary); }
+    .dropdown-item.selected { background: #f3f0ff; }
+    .dropdown-item.disabled { opacity: .5; cursor: not-allowed; }
+    .dropdown-item.disabled:hover { background: transparent; }
+
+    .dropdown-model-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .dropdown-model-icon.fallback-icon {
+      background: #fff5e6;
+      border-color: rgba(180,100,0,.2);
+    }
+    .dropdown-model-icon.auto-icon {
+      background: #f3f0ff;
+      border-color: rgba(105,59,255,.2);
+    }
+
+    .dropdown-model-info { flex: 1; min-width: 0; }
+    .dropdown-model-name {
+      font-size: 13px; font-weight: 500;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dropdown-model-sub {
+      font-size: 11px; color: var(--text-disabled);
+      margin-top: 1px;
+    }
+
+    .dropdown-check { color: var(--brand); flex-shrink: 0; }
+    .dropdown-lock { color: var(--text-disabled); flex-shrink: 0; }
+
+    .dropdown-divider {
+      height: 1px; background: var(--border);
+      margin: 4px 0;
+    }
+
+    .dropdown-upgrade-row {
+      padding: 10px 12px 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .dropdown-upgrade-btn {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(180,100,0,.3);
+      background: #fff9f0;
+      color: #92500a;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background .15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .dropdown-upgrade-btn:hover { background: #fef3e2; }
+
+    .paused-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: #fef3e2;
+      color: #92500a;
+      border: 1px solid rgba(180,100,0,.2);
+      white-space: nowrap;
+    }
+
+    /* ── Demo Controls ──────────────────────────────── */
+    .demo-bar {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 6px;
+      z-index: 1000;
+    }
+    .demo-label {
+      font-size: 10px; font-weight: 700;
+      color: var(--text-disabled);
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 0 2px;
+    }
+    .demo-btn {
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      box-shadow: 0 4px 6px -1px rgba(18,0,69,.1), 0 2px 4px -1px rgba(18,0,69,.06);
+      font-size: 12px; font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background .15s;
+      text-align: left;
+    }
+    .demo-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
+    .demo-btn.active-state {
+      border-color: rgba(105,59,255,.4);
+      color: var(--brand);
+      background: #f3f0ff;
+    }
+
+    /* ── State indicator (top-right of main) ─────────── */
+    .state-indicator {
+      position: absolute;
+      top: 52px; right: 16px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .05em; text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      z-index: 50;
+      transition: all .3s;
+    }
+    .state-indicator.full-access {
+      background: #e9f9f0; color: #1a6640;
+      border: 1px solid rgba(26,102,64,.2);
+    }
+    .state-indicator.quota-hit {
+      background: #fef3e2; color: #92500a;
+      border: 1px solid rgba(180,100,0,.2);
+    }
+    .state-indicator.restored {
+      background: #e9f9f0; color: #1a6640;
+      border: 1px solid rgba(26,102,64,.2);
+    }
+
+    /* ── Fade-in for new messages ─────────────────── */
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg-new { animation: msgIn .3s ease; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px);
+      background: #1a1a2e;
+      color: white;
+      font-size: 13px; font-weight: 500;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 16px rgba(0,0,0,.2);
+      z-index: 2000;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #1a6640; }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="6" fill="#693bff"/>
+        <path d="M7 17L12 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.5 13H14.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      nexos.ai
+    </div>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M9 3v18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="sidebar-actions">
+    <button class="sidebar-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      New chat
+    </button>
+    <button class="sidebar-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search chats
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Recent</div>
+    <div class="nav-item active">Cybersecurity market trends Q2</div>
+    <div class="nav-item">EV Market Analysis 2026</div>
+    <div class="nav-item">Product roadmap brainstorm</div>
+    <div class="nav-item">Competitor feature comparison</div>
+    <div class="nav-item">Q1 investor update draft</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar-sm">TU</div>
+    <span class="user-email" style="flex:1;min-width:0;">tomas@nexos.ai</span>
+    <span class="quota-pill normal" id="quotaPill">Pro</span>
+  </div>
+</aside>
+
+<!-- ── Main ──────────────────────────────────────── -->
+<main class="main" id="main">
+  <div class="topbar">
+    <button class="icon-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+    </button>
+    <button class="icon-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <!-- State Indicator -->
+  <div class="state-indicator full-access" id="stateIndicator">Full access</div>
+
+  <!-- Messages -->
+  <div class="messages" id="messages">
+    <div class="msg-wrapper" id="msgContainer">
+
+      <!-- ── Pre-quota messages (always visible) ── -->
+      <div class="msg-user">
+        <div class="msg-user-bubble">
+          Analyze the current state of the cybersecurity market — key trends, major players, and a 12-month forecast.
+        </div>
+      </div>
+
+      <div class="msg-ai">
+        <div class="msg-ai-header">
+          <div class="ai-icon">
+            <!-- Sparkle / Auto icon -->
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+          </div>
+          <div class="ai-model-label">
+            Claude 3.5 Sonnet
+          </div>
+        </div>
+        <div class="msg-ai-body">
+          <p>The cybersecurity market is projected to reach <strong>$298 billion by 2028</strong>, growing at a 13.4% CAGR. Several converging forces are reshaping the threat landscape in 2026.</p>
+          <h3>Key trends:</h3>
+          <ul>
+            <li><strong>AI-powered attacks:</strong> Adversarial use of LLMs for phishing, code generation, and social engineering is accelerating faster than defensive adoption.</li>
+            <li><strong>Zero Trust maturity:</strong> Enterprises are moving past pilots — 68% report active ZTA deployments, up from 41% in 2024.</li>
+            <li><strong>Cloud-native security:</strong> CNAPP platforms are consolidating CSPM, CWPP, and CIEM into unified control planes.</li>
+          </ul>
+          <h3>Major players:</h3>
+          <ul>
+            <li>CrowdStrike, Palo Alto Networks, Fortinet (endpoint/platform leaders)</li>
+            <li>Microsoft, Google, AWS (cloud-native security)</li>
+            <li>Wiz, Orca Security (cloud posture, gaining fast)</li>
+          </ul>
+        </div>
+        <div class="reaction-bar">
+          <button class="reaction-btn" title="Thumbs up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button>
+          <button class="reaction-btn" title="Thumbs down"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg></button>
+          <button class="reaction-btn" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        </div>
+      </div>
+
+      <div class="msg-user">
+        <div class="msg-user-bubble">
+          Great. Now give me a detailed competitive landscape matrix comparing the top 5 vendors across threat detection, cloud coverage, pricing model, and enterprise adoption.
+        </div>
+      </div>
+
+      <div class="msg-ai">
+        <div class="msg-ai-header">
+          <div class="ai-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+          </div>
+          <div class="ai-model-label">
+            Claude 3.5 Sonnet
+          </div>
+        </div>
+        <div class="msg-ai-body">
+          <p>Here's a competitive matrix across the dimensions you specified:</p>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:8px 6px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Vendor</th>
+                <th style="text-align:left;padding:8px 6px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Threat Detection</th>
+                <th style="text-align:left;padding:8px 6px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Cloud</th>
+                <th style="text-align:left;padding:8px 6px;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Pricing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(124,123,132,.1);">
+                <td style="padding:8px 6px;font-weight:500;">CrowdStrike</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">AI-native EDR ★★★★★</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Strong</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Seat-based</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(124,123,132,.1);">
+                <td style="padding:8px 6px;font-weight:500;">Palo Alto</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Cortex XDR ★★★★☆</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Excellent</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Platform bundle</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 6px;font-weight:500;">Wiz</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Cloud-only ★★★★☆</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Cloud-native</td>
+                <td style="padding:8px 6px;color:var(--text-secondary);">Usage-based</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="reaction-bar">
+          <button class="reaction-btn" title="Thumbs up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button>
+          <button class="reaction-btn" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        </div>
+      </div>
+
+      <!-- ── Mid-conversation switch divider (injected on quota hit) ── -->
+      <div class="model-switch-divider" id="switchDivider">
+        <div class="divider-line"></div>
+        <div class="divider-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Monthly quota reached — switched to basic model
+        </div>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- ── Fallback message (injected on quota hit) ── -->
+      <div id="fallbackMsg" style="display:none;">
+        <div class="msg-user msg-new">
+          <div class="msg-user-bubble">
+            Now draft a 500-word executive summary I can use for an investor update.
+          </div>
+        </div>
+
+        <div class="msg-ai msg-new">
+          <div class="msg-ai-header">
+            <div class="ai-icon fallback">
+              <!-- Simple bot icon for fallback -->
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c97000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 15h.01M16 15h.01"/></svg>
+            </div>
+            <div class="ai-model-label">
+              Basic
+            </div>
+          </div>
+          <div class="msg-ai-body">
+            <p>The cybersecurity industry is large and growing. Major trends include AI threats, cloud security, and zero trust adoption. Key vendors like CrowdStrike and Palo Alto Networks are market leaders. The market is expected to grow significantly over the next few years.</p>
+            <p>For investors, the opportunity is strong. Demand for security tools is increasing. Companies are spending more on cyber. The competitive landscape includes many players but also consolidation.</p>
+            <p>In summary, cybersecurity is an important and growing sector with good investment opportunities. The companies in this space are generally well-positioned for future growth given the increasing importance of security in digital transformation.</p>
+          </div>
+          <div class="reaction-bar">
+            <button class="reaction-btn" title="Thumbs up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button>
+            <button class="reaction-btn" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post-upgrade message (injected on restore) ── -->
+      <div id="restoredMsg" style="display:none;">
+        <div class="msg-user msg-new">
+          <div class="msg-user-bubble">
+            That wasn't great — rewrite it with proper depth and structure.
+          </div>
+        </div>
+
+        <div class="msg-ai msg-new">
+          <div class="msg-ai-header">
+            <div class="ai-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+            </div>
+            <div class="ai-model-label">
+              Claude 3.5 Sonnet
+            </div>
+          </div>
+          <div class="msg-ai-body">
+            <p><strong>Executive Summary: Cybersecurity Market Opportunity</strong></p>
+            <p>The global cybersecurity market represents one of the most structurally durable growth opportunities in enterprise technology. With spend projected to exceed $298 billion by 2028 (13.4% CAGR), the sector is being propelled by three interlocking forces: the weaponization of AI by threat actors, the accelerating migration of critical infrastructure to cloud environments, and tightening regulatory requirements across North America, the EU, and APAC.</p>
+            <p>Market leadership has consolidated around platform players — CrowdStrike's Falcon platform and Palo Alto Networks' Cortex suite — who are successfully monetizing the enterprise shift from point solutions toward unified security operations. Meanwhile, cloud-native challengers like Wiz are capturing disproportionate wallet-share in the fastest-growing segment.</p>
+            <p>The near-term catalyst is the AI threat surface: 73% of CISOs surveyed in Q1 2026 cited AI-augmented phishing and automated vulnerability exploitation as their top-of-mind concerns, driving budget reallocation toward detection and response tooling at the expense of perimeter-first investments.</p>
+          </div>
+          <div class="reaction-bar">
+            <button class="reaction-btn" title="Thumbs up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button>
+            <button class="reaction-btn" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Chatbox ────────────────────────────────── -->
+  <div class="chatbox-area">
+    <div class="chatbox-gradient"></div>
+    <div class="chatbox-inner">
+
+      <!-- 90% warning banner (dismissible) -->
+      <div class="warn-banner" id="warnBanner">
+        <div class="warn-banner-inner">
+          <div class="warn-banner-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="warn-banner-content">
+            <div class="warn-banner-title">You have reached 90% of your monthly allocation</div>
+            <div class="warn-banner-sub">You will be moved to a basic model with limited capabilities when your quota runs out.</div>
+            <div class="warn-banner-actions">
+              <button class="warn-cta-btn">
+                Purchase credits to keep full access
+              </button>
+            </div>
+          </div>
+          <button class="warn-banner-dismiss" onclick="dismissWarnBanner()" title="Dismiss">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quota banner (persistent, no dismiss) -->
+      <div class="quota-banner" id="quotaBanner">
+        <div class="quota-banner-inner" id="quotaBannerInner">
+          <div class="quota-banner-top">
+            <div class="quota-banner-icon" id="quotaBannerIcon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="quota-banner-content">
+              <div class="quota-banner-title" id="quotaBannerTitle">Monthly quota reached — you're on a basic model</div>
+              <div class="quota-banner-body" id="quotaBannerBody">
+                <div class="quota-banner-sub" id="quotaBannerSub" style="margin-top:3px;">Response quality is limited. Purchase credits to restore access to Claude, GPT-4o, and full Auto routing.</div>
+                <div class="quota-banner-actions" id="quotaBannerActions" style="display:flex">
+                  <button class="quota-cta-btn" onclick="simulateUpgrade()">
+                    Purchase credits
+                  </button>
+                  <span class="quota-reset-text" id="quotaResetText">Quota resets Jun 28, 2026</span>
+                </div>
+              </div>
+            </div>
+            <!-- Chevron for quota state, dismiss X for restored state -->
+            <button class="quota-banner-chevron" id="quotaBannerChevron" onclick="toggleQuotaBannerCollapse()" title="Collapse">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <button class="quota-banner-dismiss" id="quotaBannerDismiss" onclick="dismissQuotaBanner()" title="Dismiss">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Input card -->
+      <div class="prompt-input-card" id="inputCard">
+        <textarea class="input-field" placeholder="Ask a follow up" rows="1"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <div class="input-toolbar">
+          <div class="toolbar-left">
+            <button class="toolbar-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="toolbar-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Tools
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <!-- Model selector with dropdown -->
+            <div style="position:relative;">
+              <button class="model-selector" id="modelSelectorBtn" onclick="toggleModelDropdown(event)">
+                <div class="model-logo" id="modelLogo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+                </div>
+                <span class="model-selector-text" id="modelSelectorText">Auto</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+
+              <!-- Full-access dropdown -->
+              <div class="model-dropdown" id="dropdownNormal">
+                <div class="dropdown-section-label">Routing</div>
+                <div class="dropdown-item selected">
+                  <div class="dropdown-model-icon auto-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#693bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Auto routing</div>
+                    <div class="dropdown-model-sub">Best model selected per task</div>
+                  </div>
+                  <svg class="dropdown-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-section-label">Models</div>
+                <div class="dropdown-item">
+                  <div class="dropdown-model-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Claude 3.5 Sonnet</div>
+                    <div class="dropdown-model-sub">Analysis, writing, reasoning</div>
+                  </div>
+                </div>
+                <div class="dropdown-item">
+                  <div class="dropdown-model-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">GPT-4o</div>
+                    <div class="dropdown-model-sub">Multimodal, coding, speed</div>
+                  </div>
+                </div>
+                <div class="dropdown-item">
+                  <div class="dropdown-model-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Gemini 1.5 Pro</div>
+                    <div class="dropdown-model-sub">Long context, documents</div>
+                  </div>
+                </div>
+                <div class="dropdown-item">
+                  <div class="dropdown-model-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">GPT-4o mini</div>
+                    <div class="dropdown-model-sub">Fast, lightweight tasks</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quota-mode dropdown -->
+              <div class="model-dropdown" id="dropdownQuota">
+                <div class="dropdown-section-label">Current model</div>
+                <div class="dropdown-item selected">
+                  <div class="dropdown-model-icon fallback-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c97000" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">GPT OSS 120B <span class="model-badge basic" style="font-size:10px;">Basic</span></div>
+                    <div class="dropdown-model-sub">System-assigned · limited capabilities</div>
+                  </div>
+                  <svg class="dropdown-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c97000" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-section-label" style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>Premium models</span>
+                  <span class="paused-badge">Quota exceeded</span>
+                </div>
+
+                <!-- Auto routing — locked -->
+                <div class="dropdown-item disabled">
+                  <div class="dropdown-model-icon auto-icon" style="opacity:.5;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#693bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Auto routing</div>
+                    <div class="dropdown-model-sub">Paused until quota restores</div>
+                  </div>
+                  <svg class="dropdown-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+
+                <!-- Claude — locked -->
+                <div class="dropdown-item disabled">
+                  <div class="dropdown-model-icon" style="opacity:.5;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Claude 3.5 Sonnet</div>
+                  </div>
+                  <svg class="dropdown-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div class="dropdown-item disabled">
+                  <div class="dropdown-model-icon" style="opacity:.5;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">GPT-4o</div>
+                  </div>
+                  <svg class="dropdown-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div class="dropdown-item disabled">
+                  <div class="dropdown-model-icon" style="opacity:.5;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div class="dropdown-model-info">
+                    <div class="dropdown-model-name">Gemini 1.5 Pro</div>
+                  </div>
+                  <svg class="dropdown-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+
+                <div class="dropdown-upgrade-row" id="dropdownUpgradeRow">
+                  <button class="dropdown-upgrade-btn" id="dropdownUpgradeBtn" onclick="simulateUpgrade(); closeDropdown();">
+                    Purchase credits to restore access
+                  </button>
+                  <button class="dropdown-upgrade-btn" id="dropdownModelsBtn" style="display:none;" onclick="openModelModal(); closeDropdown();">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    All models and agents
+                  </button>
+                </div>
+              </div>
+
+              <!-- Purchase-only dropdown (state 6) -->
+              <div class="model-dropdown" id="dropdownPurchase">
+                <div class="dropdown-upgrade-row" style="padding:8px 0 4px;">
+                  <button class="dropdown-upgrade-btn" onclick="simulateUpgrade(); closeDropdown();" style="width:100%;justify-content:center;font-size:13px;padding:10px 16px;">
+                    Purchase credits to restore access
+                  </button>
+                </div>
+              </div>
+
+            </div><!-- end model selector wrapper -->
+
+            <!-- Voice -->
+            <button class="icon-btn" title="Voice input">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+
+            <!-- Send -->
+            <button class="icon-btn" style="background:var(--brand);color:white;border-radius:var(--radius-xs);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── Model Selector Modal ──────────────────────── -->
+<style>
+  /* ── Overlay ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(18,0,69,.35);
+    backdrop-filter: blur(2px);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: overlayIn .15s ease;
+  }
+  .modal-overlay.open { display: flex; }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ── Modal shell ── */
+  .model-modal {
+    width: 872px; height: 613px;
+    background: #f7f7f8;
+    border-radius: 16px;
+    box-shadow: 0 0 0 1px rgba(51,51,51,.07), 0 3px 6px rgba(51,51,51,.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalIn .18s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.97) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ── Header ── */
+  .modal-header {
+    background: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .modal-tabs {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .modal-tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px; font-weight: 500;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    background: #f5f5f5;
+    transition: background .12s;
+  }
+  .modal-tab.active {
+    background: #f2f0f9;
+    border-color: #8c75ff;
+    color: var(--text-secondary);
+  }
+  .modal-tab svg { flex-shrink: 0; }
+  .modal-close {
+    margin-left: auto;
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    transition: background .12s;
+  }
+  .modal-close:hover { background: var(--bg-tertiary); }
+
+  /* ── Content area ── */
+  .modal-content {
+    display: flex;
+    flex: 1;
+    gap: 24px;
+    padding: 0 24px 24px;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* ── Left: search + list ── */
+  .modal-left {
+    width: 400px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    padding-top: 12px;
+    overflow: hidden;
+  }
+  .modal-search {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #777677;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .modal-search input {
+    flex: 1; border: none; outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; color: var(--text-primary);
+    background: transparent;
+  }
+  .modal-search input::placeholder { color: #5a5a5b; }
+
+  .modal-list {
+    flex: 1; overflow-y: auto;
+    display: flex; flex-direction: column;
+    gap: 2px;
+  }
+  .modal-list::-webkit-scrollbar { width: 4px; }
+  .modal-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  .modal-group-label {
+    padding: 8px 16px 4px;
+    font-size: 12px; font-weight: 500;
+    color: #5a5a5b;
+  }
+
+  .modal-model-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #f5f5f5;
+    transition: background .12s;
+    position: relative;
+    min-height: 40px;
+  }
+  .modal-model-row:hover:not(.locked) { background: #ebebec; }
+  .modal-model-row.active {
+    background: #ebe9fe;
+    border: 1px solid #8c75ff;
+  }
+  .modal-model-row.locked {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+
+  .modal-row-bar {
+    width: 2px; height: 24px;
+    background: #ff9e1e;
+    border-radius: 1px;
+    flex-shrink: 0;
+    margin-left: -4px;
+  }
+
+  .modal-provider-logo {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(124,123,132,.15);
+    font-size: 9px; font-weight: 700;
+    color: var(--text-tertiary);
+  }
+  .modal-provider-logo.fallback-logo {
+    background: #fff5e6;
+    border-color: rgba(180,100,0,.2);
+  }
+
+  .modal-row-name {
+    flex: 1;
+    font-size: 16px; font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .modal-row-actions {
+    display: flex; align-items: center; gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── Right: detail card ── */
+  .modal-right {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    overflow-y: auto;
+    padding: 12px 0 8px;
+    display: flex; flex-direction: column;
+  }
+  .modal-right::-webkit-scrollbar { width: 0; }
+
+  .modal-detail-header {
+    padding: 0 24px 16px;
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .modal-detail-info { flex: 1; min-width: 0; }
+  .modal-detail-title {
+    font-size: 20px; font-weight: 600;
+    color: var(--text-primary);
+    line-height: 30px;
+  }
+  .modal-detail-sub {
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .modal-detail-badges {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px;
+  }
+  .modal-detail-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 6px;
+    border-radius: 100px;
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .modal-detail-badge.basic-badge {
+    background: #ffe5cc;
+    color: #935403;
+  }
+  .modal-detail-logo {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(124,123,132,.1);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px; font-weight: 700;
+    color: var(--text-tertiary);
+  }
+
+  .modal-detail-desc {
+    padding: 0 24px 8px;
+    font-size: 14px; color: var(--text-primary);
+    line-height: 21px;
+    flex-shrink: 0;
+  }
+
+  .modal-detail-hosting {
+    padding: 0 24px 8px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--text-primary);
+    flex-shrink: 0;
+  }
+
+  .modal-capabilities {
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .modal-cap-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #e4e3e6;
+    min-height: 40px;
+  }
+  .modal-cap-row:last-child { border-bottom: none; }
+  .modal-cap-label {
+    flex: 1;
+    font-size: 14px; color: var(--text-primary);
+  }
+  .modal-cap-value {
+    font-size: 14px; color: var(--text-secondary);
+    text-align: right;
+  }
+  .modal-cap-chips {
+    display: flex; align-items: center; gap: 4px;
+    flex-wrap: wrap; justify-content: flex-end;
+  }
+  .modal-chip {
+    background: #ececee;
+    border-radius: 100px;
+    padding: 2px 8px;
+    font-size: 12px; color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  /* Upgrade CTA inside modal */
+  .modal-upgrade-row {
+    padding: 16px 24px;
+    border-top: 1px solid #e4e3e6;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  .modal-upgrade-btn {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--brand);
+    color: #fff;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background .15s;
+  }
+  .modal-upgrade-btn:hover { background: var(--brand-hover); }
+</style>
+
+<div class="modal-overlay" id="modelModal" onclick="handleModalOverlayClick(event)">
+  <div class="model-modal">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-tabs">
+        <div class="modal-tab active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><rect x="15" y="14" width="7" height="7" rx="1"/></svg>
+          Models
+        </div>
+        <div class="modal-tab">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Agents
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModelModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      <!-- Left: search + list -->
+      <div class="modal-left">
+        <div class="modal-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a5b" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search Models" />
+        </div>
+        <div class="modal-list">
+
+          <!-- Available: only fallback -->
+          <div class="modal-group-label">Available</div>
+          <div class="modal-model-row active" onclick="selectModalModel('fallback')">
+            <div class="modal-row-bar"></div>
+            <div class="modal-provider-logo fallback-logo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c97000" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+            </div>
+            <span class="modal-row-name">GPT OSS 120B</span>
+            <div class="modal-row-actions">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#693bff" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+          </div>
+
+          <!-- Locked section -->
+          <div class="modal-group-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:12px;">
+            <span>Requires credits</span>
+            <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;background:#fef3e2;color:#92500a;border:1px solid rgba(180,100,0,.2);">Quota exceeded</span>
+          </div>
+
+          <!-- Anthropic -->
+          <div class="modal-group-label" style="font-size:11px;padding-top:4px;">Anthropic</div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><span style="font-size:8px;font-weight:700;">AΛ</span></div>
+            <span class="modal-row-name">Claude 3.7 Sonnet</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><span style="font-size:8px;font-weight:700;">AΛ</span></div>
+            <span class="modal-row-name">Claude 3.5 Sonnet</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><span style="font-size:8px;font-weight:700;">AΛ</span></div>
+            <span class="modal-row-name">Claude 3.5 Haiku</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+
+          <!-- OpenAI -->
+          <div class="modal-group-label" style="font-size:11px;padding-top:4px;">OpenAI</div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+            <span class="modal-row-name">GPT-4o</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+            <span class="modal-row-name">GPT-4o mini</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+
+          <!-- Google -->
+          <div class="modal-group-label" style="font-size:11px;padding-top:4px;">Google</div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <span class="modal-row-name">Gemini 1.5 Pro</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+          <div class="modal-model-row locked">
+            <div class="modal-provider-logo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <span class="modal-row-name">Gemini 2.0 Flash</span>
+            <div class="modal-row-actions">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#949399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: detail panel -->
+      <div class="modal-right">
+        <div class="modal-detail-header">
+          <div class="modal-detail-info">
+            <div class="modal-detail-title">GPT OSS 120B</div>
+            <div class="modal-detail-sub">Open source, system-assigned</div>
+            <div class="modal-detail-badges">
+              <span class="modal-detail-badge basic-badge">Basic</span>
+            </div>
+          </div>
+          <div class="modal-detail-logo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c97000" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+          </div>
+        </div>
+
+        <div class="modal-detail-desc">
+          GPT OSS 120B is an open-source model hosted on Nexos infrastructure. It handles everyday text tasks at reduced quality compared to premium models. It is automatically assigned when your monthly quota is exhausted — you cannot manually select it under normal conditions.
+        </div>
+
+        <div class="modal-detail-hosting">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a5b" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span>Hosted by Nexos (on-premise)</span>
+        </div>
+
+        <div class="modal-capabilities">
+          <div class="modal-cap-row">
+            <span class="modal-cap-label">Max Input / Output</span>
+            <span class="modal-cap-value">32K / 8K tokens</span>
+          </div>
+          <div class="modal-cap-row">
+            <span class="modal-cap-label">Input</span>
+            <div class="modal-cap-chips">
+              <span class="modal-chip">Text</span>
+            </div>
+          </div>
+          <div class="modal-cap-row">
+            <span class="modal-cap-label">Output</span>
+            <div class="modal-cap-chips">
+              <span class="modal-chip">Text</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-upgrade-row">
+          <button class="modal-upgrade-btn" onclick="simulateUpgrade(); closeModelModal();">
+            Purchase credits to unlock all models
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Demo Controls ─────────────────────────────── -->
+<div class="demo-bar">
+  <span class="demo-label">Prototype states</span>
+  <button class="demo-btn active-state" id="btnFullAccess" onclick="setStateFullAccess()">① Full access (normal)</button>
+  <button class="demo-btn" id="btnWarn" onclick="setStateWarn()">② 90% quota warning</button>
+  <button class="demo-btn" id="btnQuotaHit" onclick="setStateQuotaHit()">③ Quota hit mid-conversation</button>
+  <button class="demo-btn" id="btnUpgraded" onclick="setStateRestored()">④ Credits purchased → restored</button>
+  <button class="demo-btn" id="btnModelsAgents" onclick="setStateModelsAgents()">⑤ Basic model — models &amp; agents</button>
+  <button class="demo-btn" id="btnPurchaseOnly" onclick="setStatePurchaseOnly()">⑥ Purchase only</button>
+  <button class="demo-btn" id="btnPickerDisabled" onclick="setStatePickerDisabled()">⑦ Picker disabled</button>
+</div>
+
+<script>
+  // ── State machine ────────────────────────────────────────
+  // States: 'full' | 'warn' | 'quota' | 'restored'
+  let currentState = 'full';
+  let warnDismissed = false;
+
+  function setStateFullAccess() {
+    currentState = 'full';
+    warnDismissed = false;
+    updateUI();
+    setActiveDemoBtn('btnFullAccess');
+  }
+
+  function setStateWarn() {
+    currentState = 'warn';
+    warnDismissed = false;
+    updateUI();
+    setActiveDemoBtn('btnWarn');
+  }
+
+  function setStateQuotaHit() {
+    currentState = 'quota';
+    updateUI();
+    setActiveDemoBtn('btnQuotaHit');
+  }
+
+  function setStateRestored() {
+    currentState = 'restored';
+    updateUI();
+    setActiveDemoBtn('btnUpgraded');
+  }
+
+  function setStatePurchaseOnly() {
+    currentState = 'purchase-only';
+    updateUI();
+    setActiveDemoBtn('btnPurchaseOnly');
+  }
+
+  function setStatePickerDisabled() {
+    currentState = 'picker-disabled';
+    updateUI();
+    setActiveDemoBtn('btnPickerDisabled');
+  }
+
+  function setStateModelsAgents() {
+    currentState = 'quota-alt';
+    updateUI();
+    setActiveDemoBtn('btnModelsAgents');
+  }
+
+  function simulateUpgrade() {
+    closeDropdown();
+    setStateRestored();
+    setActiveDemoBtn('btnUpgraded');
+    showToast('✓ Credits applied — full access restored', 'success');
+  }
+
+  function dismissWarnBanner() {
+    warnDismissed = true;
+    document.getElementById('warnBanner').classList.remove('visible');
+  }
+
+  function dismissQuotaBanner() {
+    document.getElementById('quotaBanner').classList.remove('visible');
+  }
+
+  function toggleQuotaBannerCollapse() {
+    const body    = document.getElementById('quotaBannerBody');
+    const chevron = document.getElementById('quotaBannerChevron');
+    body.classList.toggle('collapsed');
+    chevron.classList.toggle('collapsed');
+  }
+
+  function updateUI() {
+    const isWarn          = currentState === 'warn';
+    const isQuota         = currentState === 'quota' || currentState === 'quota-alt' || currentState === 'purchase-only' || currentState === 'picker-disabled';
+    const isPickerDisabled = currentState === 'picker-disabled';
+    const isQuotaAlt      = currentState === 'quota-alt';
+    const isPurchaseOnly  = currentState === 'purchase-only';
+    const isRestored      = currentState === 'restored';
+    const isQuotaOrRestored = isQuota || isRestored;
+
+    // Swap dropdown CTA button
+    document.getElementById('dropdownUpgradeBtn').style.display = isQuotaAlt ? 'none' : '';
+    document.getElementById('dropdownModelsBtn').style.display  = isQuotaAlt ? 'flex' : 'none';
+
+    // 90% warning banner
+    const warnBanner = document.getElementById('warnBanner');
+    if (isWarn && !warnDismissed) {
+      warnBanner.classList.add('visible');
+    } else {
+      warnBanner.classList.remove('visible');
+    }
+
+    // Quota banner
+    const banner = document.getElementById('quotaBanner');
+    const bannerInner = document.getElementById('quotaBannerInner');
+    const bannerIcon = document.getElementById('quotaBannerIcon');
+    const bannerTitle = document.getElementById('quotaBannerTitle');
+    const bannerSub = document.getElementById('quotaBannerSub');
+    const bannerActions = document.getElementById('quotaBannerActions');
+
+    if (isQuota || isRestored) {
+      banner.classList.add('visible');
+    } else {
+      banner.classList.remove('visible');
+    }
+
+    const dismissBtn  = document.getElementById('quotaBannerDismiss');
+    const chevronBtn  = document.getElementById('quotaBannerChevron');
+    const bannerBody  = document.getElementById('quotaBannerBody');
+
+    if (isRestored) {
+      bannerInner.className = 'quota-banner-inner restored';
+      bannerIcon.className = 'quota-banner-icon restored';
+      bannerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>`;
+      bannerTitle.className = 'quota-banner-title restored';
+      bannerTitle.textContent = 'Full access restored — credits applied';
+      bannerSub.className = 'quota-banner-sub restored';
+      bannerSub.textContent = 'Auto routing and all models are available. Your quota resets again on Jun 28, 2026.';
+      bannerActions.style.display = 'none';
+      // restored: show X, hide chevron, always expand body
+      dismissBtn.classList.add('visible');
+      chevronBtn.style.display = 'none';
+      bannerBody.classList.remove('collapsed');
+    } else {
+      bannerInner.className = 'quota-banner-inner';
+      bannerIcon.className = 'quota-banner-icon';
+      bannerIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+      bannerTitle.className = 'quota-banner-title';
+      bannerTitle.textContent = 'Monthly quota reached — you\'re on a basic model';
+      bannerSub.className = 'quota-banner-sub';
+      bannerSub.textContent = 'Response quality is limited. Purchase credits to restore access to Claude, GPT-4o, and full Auto routing.';
+      bannerActions.style.display = 'flex';
+      // quota: show chevron, hide X, expand body
+      dismissBtn.classList.remove('visible');
+      chevronBtn.style.display = 'flex';
+      bannerBody.classList.remove('collapsed');
+      chevronBtn.classList.remove('collapsed');
+    }
+
+    // Mid-conversation divider
+    const divider = document.getElementById('switchDivider');
+    if (isQuotaOrRestored) {
+      divider.classList.add('visible');
+    } else {
+      divider.classList.remove('visible');
+    }
+
+    // Fallback message
+    document.getElementById('fallbackMsg').style.display = isQuotaOrRestored ? 'block' : 'none';
+
+    // Restored message
+    document.getElementById('restoredMsg').style.display = isRestored ? 'block' : 'none';
+
+    // Model selector button
+    const logo = document.getElementById('modelLogo');
+    const text = document.getElementById('modelSelectorText');
+    const inputCard = document.getElementById('inputCard');
+
+    const selectorBtn = document.getElementById('modelSelectorBtn');
+    if (isQuota && !isRestored) {
+      logo.className = 'model-logo';
+      logo.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>`;
+      text.textContent = 'Basic model';
+      text.style.color = '';
+      inputCard.classList.add('quota-mode');
+    } else {
+      logo.className = 'model-logo';
+      logo.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>`;
+      text.textContent = 'Auto';
+      text.style.color = '';
+      inputCard.classList.remove('quota-mode');
+    }
+    // State 7: completely non-interactive picker
+    selectorBtn.style.pointerEvents = isPickerDisabled ? 'none' : '';
+    selectorBtn.style.opacity = isPickerDisabled ? '0.45' : '';
+
+    // State indicator
+    const indicator = document.getElementById('stateIndicator');
+    if (currentState === 'full') {
+      indicator.className = 'state-indicator full-access';
+      indicator.textContent = 'Full access';
+    } else if (currentState === 'warn') {
+      indicator.className = 'state-indicator quota-hit';
+      indicator.textContent = '90% used';
+    } else if (currentState === 'quota' || currentState === 'quota-alt' || currentState === 'purchase-only' || currentState === 'picker-disabled') {
+      indicator.className = 'state-indicator quota-hit';
+      indicator.textContent = 'Quota exceeded';
+    } else {
+      indicator.className = 'state-indicator restored';
+      indicator.textContent = 'Restored';
+    }
+
+    // Quota pill in sidebar
+    const pill = document.getElementById('quotaPill');
+    if (currentState === 'full') {
+      pill.className = 'quota-pill normal';
+      pill.textContent = 'Pro';
+    } else if (currentState === 'warn') {
+      pill.className = 'quota-pill exceeded';
+      pill.textContent = '90% used';
+    } else if (currentState === 'quota' || currentState === 'quota-alt' || currentState === 'purchase-only' || currentState === 'picker-disabled') {
+      pill.className = 'quota-pill exceeded';
+      pill.textContent = 'Quota hit';
+    } else {
+      pill.className = 'quota-pill restored';
+      pill.textContent = 'Credits added';
+    }
+
+    // Scroll to bottom
+    const msgs = document.getElementById('messages');
+    setTimeout(() => msgs.scrollTop = msgs.scrollHeight, 50);
+  }
+
+  // ── Model dropdown ────────────────────────────────────────
+  function toggleModelDropdown(e) {
+    e.stopPropagation();
+    if (currentState === 'picker-disabled') return;
+    const normal    = document.getElementById('dropdownNormal');
+    const quota     = document.getElementById('dropdownQuota');
+    const purchase  = document.getElementById('dropdownPurchase');
+
+    if (currentState === 'purchase-only') {
+      const isOpen = purchase.classList.contains('open');
+      closeDropdown();
+      if (!isOpen) purchase.classList.add('open');
+    } else if (currentState === 'quota' || currentState === 'quota-alt') {
+      const isOpen = quota.classList.contains('open');
+      closeDropdown();
+      if (!isOpen) quota.classList.add('open');
+    } else {
+      const isOpen = normal.classList.contains('open');
+      closeDropdown();
+      if (!isOpen) normal.classList.add('open');
+    }
+  }
+
+  function closeDropdown() {
+    document.getElementById('dropdownNormal').classList.remove('open');
+    document.getElementById('dropdownQuota').classList.remove('open');
+    document.getElementById('dropdownPurchase').classList.remove('open');
+  }
+
+  // ── Model modal ───────────────────────────────────────────
+  function openModelModal() {
+    document.getElementById('modelModal').classList.add('open');
+  }
+  function closeModelModal() {
+    document.getElementById('modelModal').classList.remove('open');
+  }
+  function handleModalOverlayClick(e) {
+    if (e.target === document.getElementById('modelModal')) closeModelModal();
+  }
+  function selectModalModel(id) {
+    document.querySelectorAll('.modal-model-row').forEach(row => row.classList.remove('active'));
+    const row = document.querySelector(`.modal-model-row[onclick*="'${id}'"]`);
+    if (row) row.classList.add('active');
+  }
+
+  document.addEventListener('click', closeDropdown);
+
+  // ── Sidebar toggle ────────────────────────────────────────
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  }
+
+  // ── Demo buttons ──────────────────────────────────────────
+  function setActiveDemoBtn(id) {
+    ['btnFullAccess','btnWarn','btnQuotaHit','btnUpgraded','btnModelsAgents','btnPurchaseOnly','btnPickerDisabled'].forEach(b => {
+      document.getElementById(b).classList.remove('active-state');
+    });
+    document.getElementById(id).classList.add('active-state');
+  }
+
+  // ── Toast ─────────────────────────────────────────────────
+  function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => t.classList.add('show'));
+    });
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    setStateFullAccess();
+    document.getElementById('messages').scrollTop = 999999;
+  });
+</script>
+</body>
+</html>
