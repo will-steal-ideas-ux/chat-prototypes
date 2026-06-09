@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexos.ai — Sharing Flow (Sender)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 258 6% 15%;
+      --muted: 240 5% 97%;
+      --muted-foreground: 258 4% 45%;
+      --border: 240 6% 90%;
+      --primary: 252 100% 64%;
+      --accent: 252 100% 96%;
+      --radius: 0.5rem;
+      --bg-primary: hsl(var(--muted));
+      --bg-secondary: hsl(var(--background));
+      --bg-tertiary: hsl(240 4% 50% / 0.10);
+      --border-secondary: hsl(var(--border));
+      --text-primary: hsl(var(--foreground));
+      --text-secondary: hsl(300 1% 27%);
+      --text-tertiary: hsl(var(--muted-foreground));
+      --brand-purple: hsl(var(--primary));
+      --brand-purple-light: hsl(var(--accent));
+      --radius-xs: calc(var(--radius) * 0.5);
+      --radius-sm: var(--radius);
+      --radius-md: calc(var(--radius) * 2);
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px hsl(252 100% 14% / 0.10), 0 1px 2px hsl(252 100% 14% / 0.05);
+      --shadow-lg: 0 8px 24px hsl(252 100% 14% / 0.10), 0 4px 8px hsl(252 100% 14% / 0.06);
+      --transition: .15s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      height: 100vh; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    /* Step indicator */
+    .step-bar {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 16px; background: #fff;
+      border-bottom: 1px solid var(--border-secondary);
+      flex-shrink: 0;
+    }
+    .step-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1.5px solid var(--border-secondary);
+      color: var(--text-tertiary); background: #fff;
+      transition: all var(--transition);
+    }
+    .step-dot.active { background: var(--brand-purple); border-color: var(--brand-purple); color: #fff; }
+    .step-dot.done { background: var(--brand-purple-light); border-color: var(--brand-purple); color: var(--brand-purple); }
+    .step-connector { width: 24px; height: 1px; background: var(--border-secondary); }
+    .step-connector.done { background: var(--brand-purple); }
+    .step-desc { font-size: 12px; color: var(--text-secondary); margin-left: 12px; font-weight: 500; }
+
+    /* Layout */
+    .body-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 264px; background: var(--bg-primary);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; overflow: hidden;
+      border-right: 1px solid var(--border-secondary);
+    }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 10px 10px 16px; flex-shrink: 0;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex: 1; }
+    .logo-emblem {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--text-primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-emblem svg { width: 14px; height: 14px; color: white; }
+    .logo-name {
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+      color: var(--text-primary); letter-spacing: -0.3px;
+    }
+    .logo-name sup { color: var(--brand-purple); font-size: 11px; font-weight: 500; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; background: transparent; border: none;
+      color: var(--text-tertiary); transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .sidebar-nav { padding: 4px 8px; flex-shrink: 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 36px; padding: 0 8px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition); white-space: nowrap;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-tertiary); }
+    .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-divider { height: 1px; background: var(--border-secondary); margin: 4px 8px; flex-shrink: 0; }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+    .sidebar-section-header { display: flex; align-items: center; gap: 4px; padding: 8px 8px 4px; }
+    .sidebar-section-label {
+      flex: 1; font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; transition: background var(--transition);
+    }
+    .sidebar-link:hover { background: var(--bg-tertiary); }
+    .sidebar-link.active { background: var(--bg-tertiary); color: var(--text-primary); font-weight: 500; }
+    .sidebar-link svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
+    .sidebar-agent {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 8px; font-size: 14px; color: var(--text-secondary);
+      border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition);
+    }
+    .sidebar-agent:hover { background: var(--bg-tertiary); }
+    .agent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .show-all { font-size: 13px; color: var(--text-tertiary); padding: 2px 8px; cursor: pointer; }
+    .show-all:hover { color: var(--brand-purple); }
+    .sidebar-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; flex-shrink: 0; border-top: 1px solid var(--border-secondary);
+    }
+    .sidebar-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #e0d8ff; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--brand-purple); cursor: pointer;
+    }
+    .sidebar-email { font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Main */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+    /* Chat header */
+    .chat-header {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border-secondary);
+      flex-shrink: 0; background: #fff; position: relative;
+    }
+    .header-action {
+      display: flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 10px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-secondary); background: #fff;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: background var(--transition), border-color var(--transition);
+      white-space: nowrap;
+    }
+    .header-action:hover { background: var(--bg-primary); border-color: #d0d0d5; }
+    .header-action svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-tertiary); }
+    .header-action.share-btn { position: relative; }
+
+    /* Share dropdown */
+    .share-dropdown {
+      position: absolute; top: 50px; right: 20px;
+      width: 252px; background: #fff;
+      border: 1px solid var(--border-secondary);
+      border-radius: 10px; box-shadow: var(--shadow-lg);
+      z-index: 100; overflow: hidden;
+      opacity: 0; transform: translateY(-6px);
+      pointer-events: none; transition: opacity .15s ease, transform .15s ease;
+    }
+    .share-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .share-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .share-option:hover { background: var(--bg-primary); }
+    .share-option-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary); flex-shrink: 0;
+    }
+    .share-option-icon svg { width: 16px; height: 16px; color: var(--text-secondary); }
+    .share-option-text { flex: 1; font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .share-option-check { width: 16px; height: 16px; color: var(--brand-purple); opacity: 0; transition: opacity .1s; }
+    .share-option.checked .share-option-check { opacity: 1; }
+    .share-option.checked .share-option-icon { background: var(--brand-purple-light); }
+    .share-option.checked .share-option-icon svg { color: var(--brand-purple); }
+    .share-dropdown-footer { padding: 8px 14px 12px; border-top: 1px solid var(--border-secondary); }
+    .copy-link-btn {
+      width: 100%; height: 36px; background: #0f0f10; color: #fff;
+      border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .copy-link-btn:hover { background: #222; }
+    .copy-link-btn.copied { background: #166534; }
+    .copy-link-btn svg { width: 14px; height: 14px; }
+
+    /* Chat thread */
+    .chat-thread { flex: 1; overflow-y: auto; padding: 40px 0 0; }
+    .chat-messages { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px 32px; display: flex; flex-direction: column; gap: 24px; }
+    .msg-row.user { display: flex; justify-content: flex-end; }
+    .msg-bubble.user {
+      max-width: 68%; background: var(--bg-primary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 16px 16px 4px 16px;
+      padding: 12px 16px; font-size: 15px; line-height: 24px;
+    }
+    .msg-row.ai { display: flex; flex-direction: column; gap: 8px; }
+    .ai-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-tertiary); }
+    .ai-badge-icon {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--bg-tertiary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ai-badge-icon svg { width: 11px; height: 11px; color: var(--text-tertiary); }
+    .msg-bubble.ai { font-size: 15px; line-height: 24px; color: var(--text-primary); }
+
+    /* File attachments */
+    .file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+    .file-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border: 1px solid var(--border-secondary);
+      border-radius: 8px; background: #fff; cursor: pointer;
+      transition: border-color var(--transition);
+    }
+    .file-row:hover { border-color: #c0bfca; }
+    .file-icon {
+      width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .file-icon.pdf { background: #fde8e8; }
+    .file-icon.xlsx { background: #e6f4ea; }
+    .file-icon svg { width: 18px; height: 18px; }
+    .file-meta { flex: 1; }
+    .file-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .file-size { font-size: 12px; color: var(--text-tertiary); }
+    .file-download { color: var(--text-tertiary); cursor: pointer; }
+    .file-download svg { width: 18px; height: 18px; }
+    .file-download:hover { color: var(--text-primary); }
+
+    /* Sources row */
+    .sources-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .source-badge {
+      width: 22px; height: 22px; border-radius: 4px; border: 1.5px solid #fff;
+      box-shadow: 0 0 0 1px var(--border-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; cursor: pointer;
+    }
+    .sources-label { font-size: 13px; color: var(--text-tertiary); font-weight: 500; }
+
+    /* Chat input */
+    .chat-input-bar {
+      padding: 0 20px 20px; flex-shrink: 0; background: #fff;
+    }
+    .chat-input-wrap {
+      max-width: 760px; margin: 0 auto;
+      border: 1px solid var(--border-secondary); border-radius: 14px;
+      background: #fff; box-shadow: var(--shadow-sm);
+    }
+    .chat-input-field {
+      width: 100%; padding: 14px 16px; font-size: 15px; color: var(--text-tertiary);
+      border: none; outline: none; background: transparent; resize: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .chat-input-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; border-top: 1px solid var(--border-secondary);
+    }
+    .input-action-left { display: flex; align-items: center; gap: 4px; }
+    .input-action-btn {
+      display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px;
+      border-radius: 6px; border: none; background: transparent; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--transition);
+    }
+    .input-action-btn:hover { background: var(--bg-tertiary); }
+    .input-action-btn svg { width: 16px; height: 16px; color: var(--text-tertiary); }
+    .input-right { display: flex; align-items: center; gap: 8px; }
+    .auto-chip {
+      display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px;
+      border: 1px solid var(--border-secondary); border-radius: var(--radius-full);
+      font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+    }
+    .auto-chip svg { width: 13px; height: 13px; color: var(--text-tertiary); }
+    .voice-btn {
+      width: 30px; height: 30px; border-radius: var(--radius-full); border: 1px solid var(--border-secondary);
+      background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      color: var(--text-tertiary); transition: background var(--transition);
+    }
+    .voice-btn:hover { background: var(--bg-tertiary); }
+    .voice-btn svg { width: 16px; height: 16px; }
+
+    /* Shared link indicator on sidebar chat item */
+    .share-icon { opacity: 0; transition: opacity .2s; color: var(--brand-purple); margin-left: auto; }
+    .share-icon.visible { opacity: 1; }
+    .share-icon svg { width: 14px; height: 14px; }
+
+    /* Overlay to close dropdown */
+    .overlay { position: fixed; inset: 0; z-index: 50; display: none; }
+    .overlay.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Step Bar -->
+<div class="step-bar">
+  <span class="step-label">Flow</span>
+  <div class="step-dot done" onclick="goToStep(1)" title="Chat — normal state">1</div>
+  <div class="step-connector" id="conn-1-2"></div>
+  <div class="step-dot" id="dot-2" onclick="goToStep(2)" title="Share dropdown open">2</div>
+  <div class="step-connector" id="conn-2-3"></div>
+  <div class="step-dot" id="dot-3" onclick="goToStep(3)" title="Inside company selected">3</div>
+  <div class="step-connector" id="conn-3-4"></div>
+  <div class="step-dot" id="dot-4" onclick="goToStep(4)" title="Copy link button">4</div>
+  <div class="step-connector" id="conn-4-5"></div>
+  <div class="step-dot" id="dot-5" onclick="goToStep(5)" title="Link copied!">5</div>
+  <span class="step-desc" id="step-desc">Chat — normal state. Click "Share" to continue →</span>
+</div>
+
+<div class="body-layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">
+        <div class="logo-emblem">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M2 7C2 4.24 4.24 2 7 2s5 2.24 5 5-2.24 5-5 5-5-2.24-5-5Z" stroke="white" stroke-width="1.5"/><path d="M5 7h4M7 5v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <span class="logo-name">nexos<sup>.ai</sup></span>
+      </a>
+      <button class="icon-btn">
+        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="1.5" rx=".75" fill="currentColor"/><rect x="3" y="9.25" width="14" height="1.5" rx=".75" fill="currentColor"/><rect x="3" y="14.5" width="14" height="1.5" rx=".75" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 18 18" fill="none"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        New chat
+      </div>
+      <div class="sidebar-nav-item">
+        <svg viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/><path d="m14 14-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Search chats
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-nav" style="padding:4px 0">
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M6 9h6M9 6v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Agents
+        </div>
+        <div class="sidebar-nav-item">
+          <svg viewBox="0 0 18 18" fill="none"><path d="M3 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="1.5"/></svg>
+          Projects
+        </div>
+      </div>
+
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Recent Agents</span>
+        <button class="sidebar-section-add icon-btn" style="width:20px;height:20px;font-size:15px;">+</button>
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#7c6fd8;"></div>
+        Sprint Architect
+      </div>
+      <div class="sidebar-agent">
+        <div class="agent-dot" style="background:#7c6fd8;"></div>
+        Sentiment Strategist
+      </div>
+
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Chat Groups</span>
+        <button class="sidebar-section-add icon-btn" style="width:20px;height:20px;font-size:15px;">+</button>
+      </div>
+      <div class="sidebar-link">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 0 1 2-2h3.17a1 1 0 0 1 .71.3L9.41 3.7A1 1 0 0 0 10.12 4H12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.2"/></svg>
+        Checkout flows
+      </div>
+      <div class="sidebar-link">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 0 1 2-2h3.17a1 1 0 0 1 .71.3L9.41 3.7A1 1 0 0 0 10.12 4H12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.2"/></svg>
+        Reservation plannings
+      </div>
+      <div class="sidebar-link">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 0 1 2-2h3.17a1 1 0 0 1 .71.3L9.41 3.7A1 1 0 0 0 10.12 4H12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.2"/></svg>
+        Pinned chats
+      </div>
+      <div class="show-all">Show all</div>
+
+      <div class="sidebar-section-header">
+        <span class="sidebar-section-label">Recent Chats</span>
+      </div>
+      <div class="sidebar-link active" style="position:relative;padding-right:4px;">
+        Temperature in Barcelona
+        <span class="share-icon" id="sidebar-share-icon">
+          <svg viewBox="0 0 14 14" fill="none"><circle cx="10" cy="3" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="11" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.4 7.7 8.6 10.3M5.4 6.3 8.6 3.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+      <div class="sidebar-link">EV Market Trends Analysis</div>
+      <div class="sidebar-link">Generate an image bursting out of the pa...</div>
+      <div class="sidebar-link">Target Audience Brainstorming</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar">D</div>
+      <span class="sidebar-email">damian@nexos.ai</span>
+    </div>
+  </nav>
+
+  <!-- Main area -->
+  <main class="main-area" id="main-area">
+
+    <!-- Overlay to close dropdown -->
+    <div class="overlay" id="overlay" onclick="closeDropdown()"></div>
+
+    <!-- Chat header -->
+    <div class="chat-header">
+      <button class="header-action share-btn" id="share-btn" onclick="toggleDropdown()">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="11" cy="3" r="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="8" r="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="13" r="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6.3 8.8 9.7 12.2M6.3 7.2 9.7 3.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Share
+      </button>
+      <button class="header-action">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="2" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+        Compare models
+      </button>
+      <button class="header-action">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 13V7a1 1 0 0 1 1-1h2V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2h2a1 1 0 0 1 1 1v6" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        7 files 68 kB
+      </button>
+      <button class="icon-btn">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M7 3H3v4M13 3h4v4M3 13v4h4M17 13v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <!-- Share dropdown -->
+      <div class="share-dropdown" id="share-dropdown">
+        <div class="share-option checked" id="opt-private" onclick="selectOption('private')">
+          <div class="share-option-icon">
+            <svg viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <span class="share-option-text">Private</span>
+          <svg class="share-option-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="share-option" id="opt-company" onclick="selectOption('company')">
+          <div class="share-option-icon">
+            <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="7" width="12" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 7V5a3 3 0 0 1 6 0v2M8 10v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="10" r=".75" fill="currentColor"/></svg>
+          </div>
+          <span class="share-option-text">Inside company only</span>
+          <svg class="share-option-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="share-option" id="opt-anyone" onclick="selectOption('anyone')">
+          <div class="share-option-icon">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2a10 10 0 0 1 0 12M8 2a10 10 0 0 0 0 12M2 8a6 6 0 0 0 12 0 6 6 0 0 0-12 0Z" stroke="currentColor" stroke-width="1.3"/></svg>
+          </div>
+          <span class="share-option-text">Anyone with the link</span>
+          <svg class="share-option-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="share-dropdown-footer" id="copy-footer" style="display:none;">
+          <button class="copy-link-btn" id="copy-btn" onclick="copyLink()">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M9.5 5h1A2.5 2.5 0 0 1 13 7.5v0A2.5 2.5 0 0 1 10.5 10h-1M4.5 9H3.5A2.5 2.5 0 0 1 1 6.5v0A2.5 2.5 0 0 1 3.5 4h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 7h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Copy link
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat thread -->
+    <div class="chat-thread">
+      <div class="chat-messages">
+        <div class="msg-row user">
+          <div class="msg-bubble user">Get me temperature data in Barcelona. And info about frogs in the city.</div>
+        </div>
+        <div class="msg-row ai">
+          <div class="ai-badge">
+            <div class="ai-badge-icon">
+              <svg viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            GPT-4o mini · Search Preview
+          </div>
+          <div class="msg-bubble ai">
+            <p>Processing temperature data for Barcelona involves multiple layers of data handling, computation, and analysis to provide accurate city-wide temperature averages.</p>
+            <p style="margin-top:12px;">Here are the files you asked:</p>
+            <div class="file-list">
+              <div class="file-row">
+                <div class="file-icon pdf">
+                  <svg viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" stroke="#ef4444" stroke-width="1.3"/><path d="M11 2v4h4" stroke="#ef4444" stroke-width="1.3" stroke-linecap="round"/><path d="M6 10h2a1 1 0 0 1 0 2H6v-4h2a1 1 0 0 1 0 2" stroke="#ef4444" stroke-width="1.1"/></svg>
+                </div>
+                <div class="file-meta">
+                  <div class="file-name">worldoffrogs.pdf</div>
+                  <div class="file-size">200 KB</div>
+                </div>
+                <div class="file-download">
+                  <svg viewBox="0 0 18 18" fill="none"><path d="M9 3v9M5.5 8.5 9 12l3.5-3.5M4 15h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+              <div class="file-row">
+                <div class="file-icon xlsx">
+                  <svg viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" stroke="#16a34a" stroke-width="1.3"/><path d="M11 2v4h4" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round"/><path d="M6.5 10.5 8 12l-1.5 1.5M9.5 10.5 11 12l-1.5 1.5" stroke="#16a34a" stroke-width="1.1" stroke-linecap="round"/></svg>
+                </div>
+                <div class="file-meta">
+                  <div class="file-name">frogsmigration.xlsx</div>
+                  <div class="file-size">200 KB</div>
+                </div>
+                <div class="file-download">
+                  <svg viewBox="0 0 18 18" fill="none"><path d="M9 3v9M5.5 8.5 9 12l3.5-3.5M4 15h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="sources-row">
+              <div class="source-badge" style="background:#3b82f6;color:#fff;">G</div>
+              <div class="source-badge" style="background:#ef4444;color:#fff;">Y</div>
+              <div class="source-badge" style="background:#8b5cf6;color:#fff;">W</div>
+              <span class="sources-label">Sources</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat input -->
+    <div class="chat-input-bar">
+      <div class="chat-input-wrap">
+        <textarea class="chat-input-field" rows="1" placeholder="Ask a follow up" style="height:48px;"></textarea>
+        <div class="chat-input-actions">
+          <div class="input-action-left">
+            <button class="input-action-btn">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 6l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Attach
+            </button>
+            <button class="input-action-btn">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+              Tools
+            </button>
+          </div>
+          <div class="input-right">
+            <div class="auto-chip">
+              <svg viewBox="0 0 13 13" fill="none"><path d="M6.5 2v5M3.5 4.5 6.5 7.5 9.5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Auto
+              <svg viewBox="0 0 13 13" fill="none"><path d="M3 5l3.5 4L10 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <button class="voice-btn">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a2 2 0 0 0-2 2v4a2 2 0 0 0 4 0V4a2 2 0 0 0-2-2Z" stroke="currentColor" stroke-width="1.3"/><path d="M4 8a4 4 0 0 0 8 0M8 12v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let currentStep = 1;
+  let selectedOption = 'private';
+
+  const stepDescs = [
+    '', // 0 unused
+    'Chat — normal state. Click "Share" to continue →',
+    'Share dropdown opened. Select an access option.',
+    '"Inside company only" selected. Click "Copy link" to share.',
+    '"Copy link" ready — click it to copy the URL.',
+    'Link copied! The chat is now shared with your company.',
+  ];
+
+  function updateStepBar(step) {
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.getElementById('dot-' + i) || document.querySelector('.step-dot:nth-child(' + (i*2-1) + ')');
+    }
+    // Update all dots
+    const dots = document.querySelectorAll('.step-dot');
+    dots.forEach((dot, idx) => {
+      const n = idx + 1;
+      dot.classList.remove('active', 'done');
+      if (n < step) dot.classList.add('done');
+      else if (n === step) dot.classList.add('active');
+    });
+    // Update connectors
+    const conns = document.querySelectorAll('.step-connector');
+    conns.forEach((conn, idx) => {
+      conn.classList.toggle('done', idx + 1 < step);
+    });
+    document.getElementById('step-desc').textContent = stepDescs[step];
+  }
+
+  function goToStep(step) {
+    currentStep = step;
+    updateStepBar(step);
+    // Reset state then apply
+    document.getElementById('share-dropdown').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('copy-footer').style.display = 'none';
+    document.getElementById('copy-btn').classList.remove('copied');
+    document.getElementById('copy-btn').innerHTML = `<svg viewBox="0 0 14 14" fill="none"><path d="M9.5 5h1A2.5 2.5 0 0 1 13 7.5v0A2.5 2.5 0 0 1 10.5 10h-1M4.5 9H3.5A2.5 2.5 0 0 1 1 6.5v0A2.5 2.5 0 0 1 3.5 4h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 7h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Copy link`;
+    document.getElementById('sidebar-share-icon').classList.remove('visible');
+
+    // Reset option selection to private
+    selectOptionVisual('private');
+
+    if (step === 2) {
+      document.getElementById('share-dropdown').classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+    } else if (step === 3) {
+      selectOptionVisual('company');
+      document.getElementById('share-dropdown').classList.add('open');
+      document.getElementById('copy-footer').style.display = 'block';
+      document.getElementById('overlay').classList.add('active');
+    } else if (step === 4) {
+      selectOptionVisual('company');
+      document.getElementById('share-dropdown').classList.add('open');
+      document.getElementById('copy-footer').style.display = 'block';
+      document.getElementById('overlay').classList.add('active');
+    } else if (step === 5) {
+      selectOptionVisual('company');
+      document.getElementById('share-dropdown').classList.add('open');
+      document.getElementById('copy-footer').style.display = 'block';
+      document.getElementById('copy-btn').classList.add('copied');
+      document.getElementById('copy-btn').innerHTML = `<svg viewBox="0 0 14 14" fill="none"><path d="M2 7 5.5 10.5 12 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Link copied`;
+      document.getElementById('sidebar-share-icon').classList.add('visible');
+      document.getElementById('overlay').classList.add('active');
+    }
+  }
+
+  function selectOptionVisual(option) {
+    ['private','company','anyone'].forEach(o => {
+      document.getElementById('opt-' + o).classList.toggle('checked', o === option);
+    });
+    selectedOption = option;
+  }
+
+  function toggleDropdown() {
+    const dd = document.getElementById('share-dropdown');
+    const isOpen = dd.classList.contains('open');
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      dd.classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+      currentStep = 2;
+      updateStepBar(2);
+    }
+  }
+
+  function closeDropdown() {
+    document.getElementById('share-dropdown').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+  }
+
+  function selectOption(option) {
+    selectOptionVisual(option);
+    const showCopy = option !== 'private';
+    document.getElementById('copy-footer').style.display = showCopy ? 'block' : 'none';
+    if (showCopy) {
+      currentStep = 3;
+      updateStepBar(3);
+    }
+  }
+
+  function copyLink() {
+    const btn = document.getElementById('copy-btn');
+    if (btn.classList.contains('copied')) return;
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg viewBox="0 0 14 14" fill="none"><path d="M2 7 5.5 10.5 12 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Link copied`;
+    document.getElementById('sidebar-share-icon').classList.add('visible');
+    currentStep = 5;
+    updateStepBar(5);
+  }
+
+  // Init
+  updateStepBar(1);
+</script>
+</body>
+</html>
