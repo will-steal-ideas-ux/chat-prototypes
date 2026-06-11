@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incognito Mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      align-items: stretch;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #root { flex: 1; min-width: 0; display: flex; }
+
+    /* ── Side Nav ── */
+    .side-nav {
+      width: 320px; height: 100vh; background: #f5f5f5;
+      border-right: 1px solid rgba(124, 123, 132, 0.15);
+      display: flex; flex-direction: column; align-items: flex-start;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .nav-header { display: flex; align-items: center; min-height: 64px; padding: 16px 12px 16px 16px; width: 100%; flex-shrink: 0; }
+    .nav-header-inner { display: flex; flex: 1; gap: 8px; align-items: center; min-height: 32px; }
+    .nav-logo-wrap { display: flex; flex: 1; gap: 8px; align-items: center; padding: 0 4px; }
+    .nav-logo { display: flex; align-items: center; gap: 6px; height: 20px; }
+    .nav-hide-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 6px; border-radius: 8px; flex-shrink: 0; cursor: pointer; color: #6f6e78; transition: background 0.12s; }
+    .nav-hide-btn:hover { background: rgba(124,123,132,0.08); }
+    .nav-links { display: flex; flex-direction: column; gap: 4px; padding: 0 8px; width: 100%; flex: 1; min-height: 0; overflow: hidden; }
+    .nav-link { display: flex; align-items: center; gap: 8px; height: 32px; padding: 4px 8px 4px 12px; border-radius: 8px; width: 100%; cursor: pointer; text-decoration: none; color: #252429; font-size: 14px; font-weight: 400; line-height: 21px; transition: background 0.1s; }
+    .nav-link:hover { background: rgba(124,123,132,0.08); }
+    .nav-link-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #252429; }
+    .nav-link-new-chat { background: #8c75ff1a; }
+    .nav-link-new-chat .nav-link-icon { color: #4700cf; }
+    .nav-link-new-chat:hover { background: #8c75ff26; }
+    .nav-agent-link { position: relative; padding-left: 12px; border-radius: 0; margin-left: 12px; width: calc(100% - 12px); }
+    .nav-agent-link::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 2px; height: 20px; background: #4700cf; border-radius: 1px; }
+    .nav-spacer { height: 12px; width: 100%; flex-shrink: 0; }
+    .nav-subheader { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; padding: 4px 8px 4px 12px; border-radius: 8px; width: 100%; cursor: pointer; }
+    .nav-subheader-left { display: flex; flex: 1; gap: 8px; align-items: center; }
+    .nav-subheader-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #6f6e78; }
+    .nav-subheader-label { font-size: 12px; font-weight: 600; color: #6f6e78; letter-spacing: 0.04em; text-transform: uppercase; }
+    .nav-section-scroll { display: flex; flex-direction: column; gap: 4px; width: 100%; flex: 1; min-height: 0; overflow-y: auto; }
+    .nav-section-scroll::-webkit-scrollbar { width: 3px; }
+    .nav-section-scroll::-webkit-scrollbar-thumb { background: rgba(124,123,132,0.25); border-radius: 3px; }
+    .nav-section-scroll .nav-subheader { position: sticky; top: 0; background: #f5f5f5; z-index: 1; }
+    .nav-showall { font-size: 14px; color: #6f6e78; padding: 4px 8px 4px 12px; cursor: pointer; }
+    .nav-account { display: flex; flex-direction: column; padding: 8px 8px 16px; width: 100%; flex-shrink: 0; }
+    .nav-account-row { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 4px 8px 4px 12px; border-radius: 8px; width: 100%; cursor: pointer; transition: background 0.1s; }
+    .nav-account-row:hover { background: rgba(124,123,132,0.08); }
+    .nav-account-email { font-size: 14px; color: #252429; line-height: 21px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Main column ── */
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: #ffffff; position: relative; }
+
+    /* Home chat top header (light) */
+    .chat-header { display: flex; align-items: center; justify-content: flex-end; height: 58px; padding: 0 24px; flex-shrink: 0; }
+    .incognito-entry {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 8px; cursor: pointer;
+      color: #252429; font-size: 14px; font-weight: 400;
+      background: none; border: none; position: relative; transition: background 0.12s;
+    }
+    .incognito-entry:hover { background: rgba(124,123,132,0.08); }
+    .incognito-tooltip {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: #1c1b20; color: #fff; font-size: 12px; line-height: 18px;
+      padding: 5px 10px; border-radius: 8px; white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 60;
+      animation: ttIn 0.12s ease forwards;
+    }
+    @keyframes ttIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Incognito dark top bar */
+    .incognito-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 58px; padding: 0 24px; flex-shrink: 0;
+      background: #1c1b20; color: #f5f5f5;
+    }
+    .incognito-bar-title { font-size: 14px; font-weight: 400; color: #e8e7ea; }
+    .incognito-bar-exit {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 400; color: #e8e7ea;
+      background: none; border: none; cursor: pointer; padding: 6px 8px;
+      border-radius: 8px; transition: background 0.12s;
+    }
+    .incognito-bar-exit:hover { background: rgba(255,255,255,0.1); }
+
+    /* Centered empty state */
+    .center-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 0 24px; }
+    .stage-title { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 600; line-height: 44px; letter-spacing: -0.25px; margin-bottom: 24px; }
+    .stage-title.primary { color: #252429; }
+    .stage-title.muted { color: #6f6e78; }
+
+    /* ── Prompt card ── */
+    .prompt-card {
+      background: #ffffff;
+      border: 1px solid rgba(124, 123, 132, 0.25);
+      border-radius: 16px;
+      box-shadow: 0px 8px 15px -1px rgba(18, 0, 69, 0.06), 0px 4px 7px 0px rgba(18, 0, 69, 0.03);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      width: 760px; max-width: 100%;
+      position: relative;
+    }
+    .prompt-card.dashed { border: 1px dashed rgba(124, 123, 132, 0.4); box-shadow: none; }
+    .prompt-content { padding: 4px 8px; }
+    .prompt-textarea {
+      width: 100%; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400;
+      line-height: 24px; color: #252429; background: none; border: none; outline: none;
+      resize: none; overflow: hidden; min-height: 24px; display: block;
+    }
+    .prompt-textarea::placeholder { color: #6f6e78; }
+    .prompt-toolbar { display: flex; align-items: center; justify-content: space-between; height: 42px; }
+    .toolbar-left, .toolbar-right { display: flex; align-items: center; flex-shrink: 0; }
+    .toolbar-right { gap: 4px; }
+    .action-btn {
+      display: flex; align-items: center; gap: 4px;
+      min-height: 42px; min-width: 42px; padding: 8px; justify-content: center;
+      border-radius: 8px; cursor: pointer; border: none; background: none;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: #252429;
+      transition: background 0.1s;
+    }
+    .action-btn:hover { background: rgba(124, 123, 132, 0.08); }
+    .send-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin: 4px; border-radius: 50%; background: #693bff; border: none; cursor: pointer; transition: background 0.12s; }
+    .send-btn:hover { background: #5a2ff0; }
+    .plus-btn {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 42px; min-width: 42px; padding: 8px;
+      border-radius: 8px; cursor: pointer; border: none;
+      background: linear-gradient(90deg, rgba(204,199,231,0.25) 0%, rgba(204,199,231,0.25) 100%), #fff;
+      color: #252429; transition: background 0.12s;
+    }
+    .plus-btn:hover { background: linear-gradient(90deg, rgba(204,199,231,0.45) 0%, rgba(204,199,231,0.45) 100%), #fff; }
+    .plus-btn.menu-open { background: linear-gradient(90deg, rgba(140,117,255,0.15) 0%, rgba(140,117,255,0.15) 100%), #fff; }
+    .model-selector {
+      display: flex; align-items: center; gap: 6px;
+      height: 42px; padding: 0 8px; border-radius: 8px;
+      cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif;
+      transition: background 0.1s;
+    }
+    .model-selector:hover { background: rgba(124, 123, 132, 0.08); }
+    .model-logo { width: 32px; height: 32px; border-radius: 50%; background: #ffffff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .model-label { font-size: 14px; font-weight: 500; color: #252429; }
+
+    /* Helper texts under incognito composer */
+    .incognito-help { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 16px; text-align: center; }
+    .incognito-help-1 { font-size: 14px; color: #6f6e78; line-height: 21px; }
+    .incognito-help-2 { font-size: 12px; color: #9d9ca3; line-height: 18px; max-width: 440px; }
+
+    /* ── + menu (NewMenu) ── */
+    .new-menu {
+      position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 100;
+      background: #ffffff;
+      border: 1px solid rgba(124, 123, 132, 0.15);
+      border-radius: 8px;
+      box-shadow: 0px 8px 15px -1px rgba(18, 0, 69, 0.06), 0px 4px 7px 0px rgba(18, 0, 69, 0.03);
+      width: 282px; padding: 6px;
+      display: flex; flex-direction: column; gap: 0;
+      animation: menuIn 0.15s ease forwards;
+    }
+    @keyframes menuIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .nm-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 8px 0 12px; min-height: 42px;
+      border-radius: 4px; cursor: pointer; border: none; background: none;
+      font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; color: #252429;
+      text-align: left; width: 100%; transition: background 0.1s;
+    }
+    .nm-item:hover { background: rgba(124,123,132,0.06); }
+    .nm-item-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #44434b; }
+    .nm-item-label { flex: 1; }
+    .nm-item-chevron { color: #9ca3af; flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+    .nm-divider { height: 1px; background: rgba(124,123,132,0.15); margin: 2px 6px; flex-shrink: 0; }
+
+    /* Toggle */
+    .toggle { width: 32px; height: 18px; border-radius: 9px; flex-shrink: 0; position: relative; cursor: pointer; transition: background 0.2s; }
+    .toggle-knob { width: 14px; height: 14px; border-radius: 50%; background: #fff; position: absolute; top: 2px; transition: left 0.18s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on { background: #6c47ff; }
+    .toggle.off { background: #cacace; }
+    .toggle.on .toggle-knob { left: 16px; }
+    .toggle.off .toggle-knob { left: 2px; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: absolute; inset: 0; z-index: 200;
+      background: rgba(245,245,245,0.55); backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s ease forwards;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      width: 400px; background: #fff;
+      border: 1px solid rgba(124,123,132,0.15); border-radius: 16px;
+      box-shadow: 0px 20px 25px -5px rgba(18,0,69,0.06), 0px 10px 10px -5px rgba(18,0,69,0.03);
+      display: flex; flex-direction: column; overflow: hidden;
+      animation: modalIn 0.18s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.97) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; align-items: flex-start; gap: 8px; padding: 16px 16px 0; }
+    .modal-title { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; color: #252429; }
+    .modal-close { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #44434b; background: none; border: none; flex-shrink: 0; }
+    .modal-body { display: flex; flex-direction: column; gap: 24px; padding: 32px 16px; }
+    .modal-point { display: flex; flex-direction: column; gap: 4px; }
+    .modal-point-head { display: flex; align-items: center; gap: 8px; }
+    .modal-point-icon { width: 24px; height: 24px; flex-shrink: 0; color: #252429; }
+    .modal-point-title { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 600; line-height: 24px; color: #000; }
+    .modal-point-desc { font-size: 12px; line-height: 18px; color: #000; }
+    .modal-ctas { display: flex; justify-content: flex-end; gap: 12px; padding: 16px; border-top: 1px solid rgba(124,123,132,0.15); }
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 34px; padding: 0 12px; border-radius: 8px;
+      background: #693bff; color: #fff; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; line-height: 21px;
+      transition: background 0.12s;
+    }
+    .btn-primary:hover { background: #5a2ff0; }
+
+    /* ── Chat conversation ── */
+    .messages-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .messages-area::-webkit-scrollbar { width: 4px; }
+    .messages-area::-webkit-scrollbar-thumb { background: rgba(124,123,132,0.2); border-radius: 4px; }
+    .conv-toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 20px; padding: 16px 24px 0; flex-shrink: 0; }
+    .conv-toolbar-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6f6e78; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; }
+    .conv-toolbar-btn:hover { color: #252429; }
+    .conv-inner { max-width: 760px; width: 100%; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .user-bubble { align-self: flex-end; max-width: 75%; background: #f1f0f4; color: #252429; border-radius: 16px; padding: 12px 16px; font-size: 14px; line-height: 21px; }
+    .ai-msg { display: flex; flex-direction: column; gap: 12px; }
+    .ai-model { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6f6e78; }
+    .ai-model-logo { width: 18px; height: 18px; border-radius: 50%; background: #ececf0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ai-text { font-size: 14px; line-height: 21px; color: #252429; }
+    .ai-files-label { font-size: 14px; color: #252429; margin-top: 4px; }
+    .file-card {
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid rgba(124,123,132,0.25); border-radius: 12px;
+      padding: 12px 14px; background: #fff;
+    }
+    .file-icon { width: 26px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .file-meta { flex: 1; min-width: 0; }
+    .file-name { font-size: 14px; font-weight: 600; color: #252429; }
+    .file-size { font-size: 12px; color: #6f6e78; }
+    .file-dl { width: 20px; height: 20px; color: #6f6e78; cursor: pointer; flex-shrink: 0; }
+    .file-dl:hover { color: #252429; }
+    .sources-pill {
+      display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+      border: 1px solid rgba(124,123,132,0.25); border-radius: 999px;
+      padding: 4px 10px 4px 6px; cursor: pointer; background: #fff;
+    }
+    .sources-pill:hover { background: rgba(124,123,132,0.05); }
+    .sources-faces { display: flex; }
+    .sources-face { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #fff; margin-left: -5px; background-size: cover; }
+    .sources-face:first-child { margin-left: 0; }
+    .sources-label { font-size: 12px; font-weight: 500; color: #252429; }
+    .ai-actions { display: flex; align-items: center; gap: 6px; }
+    .ai-action-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #6f6e78; cursor: pointer; background: none; border: none; }
+    .ai-action-btn:hover { background: rgba(124,123,132,0.08); color: #252429; }
+    .composer-area { padding: 0 24px 24px; flex-shrink: 0; }
+    .composer-inner { max-width: 760px; width: 100%; margin: 0 auto; position: relative; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-msg { animation: fadeUp 0.25s ease forwards; }
+
+    /* ── Mode-switch transition: center crossfade ── */
+    .app-stage { display: flex; width: 100%; height: 100%; transform-origin: center center; }
+    .app-stage.fade-out { animation: stageFadeOut 0.24s ease-in forwards; }
+    .app-stage.fade-in  { animation: stageFadeIn 0.38s cubic-bezier(.2,.7,.2,1) forwards; }
+    @keyframes stageFadeOut { from { opacity: 1; transform: scale(1); }     to { opacity: 0; transform: scale(.99); } }
+    @keyframes stageFadeIn  { from { opacity: 0; transform: scale(1.012); } to { opacity: 1; transform: scale(1); } }
+
+    /* Content gently rises in on mount */
+    @keyframes contentRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .center-stage, .conv-inner { animation: contentRise 0.4s cubic-bezier(.4,0,.2,1) both; }
+
+    /* Version switcher */
+    .version-switcher { position: fixed; bottom: 20px; left: 20px; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .version-trigger { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #1e1e1e; border: 1px solid #333; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.3); cursor: pointer; user-select: none; }
+    .version-trigger-label { font-size: 12px; font-weight: 600; color: #aaa; }
+    .version-trigger-desc { font-size: 12px; color: #666; }
+    .version-trigger svg { width: 14px; height: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Version switcher (label only) -->
+  <div class="version-switcher">
+    <div class="version-trigger">
+      <span class="version-trigger-label">Flow</span>
+      <span class="version-trigger-desc">Incognito Mode</span>
+    </div>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    /* ── Icons ───────────────────────────────────────────────────────── */
+    const IcChevDown = () => (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+    );
+    const IcChevRight = () => (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4l4 4-4 4"/></svg>
+    );
+    const IcMic = () => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
+    );
+    const IcWand = ({ size = 17 }) => (
+      <svg width={size} height={size} viewBox="0 0 15.8667 14.9311" fill="#252429" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7.25667 0.145655C7.28875 0.0580387 7.37333 0 7.46667 0C7.56 0 7.64458 0.0580387 7.67667 0.145655L8.08792 1.24454L9.1875 1.65637C9.275 1.68933 9.33333 1.77304 9.33333 1.86666C9.33333 1.96029 9.275 2.044 9.1875 2.07696L8.08792 2.48879L7.67667 3.5875C7.64458 3.675 7.56 3.73333 7.46667 3.73333C7.37333 3.73333 7.28875 3.675 7.25667 3.5875L6.84542 2.48879L5.71958 2.07696C5.63208 2.044 5.6 1.96029 5.6 1.86666C5.6 1.77304 5.63208 1.68933 5.71958 1.65637L6.84542 1.24454L7.25667 0.145655ZM14.4462 0.41008L15.4554 1.41866C16.0008 1.96525 16.0008 2.85191 15.4554 3.39791L4.33125 14.5221C3.78583 15.0675 2.89858 15.0675 2.352 14.5221L1.34342 13.5129C0.796542 12.9675 0.796542 12.0808 1.34342 11.5325L12.4658 0.41008C13.0142 -0.136678 13.9008 -0.136678 14.4462 0.41008ZM13.4575 1.4L10.2579 4.59958L11.2642 5.60875L14.4404 2.40858L13.4575 1.4ZM3.3425 13.5071L10.2754 6.5975L9.26625 5.59125L2.33333 12.5242L3.3425 13.5071ZM0.218488 3.41833L1.86667 2.8L2.48471 1.15179C2.534 1.02025 2.65971 0.93333 2.8 0.93333C2.94 0.93333 3.06542 1.02025 3.115 1.15179L3.73333 2.8L5.38125 3.41833C5.5125 3.46791 5.6 3.59333 5.6 3.73333C5.6 3.87333 5.5125 3.99875 5.38125 4.04833L3.73333 4.66666L3.115 6.31458C3.06542 6.44583 2.94 6.53333 2.8 6.53333C2.65971 6.53333 2.534 6.44583 2.48471 6.31458L1.86667 4.66666L0.218488 4.04833C0.0870625 3.99875 0 3.87333 0 3.73333C0 3.59333 0.0870625 3.46791 0.218488 3.41833ZM10.4854 10.885L12.1333 10.2667L12.7517 8.61875C12.8013 8.46125 12.9267 8.4 13.0667 8.4C13.2067 8.4 13.3321 8.46125 13.3817 8.61875L14 10.2667L15.6479 10.885C15.7792 10.9346 15.8667 11.06 15.8667 11.2C15.8667 11.34 15.7792 11.4654 15.6479 11.515L14 12.1333L13.3817 13.7812C13.3321 13.9125 13.2067 14 13.0667 14C12.9267 14 12.8013 13.9125 12.7517 13.7812L12.1333 12.1333L10.4854 11.515C10.3279 11.4654 10.2667 11.34 10.2667 11.2C10.2667 11.06 10.3279 10.9346 10.4854 10.885Z"/>
+      </svg>
+    );
+    const IcPlus = () => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    );
+    const IcSend = () => (
+      <svg width="18" height="18" viewBox="0 0 19.2004 16.8345" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M18.4725 7.33125L1.6725 0.130875C1.52025 0.065625 1.35975 0 1.20075 0C0.877388 0 0.559501 0.131213 0.327001 0.376875C-0.0186854 0.776625 -0.0983616 1.32 0.126638 1.77038L3.6 8.43375L0.126751 15.0975C-0.0982491 15.5483 -0.0185616 16.0913 0.327151 16.4576C0.559201 16.7031 0.876901 16.8345 1.20015 16.8345C1.35953 16.8345 1.52006 16.8029 1.67228 16.7372L18.4725 9.53625C18.9143 9.34759 19.2004 8.91338 19.2004 8.43338C19.1662 7.95375 18.915 7.51875 18.4725 7.33125ZM1.19925 1.23488C1.19963 1.23413 1.1985 1.23525 1.19925 1.23488L16.6013 7.83375H4.63875L1.19925 1.23488ZM1.19063 15.6525L4.63875 9.03375H16.5675L1.19063 15.6525Z"/></svg>
+    );
+    const IcIncognito = ({ size = 18, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 11l1.6-5.2A2 2 0 0 1 8.5 4.4h7a2 2 0 0 1 1.9 1.4L19 11"/>
+        <path d="M3 12h18"/>
+        <circle cx="7.5" cy="15" r="2.5"/>
+        <circle cx="16.5" cy="15" r="2.5"/>
+        <path d="M10 14.5c.6-.5 1.4-.5 2 0"/>
+      </svg>
+    );
+    const IcXmark = ({ size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+    );
+    const IcBrain = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0V15a5 5 0 0 1-5-5 4.5 4.5 0 0 1 3.44-4.36A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 5 0V15a5 5 0 0 0 5-5 4.5 4.5 0 0 0-3.44-4.36A2.5 2.5 0 0 0 14.5 2z"/></svg>
+    );
+    const IcUserGear = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5 1 0 1.9.2 2.7.5"/><circle cx="17.5" cy="16.5" r="2.3"/><path d="M17.5 13.4v-1M17.5 20.6v-1M20.2 16.5h-1M15.8 16.5h-1M19.4 14.6l-.7.7M16.3 17.7l-.7.7M19.4 18.4l-.7-.7M16.3 15.3l-.7-.7"/></svg>
+    );
+    const IcClock = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v3.5h3.5"/><path d="M12 7.5V12l3 1.8"/></svg>
+    );
+    const IcPuzzle = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h-2.5a.5.5 0 0 0-.5.5v1a1 1 0 0 1-2 0v-1a.5.5 0 0 0-.5-.5H5a2 2 0 0 0-2 2v4.5a.5.5 0 0 0 .5.5h1a1 1 0 0 1 0 2h-1a.5.5 0 0 0-.5.5V16a2 2 0 0 0 2 2h4.5a.5.5 0 0 0 .5-.5v-1a1 1 0 0 1 2 0v1a.5.5 0 0 0 .5.5H17a2 2 0 0 0 2-2v-3.5a.5.5 0 0 1 .5-.5h1a1 1 0 0 0 0-2h-1a.5.5 0 0 1-.5-.5V5a2 2 0 0 0-2-2z"/></svg>
+    );
+    const IcGlobe = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+    );
+    const IcBooks = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    );
+    const IcPaperclip = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M20 9.5l-8.6 8.6a4 4 0 0 1-5.7-5.7l8.5-8.5a2.7 2.7 0 0 1 3.8 3.8l-8.5 8.5a1.3 1.3 0 0 1-1.9-1.9l7.9-7.9"/></svg>
+    );
+    const IcCompare = () => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18M5 7l-2.5 5h5L5 7zM19 7l-2.5 5h5L19 7zM4 21h16"/></svg>
+    );
+    const IcUpload = () => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v13"/></svg>
+    );
+    const IcExpand = () => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+    );
+    const IcDownload = () => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 11l5 4 5-4M5 21h14"/></svg>
+    );
+    const IcCopy = () => (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+    );
+    const IcSpeaker = () => (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></svg>
+    );
+    const IcPdf = () => (
+      <svg width="26" height="32" viewBox="0 0 26 32" fill="none"><path d="M3 1.5h13L24.5 10v20a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 30V3A1.5 1.5 0 0 1 3 1.5z" fill="#fff" stroke="#E2574C" strokeWidth="1.4"/><path d="M16 1.5V10h8.5" fill="#fff" stroke="#E2574C" strokeWidth="1.4"/><rect x="4" y="18" width="18" height="8" rx="1.5" fill="#E2574C"/><text x="13" y="24" fill="#fff" fontSize="6" fontWeight="700" fontFamily="Arial" textAnchor="middle">PDF</text></svg>
+    );
+    const IcXlsx = () => (
+      <svg width="26" height="32" viewBox="0 0 26 32" fill="none"><path d="M3 1.5h13L24.5 10v20a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 30V3A1.5 1.5 0 0 1 3 1.5z" fill="#fff" stroke="#1D6F42" strokeWidth="1.4"/><path d="M16 1.5V10h8.5" fill="#fff" stroke="#1D6F42" strokeWidth="1.4"/><rect x="4" y="14" width="18" height="13" rx="1.5" fill="#1D6F42"/><path d="M8 17l4 7M12 17l-4 7" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/><path d="M15 17v7M15 17h3M15 20.5h2.5M15 24h3" stroke="#fff" strokeWidth="1.2" strokeLinecap="round"/></svg>
+    );
+
+    function Toggle({ on, onChange }) {
+      return (
+        <div className={`toggle ${on ? 'on' : 'off'}`} onClick={e => { e.stopPropagation(); onChange(!on); }}>
+          <div className="toggle-knob" />
+        </div>
+      );
+    }
+
+    /* ── Side navigation ─────────────────────────────────────────────── */
+    function SideNav() {
+      return (
+        <nav className="side-nav">
+          <div className="nav-header">
+            <div className="nav-header-inner">
+              <div className="nav-logo-wrap">
+                <div className="nav-logo">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <polygon points="10,1.5 17.5,5.75 17.5,14.25 10,18.5 2.5,14.25 2.5,5.75" fill="#111113"/>
+                    <polygon points="10,6.5 13.5,8.5 13.5,12.5 10,14.5 6.5,12.5 6.5,8.5" fill="white"/>
+                    <line x1="6.5" y1="8.5" x2="13.5" y2="12.5" stroke="#111113" strokeWidth="0.8"/>
+                    <line x1="13.5" y1="8.5" x2="6.5" y2="12.5" stroke="#111113" strokeWidth="0.8"/>
+                  </svg>
+                  <span style={{fontSize:14,fontWeight:600,color:'#252429',letterSpacing:'-0.02em',lineHeight:1}}>nexos.ai</span>
+                </div>
+              </div>
+              <div className="nav-hide-btn">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/><line x1="7.5" y1="3.5" x2="7.5" y2="16.5" stroke="currentColor" strokeWidth="1.4"/></svg>
+              </div>
+            </div>
+          </div>
+          <div className="nav-links">
+            <a className="nav-link nav-link-new-chat" href="#" onClick={e=>e.preventDefault()}>
+              <span className="nav-link-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M9 4.5H5A1.5 1.5 0 0 0 3.5 6v9A1.5 1.5 0 0 0 5 16.5h9a1.5 1.5 0 0 0 1.5-1.5v-4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/><path d="M14.2 2.8a1.5 1.5 0 0 1 2.1 2.1l-6.5 6.5-2.8.7.7-2.8 6.5-6.5z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+              <span>New chat</span>
+            </a>
+            <a className="nav-link" href="#" onClick={e=>e.preventDefault()}>
+              <span className="nav-link-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.25"/><path d="M13.5 13.5L17 17" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/></svg></span>
+              <span>Search chats</span>
+            </a>
+            <div className="nav-spacer"></div>
+            <a className="nav-link" href="#" onClick={e=>e.preventDefault()}>
+              <span className="nav-link-icon"><svg width="20" height="20" viewBox="0 0 20 16" fill="currentColor"><path d="M14 3H10.5V0.5C10.5 0.223625 10.275 0 10 0C9.725 0 9.5 0.223625 9.5 0.5V3H6C4.31562 3 3 4.31562 3 6V13C3 14.6569 4.34312 16 6 16H14C15.6569 16 17 14.6569 17 13V6C17 4.31562 15.6562 3 14 3ZM16 12H15.5C15.2236 12 15 12.2236 15 12.5C15 12.7764 15.2236 13 15.5 13H16C16 14.1028 15.1028 15 14 15H6C4.89719 15 4 14.1028 4 13H4.5C4.775 13 5 12.775 5 12.5C5 12.225 4.775 12 4.5 12H4V6C4 4.89719 4.89719 4 6 4H14C15.1028 4 16 4.89719 16 6V12ZM1.1475 7.14375C1.24125 7.05 1.36438 7 1.495 7C1.77062 7 1.99906 6.77812 2 6.5C2.00094 6.225 1.7775 6 1.50094 6C1.10344 6 0.724687 6.15312 0.4425 6.43437C0.157219 6.71875 0 7.09688 0 7.5V11.4719C0 12.3281 0.670938 13 1.49625 13C1.77263 13 1.99812 12.7764 1.99812 12.5C1.99812 12.2236 1.7745 12 1.49812 12C1.22469 12 1 11.775 1 11.4719V7.5C1 7.36562 1.05281 7.2375 1.1475 7.14375ZM18.5031 6C18.2267 6 18.0031 6.22363 18.0031 6.5C18.0031 6.77637 18.2281 7 18.5031 7C18.7781 7 19 7.225 19 7.5V11.4719C19 11.6071 18.9473 11.7336 18.8525 11.8284C18.7594 11.95 18.6344 12 18.5031 12C18.2281 12 18 12.2219 18 12.4719C17.9719 12.775 18.2219 12.9719 18.4969 13C18.8944 13 19.2744 12.8457 19.5566 12.5644C19.8156 12.2531 20 11.9031 20 11.4719V7.5C20 6.67188 19.3281 6 18.5031 6ZM7.5 12H6.5C6.225 12 6 12.225 6 12.5C6 12.775 6.225 13 6.5 13H7.5C7.775 13 8 12.775 8 12.5C8 12.225 7.775 12 7.5 12ZM10.5 12H9.5C9.225 12 9 12.225 9 12.5C9 12.775 9.225 13 9.5 13H10.5C10.7764 13 11 12.7764 11 12.5C11 12.2236 10.775 12 10.5 12ZM13.5 12H12.5C12.2236 12 12 12.2236 12 12.5C12 12.7764 12.2236 13 12.5 13H13.5C13.7764 13 14 12.7764 14 12.5C14 12.2236 13.775 12 13.5 12ZM7 6C5.89688 6 5 6.89688 5 8C5 9.10312 5.8975 10 7 10C8.1025 10 9 9.10312 9 8C9 6.89688 8.10312 6 7 6ZM7 9C6.44687 9 6 8.55 6 8C6 7.45 6.44813 7 7 7C7.55187 7 8 7.44875 8 8C8 8.55125 7.55313 9 7 9ZM13 6C11.8975 6 11 6.89688 11 8C11 9.10312 11.8975 10 13 10C14.1025 10 15 9.10312 15 8C15 6.89688 14.1031 6 13 6ZM13 9C12.4481 9 12 8.55125 12 8C12 7.44875 12.4481 7 13 7C13.5519 7 14 7.44875 14 8C14 8.55125 13.5531 9 13 9Z"/></svg></span>
+              <span>Agents</span>
+            </a>
+            <a className="nav-link" href="#" onClick={e=>e.preventDefault()}>
+              <span className="nav-link-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6a2 2 0 0 1 2-2h4.5l2 2H15a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="1.25"/></svg></span>
+              <span>Projects</span>
+            </a>
+            <div className="nav-spacer"></div>
+            <div className="nav-section-scroll">
+              <div className="nav-subheader">
+                <div className="nav-subheader-left">
+                  <span className="nav-subheader-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 8L6 4.5L9.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                  <span className="nav-subheader-label">Recent Agents</span>
+                </div>
+              </div>
+              <a className="nav-link nav-agent-link" href="#" onClick={e=>e.preventDefault()}><span>Sprint Architect</span></a>
+              <a className="nav-link nav-agent-link" href="#" onClick={e=>e.preventDefault()} style={{marginTop:3}}><span>Sentiment Strategist</span></a>
+              <div className="nav-subheader" style={{marginTop:8}}>
+                <div className="nav-subheader-left">
+                  <span className="nav-subheader-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 8L6 4.5L9.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                  <span className="nav-subheader-label">Chat Groups</span>
+                </div>
+              </div>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Checkout flows</span></a>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Reservation plannings</span></a>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Pinned chats</span></a>
+              <div className="nav-showall">Show all</div>
+              <div className="nav-subheader" style={{marginTop:8}}>
+                <div className="nav-subheader-left">
+                  <span className="nav-subheader-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 8L6 4.5L9.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                  <span className="nav-subheader-label">Recent Chats</span>
+                </div>
+              </div>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Cybersecurity market trends for 2026</span></a>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>EV Market Trends Analysis</span></a>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Generate an image bursting out of the pa…</span></a>
+              <a className="nav-link" href="#" onClick={e=>e.preventDefault()}><span>Target Audience Brainstorming</span></a>
+            </div>
+          </div>
+          <div className="nav-account">
+            <div className="nav-account-row">
+              <div style={{width:20,height:20,borderRadius:'50%',background:'#693bff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:600,color:'#fff',flexShrink:0}}>A</div>
+              <span className="nav-account-email">andrzej@nexos.ai</span>
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    /* ── Conversation starters ───────────────────────────────────────── */
+    function ConversationStarters() {
+      const chips = ["What is current state of the market?", "What are the key players?", "What is the industry forecast?"];
+      return (
+        <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',width:760,maxWidth:'100%',marginTop:16}}>
+          {chips.map(c => (
+            <div key={c} style={{background:'#fff',border:'1px solid rgba(124,123,132,0.25)',borderRadius:16,minHeight:34,display:'flex',alignItems:'center',padding:'6px 14px',fontSize:14,color:'#44434b',cursor:'pointer'}}>{c}</div>
+          ))}
+        </div>
+      );
+    }
+
+    /* ── Prompt composer ─────────────────────────────────────────────── */
+    function Composer({ dashed, placeholder, value, onChange, onSubmit, menuOpen, onToggleMenu, menu }) {
+      const taRef = useRef(null);
+      return (
+        <div className={`prompt-card ${dashed ? 'dashed' : ''}`}>
+          <div className="prompt-content">
+            <textarea
+              ref={taRef}
+              className="prompt-textarea"
+              value={value}
+              onChange={e => { onChange(e.target.value); e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px'; }}
+              onKeyDown={e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); onSubmit(); } }}
+              placeholder={placeholder}
+              rows={1}
+            />
+          </div>
+          <div className="prompt-toolbar">
+            <div className="toolbar-left" style={{ position: 'relative' }}>
+              {menuOpen && menu}
+              <button className={`plus-btn ${menuOpen ? 'menu-open' : ''}`} onClick={onToggleMenu}><IcPlus /></button>
+            </div>
+            <div className="toolbar-right">
+              <button className="model-selector"><div className="model-logo"><IcWand /></div><span className="model-label">Auto</span><IcChevDown /></button>
+              {value && value.trim()
+                ? <button className="send-btn" onClick={onSubmit}><IcSend /></button>
+                : <button className="action-btn" onClick={onSubmit}><IcMic /></button>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ── + menu (NewMenu) ────────────────────────────────────────────── */
+    function NewMenu({ web, setWeb, deep, setDeep, onClose }) {
+      return (
+        <div className="new-menu" onClick={e => e.stopPropagation()}>
+          <button className="nm-item" onClick={onClose}>
+            <span className="nm-item-icon"><IcPuzzle /></span>
+            <span className="nm-item-label">Integrations</span>
+            <span className="nm-item-chevron"><IcChevRight /></span>
+          </button>
+          <button className="nm-item" onClick={() => setWeb(!web)}>
+            <span className="nm-item-icon"><IcGlobe /></span>
+            <span className="nm-item-label">Web research</span>
+            <Toggle on={web} onChange={setWeb} />
+          </button>
+          <button className="nm-item" onClick={() => setDeep(!deep)}>
+            <span className="nm-item-icon"><IcBooks /></span>
+            <span className="nm-item-label">Deep research</span>
+            <Toggle on={deep} onChange={setDeep} />
+          </button>
+          <div className="nm-divider" />
+          <button className="nm-item" onClick={onClose}>
+            <span className="nm-item-icon"><IcPaperclip /></span>
+            <span className="nm-item-label">Attach files</span>
+          </button>
+        </div>
+      );
+    }
+
+    /* ── First-time modal ────────────────────────────────────────────── */
+    function FirstTimeModal({ onContinue, onClose }) {
+      const POINTS = [
+        { Icon: IcBrain,    title: "Not saved in memory",     desc: "Your memory will be intact, whatever happens in incognito, stays in incognito. This is not saved in your memory in any way." },
+        { Icon: IcUserGear, title: "Admins can not see this", desc: "If you have workspace administrator who is managing company account, this incognito chat occurrence will not appear. No one can see this except you." },
+        { Icon: IcClock,    title: "Doesn’t appear in history", desc: "This will not reflect in your recent chats. When you exit and close incognito mode chat, it is gone for good." },
+      ];
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">Incognito mode</div>
+              <button className="modal-close" onClick={onClose}><IcXmark size={16} /></button>
+            </div>
+            <div className="modal-body">
+              {POINTS.map((p,i) => (
+                <div key={i} className="modal-point">
+                  <div className="modal-point-head">
+                    <span className="modal-point-icon"><p.Icon /></span>
+                    <span className="modal-point-title">{p.title}</span>
+                  </div>
+                  <div className="modal-point-desc">{p.desc}</div>
+                </div>
+              ))}
+            </div>
+            <div className="modal-ctas">
+              <button className="btn-primary" onClick={onContinue}>Continue</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ── Incognito conversation ──────────────────────────────────────── */
+    function IncognitoConversation({ userText, value, onChange, onSubmit, menuOpen, onToggleMenu, menu }) {
+      const areaRef = useRef(null);
+      useEffect(() => { areaRef.current?.scrollTo({ top: areaRef.current.scrollHeight }); }, []);
+      const FACE_COLORS = ["#4285F4","#EA4335","#FBBC05","#34A853"];
+      return (
+        <>
+          <div ref={areaRef} className="messages-area">
+            <div className="conv-toolbar">
+              <button className="conv-toolbar-btn"><IcCompare /> Compare models</button>
+              <button className="conv-toolbar-btn"><IcUpload /> 7 files 68 kB</button>
+              <button className="conv-toolbar-btn"><IcExpand /></button>
+            </div>
+            <div className="conv-inner">
+              <div className="chat-msg user-bubble">{userText}</div>
+              <div className="chat-msg ai-msg">
+                <div className="ai-model">
+                  <span className="ai-model-logo"><IcWand size={13} /></span>
+                  GPT-4o mini Search Preview
+                </div>
+                <div className="ai-text">Processing temperature data for Barcelona involves multiple layers of data handling, computation, and analysis to provide accurate city-wide temperature averages.</div>
+                <div className="ai-files-label">Here are the files you asked:</div>
+                <div className="file-card">
+                  <span className="file-icon"><IcPdf /></span>
+                  <div className="file-meta"><div className="file-name">worldoffrogs.pdf</div><div className="file-size">200 KB</div></div>
+                  <span className="file-dl"><IcDownload /></span>
+                </div>
+                <div className="file-card">
+                  <span className="file-icon"><IcXlsx /></span>
+                  <div className="file-meta"><div className="file-name">frogsmigration.xlsx</div><div className="file-size">200 KB</div></div>
+                  <span className="file-dl"><IcDownload /></span>
+                </div>
+                <div className="sources-pill">
+                  <div className="sources-faces">
+                    {FACE_COLORS.map((c,i) => <div key={i} className="sources-face" style={{background:c}} />)}
+                  </div>
+                  <span className="sources-label">Sources</span>
+                </div>
+                <div className="ai-actions">
+                  <button className="ai-action-btn"><IcCopy /></button>
+                  <button className="ai-action-btn"><IcSpeaker /></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="composer-area">
+            <div className="composer-inner">
+              <Composer dashed placeholder="Ask a follow up" value={value} onChange={onChange} onSubmit={onSubmit} menuOpen={menuOpen} onToggleMenu={onToggleMenu} menu={menu} />
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    /* ── App / state machine ─────────────────────────────────────────── */
+    function App() {
+      // screen: "home" | "incognito" | "incognito-chat"
+      const [screen, setScreen]       = useState("home");
+      const [showModal, setShowModal] = useState(false);
+      const [firstTime, setFirstTime] = useState(true);
+      const [hoverInc, setHoverInc]   = useState(false);
+      const [text, setText]           = useState("");
+      const [sentText, setSentText]   = useState("");
+      const [menuOpen, setMenuOpen]   = useState(false);
+      const [web, setWeb]             = useState(true);
+      const [deep, setDeep]           = useState(false);
+
+      // wipe: null | "cover" | "reveal"  ·  wipeDir: "in" | "out"
+      const [wipe, setWipe]       = useState(null);
+      const [wipeDir, setWipeDir] = useState("in");
+      const pendingRef = useRef(null);
+
+      function transitionTo(target, dir) {
+        pendingRef.current = target;
+        setWipeDir(dir);
+        setWipe("cover");
+      }
+      function onWipeEnd() {
+        if (wipe === "cover") {
+          setScreen(pendingRef.current);
+          setWipe("reveal");
+        } else {
+          setWipe(null);
+        }
+      }
+
+      function clickIncognito() {
+        if (firstTime) setShowModal(true);
+        else enterIncognito();
+      }
+      function enterIncognito() {
+        setShowModal(false);
+        setFirstTime(false);
+        setText("");
+        transitionTo("incognito", "in");
+      }
+      function exitIncognito() {
+        setMenuOpen(false);
+        setText(""); setSentText("");
+        transitionTo("home", "out");
+      }
+      function submitIncognito() {
+        const val = text.trim();
+        if (!val) return;
+        setSentText(val);
+        setText("");
+        setMenuOpen(false);
+        setScreen("incognito-chat");
+      }
+
+      const menu = <NewMenu web={web} setWeb={setWeb} deep={deep} setDeep={setDeep} onClose={() => setMenuOpen(false)} />;
+
+      const stageClass = `app-stage ${wipe === "cover" ? "fade-out" : wipe === "reveal" ? "fade-in" : ""}`;
+      const onStageEnd = e => { if (e.target === e.currentTarget) onWipeEnd(); };
+
+      useEffect(() => {
+        const onClick = () => setMenuOpen(false);
+        const onKey = e => { if (e.key === "Escape") { setMenuOpen(false); setShowModal(false); } };
+        document.addEventListener("click", onClick);
+        document.addEventListener("keydown", onKey);
+        return () => { document.removeEventListener("click", onClick); document.removeEventListener("keydown", onKey); };
+      }, []);
+
+      /* HOME */
+      if (screen === "home") {
+        return (
+          <div className={stageClass} onAnimationEnd={onStageEnd}>
+            <SideNav />
+            <div className="main" key="home">
+              <div className="chat-header">
+                <button
+                  className="incognito-entry"
+                  onClick={clickIncognito}
+                  onMouseEnter={() => setHoverInc(true)}
+                  onMouseLeave={() => setHoverInc(false)}
+                >
+                  <IcIncognito size={18} />
+                  <span>Incognito</span>
+                  {hoverInc && !showModal && <div className="incognito-tooltip">Private and temporary chat</div>}
+                </button>
+              </div>
+              <div className="center-stage">
+                <div className="stage-title primary">How can I help you today?</div>
+                <Composer placeholder="Chat or type @ for quick access" value={""} onChange={()=>{}} onSubmit={()=>{}} menuOpen={false} onToggleMenu={()=>{}} />
+                <ConversationStarters />
+              </div>
+              {showModal && <FirstTimeModal onContinue={enterIncognito} onClose={() => setShowModal(false)} />}
+            </div>
+          </div>
+        );
+      }
+
+      /* INCOGNITO (empty + chat both have dark bar, no sidebar) */
+      return (
+        <div className={stageClass} onAnimationEnd={onStageEnd}>
+        <div className="main" key="incognito">
+          <div className="incognito-bar">
+            <span className="incognito-bar-title">Incognito mode</span>
+            <button className="incognito-bar-exit" onClick={exitIncognito}>
+              <IcXmark size={16} /> Exit incognito
+            </button>
+          </div>
+
+          {screen === "incognito" ? (
+            <div className="center-stage">
+              <div className="stage-title muted">You’re incognito</div>
+              <div className="composer-inner" onClick={e => e.stopPropagation()}>
+                <Composer
+                  dashed
+                  placeholder="Chat or type @ for quick access"
+                  value={text}
+                  onChange={setText}
+                  onSubmit={submitIncognito}
+                  menuOpen={menuOpen}
+                  onToggleMenu={() => setMenuOpen(o => !o)}
+                  menu={menu}
+                />
+              </div>
+              <div className="incognito-help">
+                <div className="incognito-help-1">Chats in incognito are private. No memories are stored.</div>
+                <div className="incognito-help-2">This chat is not saved into history and is not visible to admins. If you exit this mode, chat will be lost.</div>
+              </div>
+            </div>
+          ) : (
+            <div onClick={e => e.stopPropagation()} style={{flex:1,display:'flex',flexDirection:'column',minHeight:0}}>
+              <IncognitoConversation
+                userText={sentText}
+                value={text}
+                onChange={setText}
+                onSubmit={() => { if (text.trim()) { setSentText(text.trim()); setText(""); } }}
+                menuOpen={menuOpen}
+                onToggleMenu={() => setMenuOpen(o => !o)}
+                menu={menu}
+              />
+            </div>
+          )}
+        </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
